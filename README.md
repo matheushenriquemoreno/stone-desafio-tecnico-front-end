@@ -1,0 +1,1 @@
+# stone-desafio-tecnico-front-end
