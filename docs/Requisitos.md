@@ -64,6 +64,8 @@ As respostas `400`, `401`, `403`, `404`, `409`, `429`, `500` e `503` da API deve
 - Operações que alteram estado deverão enviar o cabeçalho CSRF definido pela API.
 - O front-end não implementará Route Handlers, proxy ou endpoints intermediários para operações da API.
 - Componentes e fluxos deverão ser responsivos e acessíveis por teclado.
+- A interface seguirá o [design system e a identidade visual](./adr/ADR-004-design-system-identidade-visual.md), inspirados na linguagem do Ton e adaptados a uma identidade própria.
+- Texto, estados e controles deverão atender ao contraste mínimo definido pelo WCAG 2.2 nível AA.
 
 ## Entregáveis
 

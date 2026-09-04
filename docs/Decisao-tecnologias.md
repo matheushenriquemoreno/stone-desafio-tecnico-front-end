@@ -11,6 +11,7 @@ As versões exatas das dependências serão fixadas no arquivo de lock. Será ut
 - [ADR-001: Organização do front-end por features](./adr/ADR-001-organizacao-frontend.md)
 - [ADR-002: Cadastro de usuários no front-end](./adr/ADR-002-cadastro-de-usuarios.md)
 - [ADR-003: Consumo direto da API pelo navegador](./adr/ADR-003-consumo-direto-api.md)
+- [ADR-004: Design system e identidade visual do front-end](./adr/ADR-004-design-system-identidade-visual.md)
 
 ## Tecnologias
 
@@ -42,6 +43,8 @@ Os detalhes estão na [ADR-003](./adr/ADR-003-consumo-direto-api.md).
 Tailwind CSS será responsável por layout, responsividade, espaçamento, tipografia, cores e estados visuais. Os componentes de shadcn/ui serão incorporados ao código do projeto, permitindo customização.
 
 Não serão combinados MUI, Chakra UI, Bootstrap ou outro framework visual concorrente. Componentes genéricos ficarão em `src/components/ui`; componentes específicos permanecerão dentro de sua feature.
+
+A paleta, as fontes, a escala tipográfica, os tokens semânticos, os estados dos componentes e os critérios de acessibilidade são definidos pela [ADR-004](./adr/ADR-004-design-system-identidade-visual.md). Valores visuais não serão escolhidos de forma independente pelas features.
 
 ## Estado e acesso a dados
 
