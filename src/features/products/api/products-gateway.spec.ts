@@ -310,4 +310,78 @@ describe('products gateway', () => {
       kind: 'error',
     })
   })
+
+  it('mapeia rate limit e preserva Retry-After na consulta', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              code: 'RATE_LIMIT_EXCEEDED',
+              correlationId: 'corr-detail-rate-limit',
+              message: 'mensagem externa',
+              statusCode: 429,
+            }),
+            {
+              headers: { 'Retry-After': '8' },
+              status: 429,
+            },
+          ),
+      ),
+    )
+
+    await expect(getProduct('product-1')).resolves.toEqual({
+      error: {
+        code: 'rate-limit',
+        correlationId: 'corr-detail-rate-limit',
+        retryAfterSeconds: 8,
+        status: 429,
+      },
+      kind: 'error',
+    })
+  })
+
+  it('converge resposta de detalhe inválida e falha de rede em falhas seguras', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () => new Response(JSON.stringify({ id: 'incompleto' }), { status: 200 }),
+      ),
+    )
+
+    await expect(getProduct('product-1')).resolves.toEqual({
+      kind: 'failure',
+      reason: 'invalid-response',
+      status: 200,
+    })
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new Error('falha interna de rede')
+      }),
+    )
+
+    await expect(getProduct('product-1')).resolves.toEqual({
+      kind: 'failure',
+      reason: 'network',
+    })
+  })
+
+  it('ignora aborto de consulta sem classificar como erro da API', async () => {
+    const controller = new AbortController()
+    controller.abort()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new DOMException('Aborted', 'AbortError')
+      }),
+    )
+
+    await expect(getProduct('product-1', controller.signal)).resolves.toEqual({
+      kind: 'failure',
+      reason: 'aborted',
+    })
+  })
 })

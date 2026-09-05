@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { cleanup, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { replace } = vi.hoisted(() => ({ replace: vi.fn() }))
@@ -89,5 +90,38 @@ describe('ProductDetailScreen', () => {
       'Sua sessão não está mais disponível. Redirecionando para o login…',
     )
     expect(screen.queryByText('Produto principal')).not.toBeInTheDocument()
+  })
+
+  it('mostra rate limit com referência e permite retry manual de falha de rede', async () => {
+    getProductMock
+      .mockResolvedValueOnce({
+        error: {
+          code: 'rate-limit',
+          correlationId: 'corr-detail-rate-limit',
+          retryAfterSeconds: 8,
+          status: 429,
+        },
+        kind: 'error',
+      })
+      .mockResolvedValueOnce({ kind: 'failure', reason: 'network' })
+      .mockResolvedValueOnce({ kind: 'success', product })
+    const user = userEvent.setup()
+
+    render(<ProductDetailScreen productId={product.id} />)
+
+    const rateLimitAlert = await screen.findByRole('alert')
+    expect(rateLimitAlert).toHaveTextContent('Aguarde 8 segundos')
+    expect(rateLimitAlert).toHaveTextContent('Referência: corr-detail-rate-limit')
+
+    await user.click(screen.getByRole('button', { name: 'Tentar novamente' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Não foi possível carregar',
+    )
+    await user.click(screen.getByRole('button', { name: 'Tentar novamente' }))
+
+    expect(
+      await screen.findByRole('heading', { name: 'Produto principal' }),
+    ).toBeVisible()
+    expect(getProductMock).toHaveBeenCalledTimes(3)
   })
 })

@@ -1,6 +1,6 @@
 # Fase 06 — Consulta, edição e exclusão
 
-| Status       | Pendente   |
+| Status       | Em execução |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
@@ -87,6 +87,11 @@ Adicionar cenários E2E que criem um produto isolado, consultem, editem um únic
 - A rota de detalhe serve consulta e edição; não criar telas duplicadas sem necessidade.
 - Reutilizar o schema base, mas manter a regra de patch em função/mapeador próprio e testável.
 - Depois de excluir, reiniciar o catálogo evita inconsistência com cursores e mudanças concorrentes.
+
+## Estado da execução
+
+- T27 — **Concluída**. A leitura `GET /products/:id` valida a resposta antes de renderizar, separa loading, sucesso, não encontrado, não autorizado e erro recuperável, permite retry manual, exibe `correlationId` seguro e oferece retorno ao catálogo. A implementação mínima da rota foi antecipada na T25 para suportar a confirmação da criação. Evidências: `npm test -- --run src/features/products/api/products-gateway.spec.ts src/features/products/components/product-detail-screen.spec.tsx` (19 testes), `npm run typecheck`, `npm run lint` e `npx prettier --check` nos arquivos alterados — todos passaram.
+- T28 a T32 — **Pendentes**.
 
 ## Testes e verificações da fase
 
