@@ -72,6 +72,14 @@ Cobrir acesso direto a cada tipo de rota protegida sem sessão, expiração obse
 - `src/features/auth/components/protected-shell.spec.tsx` verifica semântica de banner/navegação, destinos dos links, ação recebida e conteúdo protegido.
 - Verificação: `npm test -- --run 'src/features/auth/components/protected-shell.spec.tsx' 'src/features/products/components/products-screen.spec.tsx' 'src/app/(protected)/page.spec.tsx'` (7 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
 
+## Registro de T14
+
+- `src/lib/redirect-to-login.ts` centraliza somente a navegação para `/login`, sem conhecer endpoint, cookie, token ou estado global.
+- `ProductsScreen` troca o estado anterior por `unauthorized` antes de conduzir a pessoa ao login, impedindo a permanência visual de dados protegidos após `401`.
+- `src/lib/redirect-to-login.spec.ts` verifica o destino único da política; `products-screen.spec.tsx` cobre `401` inicial e perda de sessão após conteúdo já carregado.
+- `403` continua sendo erro de operação e não passa pela política de sessão expirada.
+- Verificação: `npm test -- --run 'src/lib/redirect-to-login.spec.ts' 'src/features/products/components/products-screen.spec.tsx'` (7 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+
 ## Testes e verificações da fase
 
 Executar testes unitários/componentes, E2E de sessão e logout, lint, tipos e build. Fazer busca residual por cookie, token, storage, Middleware, Proxy e endpoints `/api/*`.

@@ -40,7 +40,7 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | T11 | 02 | Concluída | Fallback genérico do login preserva `correlationId` e o exibe como referência; regressão verificada na suíte auth (30 testes), typecheck, lint, format-check e diff-check — todos passaram. |
 | T12 | 02 | Concluída | E2E integrado executado com API NestJS local em `http://localhost:3001`, DynamoDB Local e origem autorizada: `$env:E2E_API_URL='http://localhost:3001'; $env:E2E_WEB_URL='http://localhost:3000'; npm run test:e2e` — 4 passaram e 2 foram pulados por credenciais opcionais do tracer; o cenário público atualizado passou. |
 | T13 | 03 | Concluída | Shell protegido composto em `src/app/(protected)/layout.tsx` e `src/features/auth/components/protected-shell.tsx`; `npm test -- --run 'src/features/auth/components/protected-shell.spec.tsx' 'src/features/products/components/products-screen.spec.tsx' 'src/app/(protected)/page.spec.tsx'` (7 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram. |
-| T14 | 03 | Pendente | — |
+| T14 | 03 | Concluída | Política `redirectToLogin` criada em `src/lib/redirect-to-login.ts`; `ProductsScreen` limpa o conteúdo protegido e renderiza estado não autorizado antes de redirecionar em `401`; `npm test -- --run 'src/lib/redirect-to-login.spec.ts' 'src/features/products/components/products-screen.spec.tsx'` (7 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram. |
 | T15 | 03 | Pendente | — |
 | T16 | 03 | Pendente | — |
 | T17 | 04 | Pendente | — |

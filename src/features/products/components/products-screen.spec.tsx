@@ -73,7 +73,32 @@ describe('ProductsScreen', () => {
     render(<ProductsScreen />)
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'))
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Sua sessão não está mais disponível. Redirecionando para o login…',
+    )
     expect(screen.queryByText('mensagem externa')).not.toBeInTheDocument()
+  })
+
+  it('remove conteúdo protegido anterior antes de redirecionar após nova leitura 401', async () => {
+    listProductsMock
+      .mockResolvedValueOnce({ kind: 'success', page: productPage })
+      .mockResolvedValueOnce({
+        error: { code: 'unauthorized', status: 401 },
+        kind: 'error',
+      })
+
+    const { rerender } = render(<ProductsScreen key="first-read" />)
+
+    expect(await screen.findByText('Produto principal')).toBeVisible()
+    replace.mockReset()
+
+    rerender(<ProductsScreen key="expired-read" />)
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'))
+    expect(screen.queryByText('Produto principal')).not.toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Sua sessão não está mais disponível. Redirecionando para o login…',
+    )
   })
 
   it('distingue catálogo vazio de erro e preserva o total recebido', async () => {

@@ -20,9 +20,11 @@ import type {
   Product,
   ProductPage,
 } from '@/features/products/types'
+import { redirectToLogin } from '@/lib/redirect-to-login'
 
 type ProductsViewState =
   | Readonly<{ kind: 'loading' }>
+  | Readonly<{ kind: 'unauthorized' }>
   | Readonly<{ kind: 'success'; page: ProductPage }>
   | Readonly<{
       correlationId?: string
@@ -108,6 +110,14 @@ function ProductsLoading() {
   )
 }
 
+function ProductsUnauthorized() {
+  return (
+    <p aria-live="polite" className="text-sm text-muted-foreground" role="status">
+      Sua sessão não está mais disponível. Redirecionando para o login…
+    </p>
+  )
+}
+
 function ProductsContent({ page }: { page: ProductPage }) {
   if (page.items.length === 0) {
     return (
@@ -156,7 +166,8 @@ export function ProductsScreen() {
       }
 
       if (result.kind === 'error' && result.error.code === 'unauthorized') {
-        router.replace('/login')
+        setViewState({ kind: 'unauthorized' })
+        redirectToLogin(router)
         return
       }
 
@@ -188,6 +199,8 @@ export function ProductsScreen() {
     >
       <div className="mx-auto max-w-6xl">
         {viewState.kind === 'loading' && <ProductsLoading />}
+
+        {viewState.kind === 'unauthorized' && <ProductsUnauthorized />}
 
         {viewState.kind === 'error' && (
           <div className="mx-auto max-w-2xl">
