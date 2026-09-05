@@ -30,7 +30,7 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | T01 | 01 | Concluída | `npm install`; `npm audit --omit=optional`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check` — todos passaram. |
 | T02 | 01 | Concluída | `npx shadcn@latest info --json`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check` — todos passaram. |
 | T03 | 01 | Concluída | `npm test -- --run src/lib/api-client.spec.ts`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run format:check` — todos passaram. |
-| T04 | 01 | Pendente | — |
+| T04 | 01 | Concluída | `npm test -- --run src/features/auth/api/auth-gateway.spec.ts src/features/products/api/products-gateway.spec.ts`; `npm run typecheck`; `npm run lint`; `npm run format:check`; `git diff --check` — todos passaram. |
 | T05 | 01 | Pendente | — |
 | T06 | 01 | Pendente | — |
 | T07 | 01 | Pendente | — |

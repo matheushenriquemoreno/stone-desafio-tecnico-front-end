@@ -17,7 +17,7 @@
 | T01 | Concluída | `npm install`; `npm audit --omit=optional`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check` — todos passaram. |
 | T02 | Concluída | `npx shadcn@latest info --json`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check` — todos passaram. |
 | T03 | Concluída | `npm test -- --run src/lib/api-client.spec.ts`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run format:check` — todos passaram. |
-| T04 | Pendente | — |
+| T04 | Concluída | `npm test -- --run src/features/auth/api/auth-gateway.spec.ts src/features/products/api/products-gateway.spec.ts`; `npm run typecheck`; `npm run lint`; `npm run format:check`; `git diff --check` — todos passaram. |
 | T05 | Pendente | — |
 | T06 | Pendente | — |
 | T07 | Pendente | — |
@@ -42,6 +42,13 @@
 - O cliente retorna uniões discriminadas para sucesso sem corpo, sucesso com resposta validada por Zod, erro padrão validado e falhas seguras de configuração, serialização, rede, aborto, schema ou status.
 - Erros preservam apenas campos confiáveis (`statusCode`, `code`, `message`, `correlationId`, erros de campo e `Retry-After` inteiro); corpos inválidos e detalhes de exceções não entram no resultado.
 - `src/lib/api-client.spec.ts` cobre URL sem `/api`, todos os métodos, headers proibidos, `204`, payload/resposta, erro `429`, `Retry-After`, `401`/status inesperado, schema malformado, rede, aborto e configuração insegura.
+
+### Registro de T04
+
+- `login` valida e-mail/senha, normaliza somente o e-mail, chama `POST /auth/login` com sucesso `204` e converte `401`, `403`, `429`, validação e falhas de transporte em resultados discriminados.
+- `listProducts` chama `GET /products?limit=20`, reenvia cursor opaco por query string e valida `items`, `total`, `nextCursor` e cada campo do produto antes de retornar sucesso.
+- Os gateways reconhecem somente códigos estáveis da API para decidir estados de domínio; mensagens externas não controlam comportamento e nenhum gateway acessa cookie ou storage.
+- `auth-gateway.spec.ts` e `products-gateway.spec.ts` cobrem payloads, caminhos, respostas `204`/`200`, normalização, limite, cursor, `401`, `403`, `429`, schema inválido e falha de rede.
 
 ## Tarefa T01 — Disponibilizar o bootstrap reproduzível da aplicação
 
