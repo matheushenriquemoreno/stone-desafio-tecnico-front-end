@@ -1,9 +1,9 @@
 # Fase 04 — Catálogo e paginação sequencial
 
-| Status       | Aguardando review |
-| ------------ | ----------------- |
-| Created      | 2026-09-05        |
-| Last Updated | 2026-09-05        |
+| Status       | Concluída  |
+| ------------ | ---------- |
+| Created      | 2026-09-05 |
+| Last Updated | 2026-09-05 |
 
 **Objetivo e resultado esperado:** completar a página inicial protegida com apresentação responsiva do catálogo, estados explícitos e navegação anterior/próxima por cursor opaco.
 **Capacidade ou fluxo coberto:** primeira página → vazio ou itens → próxima por `nextCursor` → retorno por cursor visitado → reinício seguro quando a sequência é perdida.
@@ -128,3 +128,7 @@ Executar unitários de paginação e formatação, componentes da lista, E2E pag
 - Cursores e dataset são controlados pela API e podem mudar entre leituras; a interface não promete snapshot global.
 - Origens de imagem devem ser governadas antes do ambiente publicado.
 - A conclusão exige `review`; não iniciar a Fase 05 automaticamente.
+
+## Resultado do review
+
+O review v7 aprovou a Fase 04 após verificar os requisitos, critérios de aceitação, decisões técnicas, testes e gates de qualidade. O achado informativo A-05 registra que o E2E de paginação usa dataset controlado por interceptação; a validação contra API autorizada e dataset isolável fica encaminhada para a Fase 07. A Fase 05 não deve ser iniciada sem autorização explícita.

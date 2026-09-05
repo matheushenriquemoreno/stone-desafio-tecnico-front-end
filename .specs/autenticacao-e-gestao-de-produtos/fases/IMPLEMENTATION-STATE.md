@@ -1,27 +1,27 @@
 # Estado da Implementação — Interface web de autenticação e gestão de produtos
 
-| Status       | Aguardando review |
-| ------------ | ----------------- |
-| Created      | 2026-09-05        |
-| Last Updated | 2026-09-05        |
+| Status       | Concluída  |
+| ------------ | ---------- |
+| Created      | 2026-09-05 |
+| Last Updated | 2026-09-05 |
 
 ## Fase ativa
 
-Fase 04 — Catálogo e paginação sequencial — T17 a T21 concluídas; aguardando review independente. A Fase 04 foi ativada explicitamente.
+Fase 04 — Catálogo e paginação sequencial — T17 a T21 concluídas e aprovadas no review v7. Trabalho solicitado concluído; não iniciar a Fase 05 sem autorização explícita.
 
 Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase deve passar por `review` independente antes que a próxima seja marcada como ativa.
 
 ## Fases
 
-| #   | Fase                                     | Arquivo                                           | Status            | Concluída em |
-| --- | ---------------------------------------- | ------------------------------------------------- | ----------------- | ------------ |
-| 01  | Fundação e tracer bullet autenticado     | fases/fase-01-fundacao-e-tracer-bullet.md         | Concluída         | 2026-09-05   |
-| 02  | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md  | Concluída         | 2026-09-05   |
-| 03  | Sessão protegida e logout                | fases/fase-03-sessao-protegida-e-logout.md        | Concluída         | 2026-09-05   |
-| 04  | Catálogo e paginação sequencial          | fases/fase-04-catalogo-e-paginacao.md             | Aguardando review | —            |
-| 05  | Criação de produtos                      | fases/fase-05-criacao-de-produtos.md              | Pendente          | —            |
-| 06  | Consulta, edição e exclusão              | fases/fase-06-consulta-edicao-e-exclusao.md       | Pendente          | —            |
-| 07  | Robustez e prontidão operacional         | fases/fase-07-robustez-e-prontidao-operacional.md | Pendente          | —            |
+| #   | Fase                                     | Arquivo                                           | Status    | Concluída em |
+| --- | ---------------------------------------- | ------------------------------------------------- | --------- | ------------ |
+| 01  | Fundação e tracer bullet autenticado     | fases/fase-01-fundacao-e-tracer-bullet.md         | Concluída | 2026-09-05   |
+| 02  | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md  | Concluída | 2026-09-05   |
+| 03  | Sessão protegida e logout                | fases/fase-03-sessao-protegida-e-logout.md        | Concluída | 2026-09-05   |
+| 04  | Catálogo e paginação sequencial          | fases/fase-04-catalogo-e-paginacao.md             | Concluída | 2026-09-05   |
+| 05  | Criação de produtos                      | fases/fase-05-criacao-de-produtos.md              | Pendente  | —            |
+| 06  | Consulta, edição e exclusão              | fases/fase-06-consulta-edicao-e-exclusao.md       | Pendente  | —            |
+| 07  | Robustez e prontidão operacional         | fases/fase-07-robustez-e-prontidao-operacional.md | Pendente  | —            |
 
 ## Tarefas
 
