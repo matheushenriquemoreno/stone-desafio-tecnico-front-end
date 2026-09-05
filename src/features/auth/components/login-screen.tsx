@@ -228,7 +228,7 @@ export function LoginScreen({ registrationConfirmed = false }: LoginScreenProps)
       <form
         noValidate
         aria-busy={isSubmitting}
-        className="space-y-6"
+        className="flex flex-col gap-6"
         onSubmit={handleSubmit}
       >
         {generalError && (

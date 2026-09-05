@@ -1,13 +1,13 @@
 # Estado da Implementação — Interface web de autenticação e gestão de produtos
 
-| Status       | Em execução |
+| Status       | Aguardando review |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
 
 ## Fase ativa
 
-Fase 02 — Cadastro e autenticação pública completa.
+Fase 02 — Cadastro e autenticação pública completa — aguardando review independente.
 
 Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase deve passar por `review` independente antes que a próxima seja marcada como ativa.
 
@@ -16,7 +16,7 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | #  | Fase | Arquivo | Status | Concluída em |
 |----|------|---------|--------|--------------|
 | 01 | Fundação e tracer bullet autenticado | fases/fase-01-fundacao-e-tracer-bullet.md | Concluída | 2026-09-05 |
-| 02 | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md | Em execução | — |
+| 02 | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md | Concluída | 2026-09-05 |
 | 03 | Sessão protegida e logout | fases/fase-03-sessao-protegida-e-logout.md | Pendente | — |
 | 04 | Catálogo e paginação sequencial | fases/fase-04-catalogo-e-paginacao.md | Pendente | — |
 | 05 | Criação de produtos | fases/fase-05-criacao-de-produtos.md | Pendente | — |
@@ -38,7 +38,7 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | T09 | 02 | Concluída | `npm test -- --run src/features/auth/schemas/register.spec.ts src/features/auth/schemas/registered-user.spec.ts src/features/auth/api/auth-gateway.spec.ts` (25 testes); `npm run typecheck`; `npm run lint`; `npx prettier --check` nos arquivos alterados; `git diff --check` — todos passaram. |
 | T10 | 02 | Concluída | `npm test -- --run src/features/auth/components/login-screen.spec.tsx src/features/auth/components/register-screen.spec.tsx` (9 testes); `npm run typecheck`; `npm run lint`; `npx prettier --check` nos arquivos alterados; `git diff --check` — todos passaram. |
 | T11 | 02 | Concluída | `npm test -- --run src/features/auth/components/login-screen.spec.tsx src/features/auth/components/register-screen.spec.tsx src/features/auth/api/auth-gateway.spec.ts` (27 testes); `npm run typecheck`; `npm run lint`; `npx prettier --check` nos arquivos alterados; `git diff --check` — todos passaram. |
-| T12 | 02 | Pendente | — |
+| T12 | 02 | Concluída | `npm test -- --run` (69 testes); `npm run typecheck`; `npm run lint`; `npm run format:check`; `npm run build`; `npm run test:e2e` (1 passou, 3 pulados sem API externa); `E2E_API_URL=http://127.0.0.1:3001 npm run test:e2e -- e2e/registration-and-login.spec.ts` (1 passou); `git diff --check` — gates locais e E2E integrado controlado passaram. |
 | T13 | 03 | Pendente | — |
 | T14 | 03 | Pendente | — |
 | T15 | 03 | Pendente | — |

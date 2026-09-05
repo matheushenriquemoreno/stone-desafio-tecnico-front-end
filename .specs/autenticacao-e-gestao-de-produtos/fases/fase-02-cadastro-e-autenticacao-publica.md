@@ -1,6 +1,6 @@
 # Fase 02 — Cadastro e autenticação pública completa
 
-| Status       | Em execução   |
+| Status       | Concluída   |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
@@ -96,6 +96,21 @@ Adicionar testes integrados que criem uma conta nova, confirmem a chegada ao log
 - **Testes e verificações:** executar a suíte da feature e um E2E com dados únicos e isoláveis; repetir os gates `lint`, `typecheck`, testes e build; verificar ausência de segredo em URL, storage, console e mensagens.
 - **Critérios de conclusão:** o cenário reproduz cadastro → login → catálogo; cadastro não autentica; os erros essenciais estão cobertos por teste observável; o review independente consegue reproduzir o fluxo.
 - **Riscos ou premissas:** o mecanismo de dados E2E precisa ser autorizado e não pode depender de usuários de produção.
+
+### Registro de T12
+
+- `e2e/registration-and-login.spec.ts` usa um e-mail único por execução e cobre validação local, cadastro, confirmação no login, duplicidade, credencial inválida e login até o catálogo.
+- E2E integrado controlado: `E2E_API_URL=http://127.0.0.1:3001 npm run test:e2e -- e2e/registration-and-login.spec.ts` — 1 teste passou com API NestJS local, DynamoDB Local e origem `http://127.0.0.1:3000` autorizada.
+- Gate padrão: `npm test -- --run` (69 testes), `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`, `npm run test:e2e` (1 passou e 3 foram pulados por ausência de API externa) e `git diff --check` — todos passaram.
+- O E2E integrado usa o mesmo host `127.0.0.1` no front e na API porque o cookie aprovado é `SameSite=Strict`; configurar `localhost` de um lado e `127.0.0.1` do outro não representa uma origem same-site e não é tratado como falha do fluxo da aplicação.
+
+## Encerramento da fase
+
+- Critério 1: cadastro normaliza os campos públicos, rejeita limites/entradas desconhecidas antes do transporte e mapeia e-mail duplicado.
+- Critério 2: sucesso navega somente com o sinal enumerado `registered=success`, sem PII, e o login o canonicaliza sem iniciar sessão no cadastro.
+- Critério 3: login trata validação, credenciais, origem, rate limit, falhas não confiáveis e referências de correlação sem mensagens externas.
+- Critério 4: cadastro e login bloqueiam reenvio enquanto a mutação está em andamento e não fazem retry automático.
+- Critério 5: schemas, gateways, componentes e E2E possuem cobertura reproduzível; a fase aguarda apenas o review independente obrigatório.
 
 ## Orientações de implementação
 

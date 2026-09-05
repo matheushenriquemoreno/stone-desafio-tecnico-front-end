@@ -201,7 +201,7 @@ export function RegisterScreen() {
       <form
         noValidate
         aria-busy={isSubmitting}
-        className="space-y-6"
+        className="flex flex-col gap-6"
         onSubmit={handleSubmit}
       >
         {generalError && (

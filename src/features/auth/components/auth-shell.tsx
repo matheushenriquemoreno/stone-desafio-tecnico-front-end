@@ -19,11 +19,11 @@ export function AuthShell({
     <section className="relative isolate flex min-h-svh items-center overflow-hidden px-4 py-8 sm:px-6 lg:px-8">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-primary/20 [clip-path:polygon(0_0,100%_0,100%_65%,0_100%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-primary/20 [clip-path:polygon(0_0,100%_0,100%_65%,0_100%)]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-32 bottom-8 -z-10 size-80 rounded-full bg-accent/10 blur-3xl"
+        className="pointer-events-none absolute -right-32 bottom-8 size-80 rounded-full bg-accent/10 blur-3xl"
       />
 
       <div className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-foreground/10 lg:grid-cols-[1.05fr_0.95fr]">
@@ -61,7 +61,7 @@ export function AuthShell({
             </div>
           </div>
 
-          <div className="mb-8 space-y-2">
+          <div className="mb-8 flex flex-col gap-2">
             <p className="text-sm font-semibold tracking-[0.18em] text-muted-foreground uppercase">
               {eyebrow}
             </p>
