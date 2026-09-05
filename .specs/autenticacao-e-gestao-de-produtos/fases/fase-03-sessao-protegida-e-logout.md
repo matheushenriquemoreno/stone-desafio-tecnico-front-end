@@ -1,6 +1,6 @@
 # Fase 03 — Sessão protegida e logout
 
-| Status       | Pendente   |
+| Status       | Em execução |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
@@ -63,6 +63,14 @@ Cobrir acesso direto a cada tipo de rota protegida sem sessão, expiração obse
 - Reutilizar uma política pequena para `401`, sem transformar a aplicação em store ou provider global.
 - Não confundir `401` com `403`; origem rejeitada recebe feedback seguro e não redireciona como sessão expirada.
 - O shell compõe rotas; gateways continuam pertencendo às features.
+
+## Registro de T13
+
+- `src/app/(protected)/layout.tsx` compõe o grupo protegido com o shell compartilhado.
+- `src/features/auth/components/protected-shell.tsx` oferece a marca, navegação para catálogo e criação futura e um slot explícito para ações da sessão; não lê cookie nem presume autorização.
+- `ProductsScreen` deixou de duplicar o cabeçalho global; o conteúdo protegido permanece responsável pela própria leitura da API.
+- `src/features/auth/components/protected-shell.spec.tsx` verifica semântica de banner/navegação, destinos dos links, ação recebida e conteúdo protegido.
+- Verificação: `npm test -- --run 'src/features/auth/components/protected-shell.spec.tsx' 'src/features/products/components/products-screen.spec.tsx' 'src/app/(protected)/page.spec.tsx'` (7 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
 
 ## Testes e verificações da fase
 

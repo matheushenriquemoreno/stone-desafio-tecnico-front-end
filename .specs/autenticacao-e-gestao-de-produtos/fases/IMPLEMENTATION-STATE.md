@@ -1,13 +1,13 @@
 # Estado da Implementação — Interface web de autenticação e gestão de produtos
 
-| Status       | Aguardando novo review |
+| Status       | Em execução             |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
 
 ## Fase ativa
 
-Fase 02 — Cadastro e autenticação pública completa — correções do review v4 implementadas e verificadas; aguardando novo review independente.
+Fase 03 — Sessão protegida e logout — execução autorizada; T13 em preparação. A Fase 02 foi aprovada no review independente v5.
 
 Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase deve passar por `review` independente antes que a próxima seja marcada como ativa.
 
@@ -16,8 +16,8 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | #  | Fase | Arquivo | Status | Concluída em |
 |----|------|---------|--------|--------------|
 | 01 | Fundação e tracer bullet autenticado | fases/fase-01-fundacao-e-tracer-bullet.md | Concluída | 2026-09-05 |
-| 02 | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md | Aguardando correção | — |
-| 03 | Sessão protegida e logout | fases/fase-03-sessao-protegida-e-logout.md | Pendente | — |
+| 02 | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md | Concluída | 2026-09-05 |
+| 03 | Sessão protegida e logout | fases/fase-03-sessao-protegida-e-logout.md | Em execução | — |
 | 04 | Catálogo e paginação sequencial | fases/fase-04-catalogo-e-paginacao.md | Pendente | — |
 | 05 | Criação de produtos | fases/fase-05-criacao-de-produtos.md | Pendente | — |
 | 06 | Consulta, edição e exclusão | fases/fase-06-consulta-edicao-e-exclusao.md | Pendente | — |
@@ -38,8 +38,8 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | T09 | 02 | Concluída | `npm test -- --run src/features/auth/schemas/register.spec.ts src/features/auth/schemas/registered-user.spec.ts src/features/auth/api/auth-gateway.spec.ts` (25 testes); `npm run typecheck`; `npm run lint`; `npx prettier --check` nos arquivos alterados; `git diff --check` — todos passaram. |
 | T10 | 02 | Concluída | Implementa foco no primeiro campo inválido e mantém confirmação transitória; correção de acessibilidade verificada em `npm test -- --run src/features/auth/components/register-screen.spec.tsx src/features/auth/components/login-screen.spec.tsx` (13 testes), `npm run typecheck`, `npm run lint`, `npm run format:check` e `git diff --check` — todos passaram. |
 | T11 | 02 | Concluída | Fallback genérico do login preserva `correlationId` e o exibe como referência; regressão verificada na suíte auth (30 testes), typecheck, lint, format-check e diff-check — todos passaram. |
-| T12 | 02 | Concluída | E2E integrado executado com API NestJS local, DynamoDB Local e origem autorizada: `npm run test:e2e` — 4 passaram e 2 foram pulados por credenciais opcionais do tracer; o cenário público atualizado passou. |
-| T13 | 03 | Pendente | — |
+| T12 | 02 | Concluída | E2E integrado executado com API NestJS local em `http://localhost:3001`, DynamoDB Local e origem autorizada: `$env:E2E_API_URL='http://localhost:3001'; $env:E2E_WEB_URL='http://localhost:3000'; npm run test:e2e` — 4 passaram e 2 foram pulados por credenciais opcionais do tracer; o cenário público atualizado passou. |
+| T13 | 03 | Concluída | Shell protegido composto em `src/app/(protected)/layout.tsx` e `src/features/auth/components/protected-shell.tsx`; `npm test -- --run 'src/features/auth/components/protected-shell.spec.tsx' 'src/features/products/components/products-screen.spec.tsx' 'src/app/(protected)/page.spec.tsx'` (7 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram. |
 | T14 | 03 | Pendente | — |
 | T15 | 03 | Pendente | — |
 | T16 | 03 | Pendente | — |
@@ -67,4 +67,4 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 
 ## Bloqueios e desvios
 
-A-01, A-02 e A-03, identificados no review independente v4, foram tratados na etapa `implement`: o fallback de login preserva a referência, o E2E integrado foi executado contra API autorizada e a verificação de zoom 200% equivalente foi adicionada. A Fase 02 permanece aguardando novo review independente. Dependências externas de API/OpenAPI, origem autorizada, dados E2E, origens de imagem e publicação continuam registradas nas fases correspondentes.
+A-01, A-02 e A-03, identificados no review independente v4, foram tratados na etapa `implement` e aprovados no review independente v5: o fallback de login preserva a referência, o E2E integrado foi executado contra API autorizada e a verificação de zoom 200% equivalente foi adicionada. A Fase 03 continua `Pendente` e não foi iniciada. Dependências externas de API/OpenAPI, origem autorizada, dados E2E, origens de imagem e publicação continuam registradas nas fases correspondentes.

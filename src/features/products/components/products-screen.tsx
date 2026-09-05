@@ -187,20 +187,6 @@ export function ProductsScreen() {
       aria-label="Catálogo protegido"
     >
       <div className="mx-auto max-w-6xl">
-        <header className="mb-10 flex items-center justify-between gap-4 border-b border-border pb-5">
-          <div className="flex items-center gap-3">
-            <span className="flex size-10 items-center justify-center rounded-lg bg-primary font-display text-2xl font-bold text-primary-foreground">
-              S
-            </span>
-            <span className="font-display text-3xl font-bold tracking-tight">
-              Stone
-            </span>
-          </div>
-          <span className="text-sm font-medium text-muted-foreground">
-            Área protegida
-          </span>
-        </header>
-
         {viewState.kind === 'loading' && <ProductsLoading />}
 
         {viewState.kind === 'error' && (
