@@ -59,6 +59,13 @@ Compor `/register` com formulário acessível baseado nas primitivas compartilha
 - **Critérios de conclusão:** visitante conclui o cadastro e vê a confirmação no login; o histórico não mantém informação pessoal; o cadastro não trata `201` como autenticação e não acessa o catálogo.
 - **Riscos ou premissas:** o sinal transitório pode permanecer na URL apenas até ser consumido; deve usar valor enumerado, não texto livre nem dado do usuário.
 
+### Registro de T10
+
+- `/register` compõe um formulário acessível com campos independentes, validação local, feedback persistente, loading e bloqueio de reenvio.
+- O sucesso limpa o estado efêmero, não cria sessão e navega apenas para `/login?registered=success`; o login exibe a confirmação e canonicaliza a URL para `/login`.
+- `AuthShell` concentra somente a composição visual compartilhada, enquanto cadastro e login mantêm schemas e mensagens de negócio separados.
+- Verificação: `npm test -- --run src/features/auth/components/login-screen.spec.tsx src/features/auth/components/register-screen.spec.tsx` (9 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+
 ## Tarefa T11 — Completar o feedback seguro do login público
 
 Completar a tela de login do tracer bullet para tratar validação, credenciais inválidas, origem rejeitada, rate limit com duração válida, falha de rede e `correlationId`, mantendo o erro importante junto ao formulário e oferecendo nova tentativa somente por ação explícita.

@@ -1,12 +1,15 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { push } = vi.hoisted(() => ({ push: vi.fn() }))
+const { push, replace } = vi.hoisted(() => ({
+  push: vi.fn(),
+  replace: vi.fn(),
+}))
 const { loginMock } = vi.hoisted(() => ({ loginMock: vi.fn() }))
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push }),
+  useRouter: () => ({ push, replace }),
 }))
 
 vi.mock('@/features/auth/api/auth-gateway', () => ({
@@ -18,6 +21,7 @@ import { LoginScreen } from '@/features/auth/components/login-screen'
 describe('LoginScreen', () => {
   beforeEach(() => {
     push.mockReset()
+    replace.mockReset()
     loginMock.mockReset()
   })
 
@@ -101,5 +105,17 @@ describe('LoginScreen', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Aguarde 7 segundos antes de tentar novamente.',
     )
+  })
+
+  it('confirma cadastro e remove o sinal enumerado da URL', async () => {
+    render(<LoginScreen registrationConfirmed />)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Sua conta foi criada. Entre com seu e-mail e senha para continuar.',
+    )
+    await waitFor(() => {
+      expect(replace).toHaveBeenCalledWith('/login', { scroll: false })
+    })
+    expect(replace).toHaveBeenCalledOnce()
   })
 })

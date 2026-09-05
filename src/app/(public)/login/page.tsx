@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   description: 'Acesse sua área segura de produtos.',
 }
 
-export default function LoginPage() {
-  return <LoginScreen />
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ registered?: string | string[] | undefined }>
+}) {
+  const { registered } = await searchParams
+
+  return <LoginScreen registrationConfirmed={registered === 'success'} />
 }

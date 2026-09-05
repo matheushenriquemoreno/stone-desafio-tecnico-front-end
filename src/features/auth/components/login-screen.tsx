@@ -1,6 +1,8 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import type { FormEvent } from 'react'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -15,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { login } from '@/features/auth/api/auth-gateway'
+import { AuthShell } from '@/features/auth/components/auth-shell'
 import { loginCredentialsSchema } from '@/features/auth/schemas/login'
 import type { AuthFieldError, LoginResult } from '@/features/auth/types'
 
@@ -113,12 +116,25 @@ function getResultError(result: LoginResult): {
   return { fieldErrors: [], generalMessage: genericLoginError }
 }
 
-export function LoginScreen() {
-  const router = useRouter()
+type LoginScreenProps = Readonly<{
+  registrationConfirmed?: boolean
+}>
+
+export function LoginScreen({ registrationConfirmed = false }: LoginScreenProps) {
+  const { push, replace } = useRouter()
   const [values, setValues] = useState<LoginFormValues>(initialValues)
   const [fieldErrors, setFieldErrors] = useState<readonly AuthFieldError[]>([])
   const [generalError, setGeneralError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showRegistrationConfirmation] = useState(registrationConfirmed)
+
+  useEffect(() => {
+    if (!registrationConfirmed) {
+      return
+    }
+
+    replace('/login', { scroll: false })
+  }, [registrationConfirmed, replace])
 
   function updateField(field: LoginField, value: string) {
     setValues((current) => ({ ...current, [field]: value }))
@@ -150,7 +166,7 @@ export function LoginScreen() {
 
       if (result.kind === 'success') {
         setValues(initialValues)
-        router.push('/')
+        push('/')
         return
       }
 
@@ -166,135 +182,100 @@ export function LoginScreen() {
   const passwordError = getFieldError(fieldErrors, 'password')
 
   return (
-    <section className="relative isolate flex min-h-svh items-center overflow-hidden px-4 py-8 sm:px-6 lg:px-8">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-primary/20 [clip-path:polygon(0_0,100%_0,100%_65%,0_100%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-32 bottom-8 -z-10 size-80 rounded-full bg-accent/10 blur-3xl"
-      />
-
-      <div className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-foreground/10 lg:grid-cols-[1.05fr_0.95fr]">
-        <div className="hidden flex-col justify-between bg-secondary p-10 text-secondary-foreground lg:flex xl:p-14">
-          <div>
-            <div className="mb-12 flex items-center gap-3">
-              <span className="flex size-10 items-center justify-center rounded-lg bg-primary font-display text-2xl font-bold text-primary-foreground">
-                S
-              </span>
-              <span className="font-display text-3xl font-bold tracking-tight">
-                Stone
-              </span>
-            </div>
-            <p className="mb-4 font-display text-5xl leading-[0.95] font-semibold tracking-tight xl:text-6xl">
-              Seu catálogo, com clareza.
-            </p>
-            <p className="max-w-sm text-base leading-7 text-secondary-foreground/80">
-              Acesse a área segura para acompanhar e gerenciar os produtos do catálogo.
-            </p>
-          </div>
-          <p className="text-sm text-secondary-foreground/60">
-            Gestão simples para o dia a dia.
-          </p>
-        </div>
-
-        <div className="p-6 sm:p-10 xl:p-14">
-          <div className="mb-8 lg:hidden">
-            <div className="flex items-center gap-3">
-              <span className="flex size-10 items-center justify-center rounded-lg bg-primary font-display text-2xl font-bold text-primary-foreground">
-                S
-              </span>
-              <span className="font-display text-3xl font-bold tracking-tight">
-                Stone
-              </span>
-            </div>
-          </div>
-
-          <div className="mb-8 space-y-2">
-            <p className="text-sm font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-              Acesso seguro
-            </p>
-            <h1 className="text-4xl leading-none font-semibold tracking-tight">
-              Boas-vindas
-            </h1>
-            <p className="text-muted-foreground">
-              Entre para acessar seu catálogo de produtos.
-            </p>
-          </div>
-
-          <form
-            noValidate
-            aria-busy={isSubmitting}
-            className="space-y-6"
-            onSubmit={handleSubmit}
-          >
-            {generalError && (
-              <Alert variant="destructive">
-                <AlertTitle>Não foi possível entrar</AlertTitle>
-                <AlertDescription>{generalError}</AlertDescription>
-              </Alert>
-            )}
-
-            <FieldGroup>
-              <Field data-invalid={emailError !== undefined}>
-                <FieldLabel htmlFor="login-email">E-mail</FieldLabel>
-                <FieldContent>
-                  <Input
-                    aria-describedby={emailError ? 'login-email-error' : undefined}
-                    aria-invalid={emailError !== undefined}
-                    autoComplete="email"
-                    disabled={isSubmitting}
-                    id="login-email"
-                    inputMode="email"
-                    name="email"
-                    onChange={(event) => updateField('email', event.target.value)}
-                    placeholder="voce@empresa.com"
-                    type="email"
-                    value={values.email}
-                  />
-                  <FieldError
-                    id="login-email-error"
-                    errors={emailError ? [emailError] : undefined}
-                  />
-                </FieldContent>
-              </Field>
-
-              <Field data-invalid={passwordError !== undefined}>
-                <FieldLabel htmlFor="login-password">Senha</FieldLabel>
-                <FieldContent>
-                  <Input
-                    aria-describedby={
-                      passwordError ? 'login-password-error' : undefined
-                    }
-                    aria-invalid={passwordError !== undefined}
-                    autoComplete="current-password"
-                    disabled={isSubmitting}
-                    id="login-password"
-                    name="password"
-                    onChange={(event) => updateField('password', event.target.value)}
-                    type="password"
-                    value={values.password}
-                  />
-                  <FieldError
-                    id="login-password-error"
-                    errors={passwordError ? [passwordError] : undefined}
-                  />
-                </FieldContent>
-              </Field>
-            </FieldGroup>
-
-            <Button className="w-full" disabled={isSubmitting} type="submit">
-              {isSubmitting && <Spinner />}
-              {isSubmitting ? 'Entrando…' : 'Entrar'}
-            </Button>
-          </form>
-
+    <AuthShell
+      description="Entre para acessar seu catálogo de produtos."
+      eyebrow="Acesso seguro"
+      footer={
+        <>
           <p className="mt-8 text-center text-sm text-muted-foreground">
+            Ainda não possui uma conta?{' '}
+            <Link
+              className="font-semibold text-link underline-offset-4 hover:underline"
+              href="/register"
+            >
+              Cadastre-se
+            </Link>
+          </p>
+          <p className="mt-3 text-center text-sm text-muted-foreground">
             Suas credenciais são protegidas e usadas somente nesta tentativa de acesso.
           </p>
-        </div>
-      </div>
-    </section>
+        </>
+      }
+      title="Boas-vindas"
+    >
+      {showRegistrationConfirmation && (
+        <Alert className="mb-6">
+          <AlertTitle>Cadastro concluído</AlertTitle>
+          <AlertDescription>
+            Sua conta foi criada. Entre com seu e-mail e senha para continuar.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <form
+        noValidate
+        aria-busy={isSubmitting}
+        className="space-y-6"
+        onSubmit={handleSubmit}
+      >
+        {generalError && (
+          <Alert variant="destructive">
+            <AlertTitle>Não foi possível entrar</AlertTitle>
+            <AlertDescription>{generalError}</AlertDescription>
+          </Alert>
+        )}
+
+        <FieldGroup>
+          <Field data-invalid={emailError !== undefined}>
+            <FieldLabel htmlFor="login-email">E-mail</FieldLabel>
+            <FieldContent>
+              <Input
+                aria-describedby={emailError ? 'login-email-error' : undefined}
+                aria-invalid={emailError !== undefined}
+                autoComplete="email"
+                disabled={isSubmitting}
+                id="login-email"
+                inputMode="email"
+                name="email"
+                onChange={(event) => updateField('email', event.target.value)}
+                placeholder="voce@empresa.com"
+                type="email"
+                value={values.email}
+              />
+              <FieldError
+                id="login-email-error"
+                errors={emailError ? [emailError] : undefined}
+              />
+            </FieldContent>
+          </Field>
+
+          <Field data-invalid={passwordError !== undefined}>
+            <FieldLabel htmlFor="login-password">Senha</FieldLabel>
+            <FieldContent>
+              <Input
+                aria-describedby={passwordError ? 'login-password-error' : undefined}
+                aria-invalid={passwordError !== undefined}
+                autoComplete="current-password"
+                disabled={isSubmitting}
+                id="login-password"
+                name="password"
+                onChange={(event) => updateField('password', event.target.value)}
+                type="password"
+                value={values.password}
+              />
+              <FieldError
+                id="login-password-error"
+                errors={passwordError ? [passwordError] : undefined}
+              />
+            </FieldContent>
+          </Field>
+        </FieldGroup>
+
+        <Button className="w-full" disabled={isSubmitting} type="submit">
+          {isSubmitting && <Spinner />}
+          {isSubmitting ? 'Entrando…' : 'Entrar'}
+        </Button>
+      </form>
+    </AuthShell>
   )
 }

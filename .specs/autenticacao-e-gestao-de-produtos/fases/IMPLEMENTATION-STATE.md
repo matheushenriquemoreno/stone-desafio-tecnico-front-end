@@ -36,7 +36,7 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | T07 | 01 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm audit --omit=optional`; `npm run test:e2e`; E2E integrado com API local controlada `2 passed`; `npm run format:check`; `git diff --check` — todos os gates passaram. |
 | T08 | 02 | Concluída | `npm test -- --run src/features/auth/schemas/register.spec.ts` (8 testes); `npm run typecheck`; `npm run lint`; `npx prettier --check src/features/auth/schemas/register.ts src/features/auth/schemas/register.spec.ts`; `git diff --check` — todos passaram. |
 | T09 | 02 | Concluída | `npm test -- --run src/features/auth/schemas/register.spec.ts src/features/auth/schemas/registered-user.spec.ts src/features/auth/api/auth-gateway.spec.ts` (25 testes); `npm run typecheck`; `npm run lint`; `npx prettier --check` nos arquivos alterados; `git diff --check` — todos passaram. |
-| T10 | 02 | Pendente | — |
+| T10 | 02 | Concluída | `npm test -- --run src/features/auth/components/login-screen.spec.tsx src/features/auth/components/register-screen.spec.tsx` (9 testes); `npm run typecheck`; `npm run lint`; `npx prettier --check` nos arquivos alterados; `git diff --check` — todos passaram. |
 | T11 | 02 | Pendente | — |
 | T12 | 02 | Pendente | — |
 | T13 | 03 | Pendente | — |
