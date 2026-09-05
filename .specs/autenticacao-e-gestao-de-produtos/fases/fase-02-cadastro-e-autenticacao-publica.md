@@ -1,6 +1,6 @@
 # Fase 02 — Cadastro e autenticação pública completa
 
-| Status       | Pendente   |
+| Status       | Em execução   |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
@@ -21,6 +21,12 @@ Criar o schema da feature de autenticação para normalizar nome e e-mail, valid
 - **Testes e verificações:** cobrir limites inferiores e superiores, trim/normalização, e-mail inválido, senha curta/longa, entradas desconhecidas e associação de mensagens aos campos.
 - **Critérios de conclusão:** entradas válidas produzem payload normalizado; cada limite inválido falha antes do transporte; o tipo do formulário é derivado sem `any` ou coerção insegura.
 - **Riscos ou premissas:** normalização deve reproduzir o contrato publicado sem alterar a senha.
+
+### Registro de T08
+
+- `registerSchema` valida nome, e-mail e senha em objeto estrito, normaliza nome/e-mail e preserva a senha.
+- `src/features/auth/schemas/register.spec.ts` cobre normalização, limites 2/100 e 8/128, entradas inválidas, propriedades desconhecidas e mensagens associadas aos campos.
+- Verificação: `npm test -- --run src/features/auth/schemas/register.spec.ts` (8 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check src/features/auth/schemas/register.ts src/features/auth/schemas/register.spec.ts` e `git diff --check` — todos passaram.
 
 ## Tarefa T09 — Implementar o gateway de cadastro e seus erros contratados
 
