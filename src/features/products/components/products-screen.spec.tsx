@@ -149,6 +149,26 @@ describe('ProductsScreen', () => {
     expect(listProductsMock).toHaveBeenCalledTimes(2)
   })
 
+  it('orienta a espera do rate limit e exibe a referência segura', async () => {
+    listProductsMock.mockResolvedValue({
+      error: {
+        code: 'rate-limit',
+        correlationId: 'corr-products-limit',
+        retryAfterSeconds: 17,
+        status: 429,
+      },
+      kind: 'error',
+    })
+
+    render(<ProductsScreen />)
+
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent(
+      'Muitas consultas em sequência. Aguarde 17 segundos antes de tentar novamente.',
+    )
+    expect(alert).toHaveTextContent('Referência: corr-products-limit')
+  })
+
   it('avança, retorna apenas por cursores visitados e bloqueia saltos inéditos', async () => {
     const pageOne = { ...productPage, nextCursor: 'cursor-one' }
     const pageTwo = {

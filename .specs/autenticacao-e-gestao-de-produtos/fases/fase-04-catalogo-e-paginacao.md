@@ -89,7 +89,7 @@ Consolidar testes de componente e E2E para lista vazia, múltiplas páginas, ret
 
 - `e2e/product-pagination.spec.ts` usa respostas controladas no endpoint direto da API para provar duas páginas, envio byte a byte do cursor opaco, fim da sequência, retorno por controle e por histórico do navegador, reload/deep link sem cursor, retry manual, catálogo vazio e `401` durante a navegação.
 - O cenário adicional em viewport de 400px confirma ausência de overflow horizontal e foco visível/operável no controle `Próxima`.
-- Verificação: `npm test -- --run` (18 arquivos, 100 testes), `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`, `npm run test:e2e` (7 passaram, 4 foram pulados por credenciais opcionais do tracer) e `git diff --check` — todos os gates passaram.
+- Verificação: `npm test -- --run` (18 arquivos, 101 testes), `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`, `npm run test:e2e` (7 passaram, 4 foram pulados por credenciais opcionais do tracer) e `git diff --check` — todos os gates passaram.
 
 ## Orientações de implementação
 
