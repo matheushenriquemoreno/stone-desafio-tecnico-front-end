@@ -1,13 +1,13 @@
 # Estado da Implementação — Interface web de autenticação e gestão de produtos
 
-| Status       | Concluída |
+| Status       | Aguardando correção |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
 
 ## Fase ativa
 
-Fase 02 — Cadastro e autenticação pública completa — review v2 aprovado; aguardando autorização para a Fase 03.
+Fase 02 — Cadastro e autenticação pública completa — review independente v3 reprovado; aguardando correção de A-01 e novo review.
 
 Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase deve passar por `review` independente antes que a próxima seja marcada como ativa.
 
@@ -16,7 +16,7 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | #  | Fase | Arquivo | Status | Concluída em |
 |----|------|---------|--------|--------------|
 | 01 | Fundação e tracer bullet autenticado | fases/fase-01-fundacao-e-tracer-bullet.md | Concluída | 2026-09-05 |
-| 02 | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md | Concluída | 2026-09-05 |
+| 02 | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md | Aguardando correção | — |
 | 03 | Sessão protegida e logout | fases/fase-03-sessao-protegida-e-logout.md | Pendente | — |
 | 04 | Catálogo e paginação sequencial | fases/fase-04-catalogo-e-paginacao.md | Pendente | — |
 | 05 | Criação de produtos | fases/fase-05-criacao-de-produtos.md | Pendente | — |
@@ -67,4 +67,4 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 
 ## Bloqueios e desvios
 
-Nenhum bloqueio de produto ou arquitetura. Dependências externas de API/OpenAPI, origem autorizada, dados E2E, origens de imagem e publicação estão registradas nas fases correspondentes e só bloqueiam a execução das tarefas que as utilizam.
+A-01, identificado no review independente v3, é um bloqueio de qualidade: `correlationId` não é exibido em todos os caminhos de erro. Corrigir na etapa `implement` e repetir o review antes de considerar a Fase 02 concluída. Dependências externas de API/OpenAPI, origem autorizada, dados E2E, origens de imagem e publicação continuam registradas nas fases correspondentes.
