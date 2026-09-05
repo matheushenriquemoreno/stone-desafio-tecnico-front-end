@@ -1,6 +1,6 @@
 # Fase 05 — Criação de produtos
 
-| Status       | Em execução |
+| Status       | Concluída |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |

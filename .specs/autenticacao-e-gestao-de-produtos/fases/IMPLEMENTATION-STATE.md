@@ -7,7 +7,7 @@
 
 ## Fase ativa
 
-Fase 05 — Criação de produtos — T26 concluída; aguardando gate da fase e review independente. A Fase 04 foi aprovada no review v7 e a execução da Fase 05 foi autorizada nesta sessão.
+Fase 06 — Consulta, edição e exclusão — T27 em preparação. A Fase 05 foi aprovada no review v8; a execução das Fases 05 e 06 foi autorizada nesta sessão.
 
 Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase deve passar por `review` independente antes que a próxima seja marcada como ativa.
 
@@ -19,8 +19,8 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | 02  | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md  | Concluída | 2026-09-05   |
 | 03  | Sessão protegida e logout                | fases/fase-03-sessao-protegida-e-logout.md        | Concluída | 2026-09-05   |
 | 04  | Catálogo e paginação sequencial          | fases/fase-04-catalogo-e-paginacao.md             | Concluída | 2026-09-05   |
-| 05  | Criação de produtos                      | fases/fase-05-criacao-de-produtos.md              | Em execução | —         |
-| 06  | Consulta, edição e exclusão              | fases/fase-06-consulta-edicao-e-exclusao.md       | Pendente  | —            |
+| 05  | Criação de produtos                      | fases/fase-05-criacao-de-produtos.md              | Concluída | 2026-09-05 |
+| 06  | Consulta, edição e exclusão              | fases/fase-06-consulta-edicao-e-exclusao.md       | Em execução | —            |
 | 07  | Robustez e prontidão operacional         | fases/fase-07-robustez-e-prontidao-operacional.md | Pendente  | —            |
 
 ## Tarefas
@@ -67,4 +67,4 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 
 ## Bloqueios e desvios
 
-A-01, A-02 e A-03, identificados no review independente v4, foram tratados na etapa `implement` e aprovados no review independente v5. A Fase 03 foi aprovada no review v6; o cenário integrado usa API local, origem autorizada e dados isoláveis. A leitura detalhada mínima será criada como suporte necessário da T25, embora o plano também registre a T27 na Fase 06; edição, exclusão e os estados completos do detalhe permanecem na Fase 06. Dependências externas de API/OpenAPI, origem autorizada, dataset paginado, origens de imagem e publicação continuam registradas nas fases correspondentes.
+A-01, A-02 e A-03, identificados no review independente v4, foram tratados na etapa `implement` e aprovados no review independente v5. A Fase 03 foi aprovada no review v6, a Fase 04 no review v7 e a Fase 05 no review v8; os cenários integrados existentes usam API local, origem autorizada e dados isoláveis. A leitura detalhada mínima foi criada como suporte necessário da T25, embora o plano também registre a T27 na Fase 06; edição, exclusão e os estados completos do detalhe permanecem na Fase 06. Os achados informativos A-06 e A-07 ficam encaminhados à Fase 07. Dependências externas de API/OpenAPI, origem autorizada, dataset paginado, origens de imagem e publicação continuam registradas nas fases correspondentes.
