@@ -18,7 +18,7 @@
 | T02 | Concluída | `npx shadcn@latest info --json`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check` — todos passaram. |
 | T03 | Concluída | `npm test -- --run src/lib/api-client.spec.ts`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run format:check` — todos passaram. |
 | T04 | Concluída | `npm test -- --run src/features/auth/api/auth-gateway.spec.ts src/features/products/api/products-gateway.spec.ts`; `npm run typecheck`; `npm run lint`; `npm run format:check`; `git diff --check` — todos passaram. |
-| T05 | Pendente | — |
+| T05 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check`; `git diff --check` — todos passaram após normalizar o artefato automático `next-env.d.ts`. |
 | T06 | Pendente | — |
 | T07 | Pendente | — |
 
@@ -49,6 +49,13 @@
 - `listProducts` chama `GET /products?limit=20`, reenvia cursor opaco por query string e valida `items`, `total`, `nextCursor` e cada campo do produto antes de retornar sucesso.
 - Os gateways reconhecem somente códigos estáveis da API para decidir estados de domínio; mensagens externas não controlam comportamento e nenhum gateway acessa cookie ou storage.
 - `auth-gateway.spec.ts` e `products-gateway.spec.ts` cobrem payloads, caminhos, respostas `204`/`200`, normalização, limite, cursor, `401`, `403`, `429`, schema inválido e falha de rede.
+
+### Registro de T05
+
+- A rota pública `/login` compõe `LoginScreen` e mantém a regra de formulário na menor fronteira cliente da feature.
+- O formulário possui labels associados, foco visível herdado das primitivas, `aria-invalid`, `aria-describedby`, alertas persistentes e estados de loading/disabled.
+- A senha permanece somente no estado efêmero do formulário, é limpa antes da navegação após `204` e não é armazenada, registrada ou exposta.
+- `login-screen.spec.tsx` cobre teclado implícito via `user-event`, validação local, erro seguro de credenciais, bloqueio de reenvio, loading, rate limit e navegação pós-sucesso.
 
 ## Tarefa T01 — Disponibilizar o bootstrap reproduzível da aplicação
 
