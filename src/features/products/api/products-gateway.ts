@@ -10,6 +10,7 @@ import type {
   CreateProductResult,
   ListProductsResult,
   ProductFieldError,
+  ProductDetailResult,
   ProductInputField,
   ProductMutationGatewayError,
   ProductsGatewayError,
@@ -164,6 +165,51 @@ function mapProductMutationApiError(
   }
 }
 
+function mapProductDetailApiError(
+  result: Extract<ApiResult<never>, { kind: 'api-error' }>,
+): ProductMutationGatewayError {
+  const { error, status } = result
+
+  if (status === 401 && error.code === 'UNAUTHORIZED') {
+    return {
+      code: 'unauthorized',
+      correlationId: error.correlationId,
+      status,
+    }
+  }
+
+  if (status === 404 && error.code === 'PRODUCT_NOT_FOUND') {
+    return {
+      code: 'not-found',
+      correlationId: error.correlationId,
+      status,
+    }
+  }
+
+  if (status === 429 && error.code === 'RATE_LIMIT_EXCEEDED') {
+    return {
+      code: 'rate-limit',
+      correlationId: error.correlationId,
+      retryAfterSeconds: error.retryAfterSeconds,
+      status,
+    }
+  }
+
+  if (status === 503 && error.code === 'SERVICE_UNAVAILABLE') {
+    return {
+      code: 'unavailable',
+      correlationId: error.correlationId,
+      status,
+    }
+  }
+
+  return {
+    code: 'unknown',
+    correlationId: error.correlationId,
+    status,
+  }
+}
+
 export async function listProducts(
   options: {
     cursor?: string
@@ -243,6 +289,42 @@ export async function createProduct(
 
   if (result.kind === 'api-error') {
     return { error: mapProductMutationApiError(result), kind: 'error' }
+  }
+
+  if (result.kind !== 'failure') {
+    return {
+      kind: 'failure',
+      reason: 'invalid-response',
+      status: result.status,
+    }
+  }
+
+  return {
+    kind: 'failure',
+    reason: result.reason,
+    ...(result.status === undefined ? {} : { status: result.status }),
+  }
+}
+
+export async function getProduct(
+  productId: string,
+  signal?: AbortSignal,
+): Promise<ProductDetailResult> {
+  const result = await requestApi({
+    expectedErrorStatuses: [401, 404, 429, 503],
+    expectedStatuses: [200],
+    method: 'GET',
+    path: `/products/${encodeURIComponent(productId)}`,
+    responseSchema: productSchema,
+    signal,
+  })
+
+  if (result.kind === 'success') {
+    return { kind: 'success', product: result.data }
+  }
+
+  if (result.kind === 'api-error') {
+    return { error: mapProductDetailApiError(result), kind: 'error' }
   }
 
   if (result.kind !== 'failure') {

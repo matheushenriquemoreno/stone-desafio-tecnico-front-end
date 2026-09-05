@@ -44,6 +44,7 @@ export type ProductFieldError = Readonly<{
 
 export type ProductMutationGatewayErrorCode =
   | 'forbidden'
+  | 'not-found'
   | 'rate-limit'
   | 'unauthorized'
   | 'validation'
@@ -59,6 +60,15 @@ export type ProductMutationGatewayError = Readonly<{
 }>
 
 export type CreateProductResult =
+  | Readonly<{ kind: 'success'; product: Product }>
+  | Readonly<{ kind: 'error'; error: ProductMutationGatewayError }>
+  | Readonly<{
+      kind: 'failure'
+      reason: Extract<ApiResult<never>, { kind: 'failure' }>['reason']
+      status?: number
+    }>
+
+export type ProductDetailResult =
   | Readonly<{ kind: 'success'; product: Product }>
   | Readonly<{ kind: 'error'; error: ProductMutationGatewayError }>
   | Readonly<{

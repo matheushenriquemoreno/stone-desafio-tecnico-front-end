@@ -42,6 +42,16 @@ const productImageUrlSchema = z
     }
   }, 'A URL da imagem deve usar HTTP(S) e ter até 2048 caracteres.')
 
+const productFormPriceSchema = z
+  .string({ error: 'Informe o preço.' })
+  .trim()
+  .min(1, 'Informe o preço.')
+  .refine(
+    (value) => productPriceSchema.safeParse(Number(value)).success,
+    'Informe um preço válido ou use até duas casas decimais.',
+  )
+  .transform(Number)
+
 export const productInputSchema = z.strictObject({
   description: productDescriptionSchema,
   imageUrl: productImageUrlSchema,
@@ -49,20 +59,12 @@ export const productInputSchema = z.strictObject({
   price: productPriceSchema,
 })
 
-const productFormSchema = z
-  .strictObject({
-    description: z.string(),
-    imageUrl: z.string(),
-    name: z.string(),
-    price: z.string().trim().min(1, 'Informe o preço.'),
-  })
-  .transform((values) => ({
-    description: values.description,
-    imageUrl: values.imageUrl,
-    name: values.name,
-    price: Number(values.price),
-  }))
-  .pipe(productInputSchema)
+const productFormSchema = z.strictObject({
+  description: productDescriptionSchema,
+  imageUrl: productImageUrlSchema,
+  name: productNameSchema,
+  price: productFormPriceSchema,
+})
 
 export { productFormSchema }
 

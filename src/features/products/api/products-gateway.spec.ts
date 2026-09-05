@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createProduct, listProducts } from '@/features/products/api/products-gateway'
+import {
+  createProduct,
+  getProduct,
+  listProducts,
+} from '@/features/products/api/products-gateway'
 
 const page = {
   items: [
@@ -257,5 +261,53 @@ describe('products gateway', () => {
       }),
     ).resolves.toEqual({ kind: 'failure', reason: 'invalid-response', status: 201 })
     expect(vi.mocked(fetch)).toHaveBeenCalledOnce()
+  })
+
+  it('lê produto por id codificado e valida a resposta', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify(product), {
+            headers: { 'Content-Type': 'application/json' },
+            status: 200,
+          }),
+      ),
+    )
+
+    const result = await getProduct('product/id')
+
+    expect(result).toEqual({ kind: 'success', product })
+    const [requestUrl, requestInit] = vi.mocked(fetch).mock.calls[0] ?? []
+    expect(String(requestUrl)).toBe('https://api.example.test/products/product%2Fid')
+    expect(requestInit?.credentials).toBe('include')
+    expect(requestInit?.method).toBe('GET')
+  })
+
+  it('mapeia produto inexistente sem expor mensagem externa', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              code: 'PRODUCT_NOT_FOUND',
+              correlationId: 'corr-detail',
+              message: 'mensagem externa',
+              statusCode: 404,
+            }),
+            { status: 404 },
+          ),
+      ),
+    )
+
+    await expect(getProduct('missing-product')).resolves.toEqual({
+      error: {
+        code: 'not-found',
+        correlationId: 'corr-detail',
+        status: 404,
+      },
+      kind: 'error',
+    })
   })
 })

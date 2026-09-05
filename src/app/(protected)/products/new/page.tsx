@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { ProductCreationGate } from '@/features/products/components/product-creation-gate'
+import { ProductCreationScreen } from '@/features/products/components/product-creation-screen'
 
 export const metadata: Metadata = {
   title: 'Novo produto',
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 }
 
 export default function NewProductPage() {
-  return <ProductCreationGate />
+  return (
+    <ProductCreationGate>
+      <ProductCreationScreen />
+    </ProductCreationGate>
+  )
 }
