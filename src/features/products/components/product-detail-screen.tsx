@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getProduct } from '@/features/products/api/products-gateway'
+import { ProductEditForm } from '@/features/products/components/product-edit-form'
 import { ProductImage } from '@/features/products/components/product-image'
 import { formatProductPrice } from '@/features/products/format-product-price'
 import type { Product } from '@/features/products/types'
@@ -106,6 +107,8 @@ export function ProductDetailScreen({
   const { replace } = useRouter()
   const [attempt, setAttempt] = useState(0)
   const [createdConfirmation] = useState(showCreatedConfirmation)
+  const [isEditing, setIsEditing] = useState(false)
+  const [updatedConfirmation, setUpdatedConfirmation] = useState(false)
   const [state, setState] = useState<ProductDetailViewState>({ kind: 'loading' })
 
   useEffect(() => {
@@ -133,6 +136,8 @@ export function ProductDetailScreen({
 
       if (result.kind === 'success') {
         setState({ kind: 'success', product: result.product })
+        setIsEditing(false)
+        setUpdatedConfirmation(false)
         return
       }
 
@@ -206,26 +211,58 @@ export function ProductDetailScreen({
               </Alert>
             )}
 
-            <Card>
-              <CardHeader>
-                <ProductImage
-                  alt={`Imagem de ${state.product.name}`}
-                  src={state.product.imageUrl}
-                />
-                <CardTitle className="font-display text-3xl">
-                  <h1 id="product-detail-title">{state.product.name}</h1>
-                </CardTitle>
-                <CardDescription>{state.product.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                <p className="font-display text-3xl font-semibold tracking-tight">
-                  {formatProductPrice(state.product.price)}
-                </p>
-                <Link className={cn(buttonVariants({ variant: 'outline' }))} href="/">
-                  Voltar ao catálogo
-                </Link>
-              </CardContent>
-            </Card>
+            {updatedConfirmation && (
+              <Alert>
+                <AlertTitle>Produto atualizado</AlertTitle>
+                <AlertDescription>
+                  As alterações foram salvas no catálogo.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {isEditing ? (
+              <ProductEditForm
+                key={`${state.product.id}:${state.product.updatedAt}`}
+                onCancel={() => setIsEditing(false)}
+                onNotFound={(correlationId) => {
+                  setIsEditing(false)
+                  setState({ kind: 'not-found', correlationId })
+                }}
+                onProductUpdated={(product) => {
+                  setIsEditing(false)
+                  setUpdatedConfirmation(true)
+                  setState({ kind: 'success', product })
+                }}
+                product={state.product}
+              />
+            ) : (
+              <Card>
+                <CardHeader>
+                  <ProductImage
+                    alt={`Imagem de ${state.product.name}`}
+                    src={state.product.imageUrl}
+                  />
+                  <CardTitle className="font-display text-3xl">
+                    <h1 id="product-detail-title">{state.product.name}</h1>
+                  </CardTitle>
+                  <CardDescription>{state.product.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  <p className="font-display text-3xl font-semibold tracking-tight">
+                    {formatProductPrice(state.product.price)}
+                  </p>
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <Button onClick={() => setIsEditing(true)}>Editar produto</Button>
+                    <Link
+                      className={cn(buttonVariants({ variant: 'outline' }))}
+                      href="/"
+                    >
+                      Voltar ao catálogo
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </section>
         )}
       </div>

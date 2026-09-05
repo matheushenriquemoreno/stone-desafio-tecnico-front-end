@@ -5,7 +5,10 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { replace } = vi.hoisted(() => ({ replace: vi.fn() }))
-const { getProductMock } = vi.hoisted(() => ({ getProductMock: vi.fn() }))
+const { getProductMock, patchProductMock } = vi.hoisted(() => ({
+  getProductMock: vi.fn(),
+  patchProductMock: vi.fn(),
+}))
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace }),
@@ -13,6 +16,7 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/features/products/api/products-gateway', () => ({
   getProduct: getProductMock,
+  patchProduct: patchProductMock,
 }))
 
 vi.mock('next/image', () => ({
@@ -36,6 +40,7 @@ const product = {
 describe('ProductDetailScreen', () => {
   beforeEach(() => {
     getProductMock.mockReset()
+    patchProductMock.mockReset()
     replace.mockReset()
     vi.stubEnv('NEXT_PUBLIC_IMAGE_ORIGINS', 'https://images.example.com')
   })
@@ -123,5 +128,99 @@ describe('ProductDetailScreen', () => {
       await screen.findByRole('heading', { name: 'Produto principal' }),
     ).toBeVisible()
     expect(getProductMock).toHaveBeenCalledTimes(3)
+  })
+
+  it('edita somente o campo alterado, atualiza o detalhe e confirma o sucesso', async () => {
+    const updatedProduct = { ...product, name: 'Produto atualizado' }
+    getProductMock.mockResolvedValue({ kind: 'success', product })
+    patchProductMock.mockResolvedValue({ kind: 'success', product: updatedProduct })
+    const user = userEvent.setup()
+
+    render(<ProductDetailScreen productId={product.id} />)
+    await user.click(await screen.findByRole('button', { name: 'Editar produto' }))
+    const nameInput = screen.getByLabelText('Nome')
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Produto atualizado')
+    await user.click(screen.getByRole('button', { name: 'Salvar alterações' }))
+
+    await vi.waitFor(() =>
+      expect(patchProductMock).toHaveBeenCalledWith(product.id, {
+        name: 'Produto atualizado',
+      }),
+    )
+    expect(
+      await screen.findByRole('heading', { name: 'Produto atualizado' }),
+    ).toBeVisible()
+    expect(screen.getByRole('alert')).toHaveTextContent('Produto atualizado')
+  })
+
+  it('impede salvar sem alteração e preserva os dados editáveis', async () => {
+    getProductMock.mockResolvedValue({ kind: 'success', product })
+    const user = userEvent.setup()
+
+    render(<ProductDetailScreen productId={product.id} />)
+    await user.click(await screen.findByRole('button', { name: 'Editar produto' }))
+    await user.click(screen.getByRole('button', { name: 'Salvar alterações' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Altere ao menos um campo do produto.',
+    )
+    expect(screen.getByLabelText('Nome')).toHaveValue(product.name)
+    expect(patchProductMock).not.toHaveBeenCalled()
+  })
+
+  it('mostra erro de validação seguro e mantém o valor corrigível', async () => {
+    getProductMock.mockResolvedValue({ kind: 'success', product })
+    patchProductMock.mockResolvedValue({
+      error: {
+        code: 'validation',
+        correlationId: 'corr-update',
+        fieldErrors: [
+          {
+            code: 'invalid',
+            field: 'name',
+            message: 'O nome deve ter entre 2 e 100 caracteres.',
+          },
+        ],
+      },
+      kind: 'error',
+    })
+    const user = userEvent.setup()
+
+    render(<ProductDetailScreen productId={product.id} />)
+    await user.click(await screen.findByRole('button', { name: 'Editar produto' }))
+    const nameInput = screen.getByLabelText('Nome')
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Produto rejeitado')
+    await user.click(screen.getByRole('button', { name: 'Salvar alterações' }))
+
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('O nome deve ter entre 2 e 100 caracteres.')
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Referência de suporte: corr-update',
+    )
+    expect(screen.getByLabelText('Nome')).toHaveValue('Produto rejeitado')
+    expect(screen.getByLabelText('Nome')).toHaveFocus()
+  })
+
+  it('trata produto removido durante a edição sem manter ações obsoletas', async () => {
+    getProductMock.mockResolvedValue({ kind: 'success', product })
+    patchProductMock.mockResolvedValue({
+      error: { code: 'not-found', correlationId: 'corr-gone', status: 404 },
+      kind: 'error',
+    })
+    const user = userEvent.setup()
+
+    render(<ProductDetailScreen productId={product.id} />)
+    await user.click(await screen.findByRole('button', { name: 'Editar produto' }))
+    await user.clear(screen.getByLabelText('Nome'))
+    await user.type(screen.getByLabelText('Nome'), 'Produto removido')
+    await user.click(screen.getByRole('button', { name: 'Salvar alterações' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Produto não encontrado')
+    expect(screen.getByRole('alert')).toHaveTextContent('Referência: corr-gone')
+    expect(
+      screen.queryByRole('button', { name: 'Editar produto' }),
+    ).not.toBeInTheDocument()
   })
 })

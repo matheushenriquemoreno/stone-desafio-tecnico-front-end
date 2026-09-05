@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/card'
 import { createProduct } from '@/features/products/api/products-gateway'
 import { ProductForm } from '@/features/products/components/product-form'
+import { getProductMutationFeedback } from '@/features/products/product-mutation-feedback'
 import type {
   ProductFieldError,
   ProductFormValues,
@@ -29,49 +30,6 @@ const emptyProductValues: ProductFormValues = {
 
 const genericCreationError =
   'Não foi possível criar o produto. Tente novamente em instantes.'
-
-function getCreationError(
-  result: Extract<Awaited<ReturnType<typeof createProduct>>, { kind: 'error' }>,
-): {
-  correlationId?: string
-  fieldErrors: readonly ProductFieldError[]
-  generalMessage?: string
-} {
-  if (result.error.code === 'validation') {
-    return {
-      correlationId: result.error.correlationId,
-      fieldErrors: result.error.fieldErrors ?? [],
-      generalMessage: result.error.fieldErrors?.length
-        ? undefined
-        : 'Confira os dados informados e tente novamente.',
-    }
-  }
-
-  if (result.error.code === 'forbidden') {
-    return {
-      correlationId: result.error.correlationId,
-      fieldErrors: [],
-      generalMessage: 'Esta origem não está autorizada a criar produtos.',
-    }
-  }
-
-  if (result.error.code === 'rate-limit') {
-    return {
-      correlationId: result.error.correlationId,
-      fieldErrors: [],
-      generalMessage:
-        result.error.retryAfterSeconds === undefined
-          ? 'Muitas tentativas de criação. Aguarde alguns instantes antes de tentar novamente.'
-          : `Muitas tentativas de criação. Aguarde ${result.error.retryAfterSeconds} segundos antes de tentar novamente.`,
-    }
-  }
-
-  return {
-    correlationId: result.error.correlationId,
-    fieldErrors: [],
-    generalMessage: genericCreationError,
-  }
-}
 
 export function ProductCreationScreen() {
   const { push, replace } = useRouter()
@@ -110,7 +68,11 @@ export function ProductCreationScreen() {
       }
 
       if (result.kind === 'error') {
-        const mappedError = getCreationError(result)
+        const mappedError = getProductMutationFeedback(
+          result.error,
+          genericCreationError,
+          'Esta origem não está autorizada a criar produtos.',
+        )
         setFieldErrors(mappedError.fieldErrors)
         setGeneralError(mappedError.generalMessage)
         setCorrelationId(mappedError.correlationId)

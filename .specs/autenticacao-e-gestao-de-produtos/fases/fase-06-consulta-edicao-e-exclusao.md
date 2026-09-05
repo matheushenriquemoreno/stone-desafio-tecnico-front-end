@@ -92,7 +92,8 @@ Adicionar cenários E2E que criem um produto isolado, consultem, editem um únic
 
 - T27 — **Concluída**. A leitura `GET /products/:id` valida a resposta antes de renderizar, separa loading, sucesso, não encontrado, não autorizado e erro recuperável, permite retry manual, exibe `correlationId` seguro e oferece retorno ao catálogo. A implementação mínima da rota foi antecipada na T25 para suportar a confirmação da criação. Evidências: `npm test -- --run src/features/products/api/products-gateway.spec.ts src/features/products/components/product-detail-screen.spec.tsx` (19 testes), `npm run typecheck`, `npm run lint` e `npx prettier --check` nos arquivos alterados — todos passaram.
 - T28 — **Concluída**. O `productPatchSchema` e `buildProductPatch` validam valores públicos, comparam a forma normalizada, rejeitam patch vazio, `null` e chaves desconhecidas e retornam somente campos alterados. Evidências: `npm test -- --run src/features/products/product-patch.spec.ts` (9 testes), `npm run typecheck`, `npm run lint` e `npx prettier --check` nos arquivos alterados — todos passaram.
-- T29 a T32 — **Pendentes**.
+- T29 — **Concluída**. A edição foi integrada à tela de detalhe com formulário preenchido pela resposta validada, patch mínimo, confirmação persistente, bloqueio de duplo envio, preservação de valores corrigíveis e estados seguros para `400`, `401`, `403`, `404`, `429` e falhas não confiáveis. Evidências: `npm test -- --run` (156 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+- T30 a T32 — **Pendentes**.
 
 ## Testes e verificações da fase
 

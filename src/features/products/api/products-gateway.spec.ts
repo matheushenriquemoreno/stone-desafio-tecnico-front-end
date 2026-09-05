@@ -4,6 +4,7 @@ import {
   createProduct,
   getProduct,
   listProducts,
+  patchProduct,
 } from '@/features/products/api/products-gateway'
 
 const page = {
@@ -261,6 +262,136 @@ describe('products gateway', () => {
       }),
     ).resolves.toEqual({ kind: 'failure', reason: 'invalid-response', status: 201 })
     expect(vi.mocked(fetch)).toHaveBeenCalledOnce()
+  })
+
+  it('atualiza produto com patch mínimo, credenciais e resposta validada', async () => {
+    const updatedProduct = { ...product, name: 'Produto atualizado' }
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify(updatedProduct), {
+            headers: { 'Content-Type': 'application/json' },
+            status: 200,
+          }),
+      ),
+    )
+
+    const result = await patchProduct('product/id', { name: 'Produto atualizado' })
+
+    expect(result).toEqual({ kind: 'success', product: updatedProduct })
+    const [requestUrl, requestInit] = vi.mocked(fetch).mock.calls[0] ?? []
+    const requestHeaders = new Headers(requestInit?.headers)
+    expect(String(requestUrl)).toBe('https://api.example.test/products/product%2Fid')
+    expect(requestInit?.credentials).toBe('include')
+    expect(requestInit?.method).toBe('PATCH')
+    expect(JSON.parse(String(requestInit?.body))).toEqual({
+      name: 'Produto atualizado',
+    })
+    expect(requestHeaders.get('Authorization')).toBeNull()
+    expect(requestHeaders.get('X-CSRF-Protection')).toBeNull()
+  })
+
+  it('não chama a API para patch vazio ou inválido', async () => {
+    await expect(patchProduct('product-1', {})).resolves.toEqual({
+      error: { code: 'validation', fieldErrors: [] },
+      kind: 'error',
+    })
+
+    await expect(patchProduct('product-1', { price: '99,90' })).resolves.toEqual({
+      error: {
+        code: 'validation',
+        fieldErrors: [
+          {
+            code: 'invalid',
+            field: 'price',
+            message: 'Informe um preço válido.',
+          },
+        ],
+      },
+      kind: 'error',
+    })
+    expect(vi.mocked(fetch)).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    [400, 'VALIDATION_ERROR', 'validation'],
+    [401, 'UNAUTHORIZED', 'unauthorized'],
+    [403, 'REQUEST_FORBIDDEN', 'forbidden'],
+    [404, 'PRODUCT_NOT_FOUND', 'not-found'],
+    [429, 'RATE_LIMIT_EXCEEDED', 'rate-limit'],
+  ] as const)(
+    'mapeia erro de atualização %s sem expor mensagem externa',
+    async (status, code, expectedCode) => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(
+          async () =>
+            new Response(
+              JSON.stringify({
+                code,
+                correlationId: 'corr-update',
+                errors:
+                  status === 400
+                    ? [{ code: 'invalid', field: 'name', message: 'mensagem externa' }]
+                    : undefined,
+                message: 'mensagem externa',
+                statusCode: status,
+              }),
+              {
+                headers: status === 429 ? { 'Retry-After': '8' } : undefined,
+                status,
+              },
+            ),
+        ),
+      )
+
+      const result = await patchProduct('product-1', { name: 'Produto atualizado' })
+
+      expect(result.kind).toBe('error')
+      if (result.kind === 'error') {
+        expect(result.error.code).toBe(expectedCode)
+        expect(result.error.correlationId).toBe('corr-update')
+        expect(JSON.stringify(result)).not.toContain('mensagem externa')
+        if (status === 400) {
+          expect(result.error.fieldErrors).toEqual([
+            {
+              code: 'invalid',
+              field: 'name',
+              message: 'O nome deve ter entre 2 e 100 caracteres.',
+            },
+          ])
+        }
+        if (status === 429) {
+          expect(result.error.retryAfterSeconds).toBe(8)
+        }
+      }
+      expect(vi.mocked(fetch)).toHaveBeenCalledOnce()
+    },
+  )
+
+  it('converge resposta de atualização inválida e falha de rede em falhas seguras', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () => new Response(JSON.stringify({ id: 'incompleto' }), { status: 200 }),
+      ),
+    )
+
+    await expect(
+      patchProduct('product-1', { description: 'Nova descrição' }),
+    ).resolves.toEqual({ kind: 'failure', reason: 'invalid-response', status: 200 })
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new Error('falha interna de rede')
+      }),
+    )
+
+    await expect(
+      patchProduct('product-1', { description: 'Nova descrição' }),
+    ).resolves.toEqual({ kind: 'failure', reason: 'network' })
   })
 
   it('lê produto por id codificado e valida a resposta', async () => {

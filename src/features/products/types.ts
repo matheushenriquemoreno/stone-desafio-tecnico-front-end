@@ -76,3 +76,5 @@ export type ProductDetailResult =
       reason: Extract<ApiResult<never>, { kind: 'failure' }>['reason']
       status?: number
     }>
+
+export type UpdateProductResult = ProductDetailResult
