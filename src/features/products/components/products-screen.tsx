@@ -7,13 +7,7 @@ import { Package2 } from 'lucide-react'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button, buttonVariants } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   canGoNext,
@@ -28,11 +22,8 @@ import {
 } from '@/features/products/pagination'
 import { cn } from '@/lib/utils'
 import { listProducts } from '@/features/products/api/products-gateway'
-import type {
-  ListProductsResult,
-  Product,
-  ProductPage,
-} from '@/features/products/types'
+import { ProductCard } from '@/features/products/components/product-card'
+import type { ListProductsResult, ProductPage } from '@/features/products/types'
 import { redirectToLogin } from '@/lib/redirect-to-login'
 
 type ProductsViewState =
@@ -82,32 +73,6 @@ function getFailureError(): ProductsViewState {
     kind: 'error',
     message: genericProductsError,
   }
-}
-
-function ProductItem({ product }: { product: Product }) {
-  return (
-    <li>
-      <Card className="h-full">
-        <CardHeader className="gap-3">
-          <div className="flex size-11 items-center justify-center rounded-xl bg-primary/20 text-secondary">
-            <Package2 aria-hidden="true" className="size-5" />
-          </div>
-          <div className="space-y-1">
-            <CardTitle>{product.name}</CardTitle>
-            <CardDescription>{product.description}</CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="font-display text-2xl font-semibold tracking-tight">
-            {product.price.toLocaleString('pt-BR', {
-              currency: 'BRL',
-              style: 'currency',
-            })}
-          </p>
-        </CardContent>
-      </Card>
-    </li>
-  )
 }
 
 function ProductsLoading() {
@@ -160,7 +125,7 @@ function ProductsContent({ page }: { page: ProductPage }) {
   return (
     <ul aria-label="Produtos do catálogo" className="grid gap-4 md:grid-cols-2">
       {page.items.map((product) => (
-        <ProductItem key={product.id} product={product} />
+        <ProductCard key={product.id} product={product} />
       ))}
     </ul>
   )

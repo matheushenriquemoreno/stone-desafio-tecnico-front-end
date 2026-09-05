@@ -65,6 +65,13 @@ Criar a apresentação reutilizável dos itens com nome, descrição, preço e i
 - O boundary `Suspense` mantém a leitura de `useSearchParams` compatível com o build do App Router; a pilha continua efêmera e nenhuma posição/cursor é persistida em storage.
 - Verificação: `npm test -- --run 'src/features/products/pagination.spec.ts' 'src/features/products/components/products-screen.spec.tsx'` (18 testes), `npm run typecheck`, `npm run lint` e `git diff --check` — todos passaram.
 
+## Registro de T20
+
+- `ProductCard` separa a apresentação dos itens com nome, descrição e preço; `formatProductPrice` fixa a exibição em moeda brasileira com duas casas decimais.
+- `ProductImage` mantém dimensões e `sizes` coerentes, usa `next/image` somente para origens explicitamente configuradas em `NEXT_PUBLIC_IMAGE_ORIGINS` e apresenta fallback acessível tanto para origem bloqueada quanto para falha de carregamento.
+- `next.config.ts` converte a mesma allowlist em `images.remotePatterns`, sem wildcard; nenhum proxy ou origem genérica foi introduzido. A grade permanece responsiva e baseada nos tokens semânticos existentes.
+- Verificação: testes de política de imagem, formatador, cartão e tela de produtos (18 testes), `npm run typecheck`, `npm run lint`, `npm run build` e `git diff --check` — todos passaram.
+
 ## Tarefa T21 — Provar paginação e estados do catálogo
 
 Consolidar testes de componente e E2E para lista vazia, múltiplas páginas, retorno, fim da sequência, reload, cursor inválido, retry e sessão expirada durante navegação.
