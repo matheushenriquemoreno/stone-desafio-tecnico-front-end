@@ -1,6 +1,6 @@
 # Fase 05 — Criação de produtos
 
-| Status       | Pendente   |
+| Status       | Em execução |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
@@ -71,6 +71,11 @@ Adicionar testes integrados para proteção da rota, validação, criação bem-
 - **Riscos ou premissas:** limpeza de dados E2E precisa usar mecanismo autorizado do ambiente e não pode ampliar o escopo da interface.
 
 ## Orientações de implementação
+
+## Estado da execução
+
+- T22 — **Concluída**. O schema compartilhado de entrada e o schema de formulário foram adicionados; a resposta de produto reutiliza os mesmos limites dos campos editáveis. Evidências: `npm test -- --run src/features/products/schemas/product-input-schema.spec.ts` (9 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+- T23 a T26 — **Pendentes**.
 
 - Reutilizar o conceito de campos de produto na edição futura, sem criar formulário universal orientado por configuração.
 - O probe é uma leitura de autorização, não cache nem carregamento antecipado do catálogo.
