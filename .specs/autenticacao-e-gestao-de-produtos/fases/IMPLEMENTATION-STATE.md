@@ -1,27 +1,27 @@
 # Estado da Implementação — Interface web de autenticação e gestão de produtos
 
-| Status       | Aguardando review |
-| ------------ | ----------------- |
-| Created      | 2026-09-05        |
-| Last Updated | 2026-09-05        |
+| Status       | Concluída  |
+| ------------ | ---------- |
+| Created      | 2026-09-05 |
+| Last Updated | 2026-09-05 |
 
 ## Fase ativa
 
-Fase 03 — Sessão protegida e logout — tarefas T13–T16 concluídas e gates executados; aguardando review independente. A Fase 04 permanece pendente.
+Fase 03 — Sessão protegida e logout — tarefas T13–T16 concluídas, gates executados e review independente v6 aprovado. A Fase 04 permanece pendente até a ativação explícita da próxima tarefa.
 
 Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase deve passar por `review` independente antes que a próxima seja marcada como ativa.
 
 ## Fases
 
-| #   | Fase                                     | Arquivo                                           | Status            | Concluída em |
-| --- | ---------------------------------------- | ------------------------------------------------- | ----------------- | ------------ |
-| 01  | Fundação e tracer bullet autenticado     | fases/fase-01-fundacao-e-tracer-bullet.md         | Concluída         | 2026-09-05   |
-| 02  | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md  | Concluída         | 2026-09-05   |
-| 03  | Sessão protegida e logout                | fases/fase-03-sessao-protegida-e-logout.md        | Aguardando review | —            |
-| 04  | Catálogo e paginação sequencial          | fases/fase-04-catalogo-e-paginacao.md             | Pendente          | —            |
-| 05  | Criação de produtos                      | fases/fase-05-criacao-de-produtos.md              | Pendente          | —            |
-| 06  | Consulta, edição e exclusão              | fases/fase-06-consulta-edicao-e-exclusao.md       | Pendente          | —            |
-| 07  | Robustez e prontidão operacional         | fases/fase-07-robustez-e-prontidao-operacional.md | Pendente          | —            |
+| #   | Fase                                     | Arquivo                                           | Status    | Concluída em |
+| --- | ---------------------------------------- | ------------------------------------------------- | --------- | ------------ |
+| 01  | Fundação e tracer bullet autenticado     | fases/fase-01-fundacao-e-tracer-bullet.md         | Concluída | 2026-09-05   |
+| 02  | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md  | Concluída | 2026-09-05   |
+| 03  | Sessão protegida e logout                | fases/fase-03-sessao-protegida-e-logout.md        | Concluída | 2026-09-05   |
+| 04  | Catálogo e paginação sequencial          | fases/fase-04-catalogo-e-paginacao.md             | Pendente  | —            |
+| 05  | Criação de produtos                      | fases/fase-05-criacao-de-produtos.md              | Pendente  | —            |
+| 06  | Consulta, edição e exclusão              | fases/fase-06-consulta-edicao-e-exclusao.md       | Pendente  | —            |
+| 07  | Robustez e prontidão operacional         | fases/fase-07-robustez-e-prontidao-operacional.md | Pendente  | —            |
 
 ## Tarefas
 
@@ -67,4 +67,4 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 
 ## Bloqueios e desvios
 
-A-01, A-02 e A-03, identificados no review independente v4, foram tratados na etapa `implement` e aprovados no review independente v5. A Fase 03 foi implementada até T16 e aguarda review independente; o cenário integrado usa API local, origem autorizada e dados isoláveis. As rotas protegidas de criação/detalhe ainda não existem e serão introduzidas nas Fases 05–06; o shell já envolve futuras rotas do grupo protegido. Dependências externas de API/OpenAPI, origem autorizada, dataset paginado, origens de imagem e publicação continuam registradas nas fases correspondentes.
+A-01, A-02 e A-03, identificados no review independente v4, foram tratados na etapa `implement` e aprovados no review independente v5. A Fase 03 foi aprovada no review v6; o cenário integrado usa API local, origem autorizada e dados isoláveis. As rotas protegidas de criação/detalhe ainda não existem e serão introduzidas nas Fases 05–06; o shell já envolve futuras rotas do grupo protegido. Dependências externas de API/OpenAPI, origem autorizada, dataset paginado, origens de imagem e publicação continuam registradas nas fases correspondentes.

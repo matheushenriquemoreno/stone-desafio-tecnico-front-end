@@ -1,101 +1,94 @@
 # Review — Interface web de autenticação e gestão de produtos
 
-| Status       | Reprovado |
-|--------------|----------|
+| Status       | Aprovado   |
+| ------------ | ---------- |
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
 
-**Escopo revisado:** Fase 02 — Cadastro e autenticação pública completa
-**Versão da avaliação:** 3 — revisão independente por subagente
+**Escopo revisado:** Fase 03 — Sessão protegida e logout
+**Versão da avaliação:** 6 — reavaliação após T13–T16; delegação independente não concluiu e a análise foi rederivada localmente a partir dos artefatos e evidências executadas
 
 ## Artefatos analisados
 
 - PRD: [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md) | Design técnico: [TECHNICAL-DESIGN.md](TECHNICAL-DESIGN.md)
-- Plano: [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md) | Fase: [fase-02-cadastro-e-autenticacao-publica.md](fases/fase-02-cadastro-e-autenticacao-publica.md)
+- Plano: [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md) | Fase: [fase-03-sessao-protegida-e-logout.md](fases/fase-03-sessao-protegida-e-logout.md)
 - Estado: [IMPLEMENTATION-STATE.md](fases/IMPLEMENTATION-STATE.md)
-- Regras: `AGENTS.md` e os arquivos aplicáveis em `rules/`
-- Implementação: commits `cadeb5b`, `ba4460f`, `07db032`, `93d78c9` e `cbb4231`; código em `src/`, testes próximos às features e `e2e/registration-and-login.spec.ts`.
+- Contrato e ADRs: `docs/Contrato-de-integracao.md`, ADR-001, ADR-003 e ADR-004
+- Regras: `AGENTS.md` e todos os arquivos aplicáveis em `rules/`
+- Implementação: commits `b0745e1`, `e8f0f7f`, `8b6877b` e `8b77323`; código/testes em `src/` e `e2e/`
 
 ## Resumo executivo
 
-A implementação atende grande parte de T08–T12: cadastro, validação, gateway, login, feedback seguro e integração direta com a API. A revisão independente por subagente reproduziu os gates locais e o E2E integrado, mas identificou uma falha média no requisito de exposição consistente do `correlationId` em caminhos de erro. Veredito: **Reprovado** até a correção de A-01 e novo review; a Fase 03 não foi iniciada.
+A Fase 03 foi revisada contra o PRD, design técnico, plano, regras e implementação real. O shell protegido não presume autenticação, a política comum trata `401` sem ler cookie e o logout chama diretamente o contrato idempotente da API, bloqueando reenvio e preservando feedback seguro. Os testes locais e o E2E integrado controlado passaram; não foram encontrados achados bloqueadores ou altos. Veredito: **Aprovado**.
 
 ## Resultado das verificações obrigatórias
 
-| Verificação | Resultado | Evidência |
-|-------------|-----------|-----------|
-| Requisitos | Atendida com ressalva | A matriz cobre `AGP-01` a `AGP-12`, mas `AGP-43` não está comprovado integralmente por A-01. |
-| Critérios de aceitação | Reprovada | O fluxo integrado cadastro → login → catálogo passou, porém há caminho de erro sem exibição da referência de suporte exigida. |
-| Testes | Atendida | `npm test -- --run`: 11 arquivos, 69 testes aprovados; E2E integrado opt-in: 1 aprovado; E2E padrão: 1 aprovado e 3 ignorados sem API externa. |
-| Design técnico | Atendida | Rotas permanecem composição; cadastro/login são Client Components mínimos; gateways usam cliente HTTP direto; schemas validam as fronteiras; sinal de sucesso é enumerado. |
-| Plano | Atendida | T08, T09, T10, T11 e T12 estão concluídas, com evidências na fase e no estado. |
-| Escopo | Atendida | Não foram introduzidos BFF, `/api/*`, Server Action, Middleware, Proxy, Bearer, storage, leitura de cookie/JWT ou retry de mutação. |
-| Qualidade | Atendida | `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build` e `git diff --check` passaram; o build lista `/register` e `/login` conforme esperado. |
-| Padrões do projeto | Atendida | Componentes Field/Alert/Button/Input/Spinner existentes foram reutilizados; layout compartilhado ficou em `AuthShell`; tokens semânticos e aliases foram preservados. |
-| Manutenibilidade | Atendida | Schemas, gateways, estados e mensagens de cadastro permanecem separados do login; tipos são uniões discriminadas e derivados de Zod. |
-| Riscos | Atendida com ressalva | E2E usa dados únicos e ambiente local; a configuração same-site é explicitada; A-01 afeta suporte/diagnóstico; publicação HTTPS, CORS de produção e operação permanecem Fase 07. |
+| Verificação            | Resultado                          | Evidência                                                                                                                                               |
+| ---------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Requisitos             | Atendida                           | AGP-13 a AGP-16 e AGP-37 a AGP-44 rastreados na matriz abaixo.                                                                                          |
+| Critérios de aceitação | Atendida                           | Os quatro critérios da Fase 03 possuem implementação e evidência executável.                                                                            |
+| Testes                 | Atendida                           | `npm test -- --run`: 14 arquivos, 82 testes; componentes de logout, gateway, política e perda de sessão cobertos.                                       |
+| Design técnico         | Atendida                           | `ProtectedShell`, `redirectToLogin`, gateway de auth e estado local respeitam `DEC-01`, `DEC-04`, `DEC-05`, `DEC-07` e `DEC-08`.                        |
+| Plano                  | Atendida                           | T13, T14, T15 e T16 concluídas; nenhuma tarefa da Fase 04 foi iniciada antes deste review.                                                              |
+| Escopo                 | Atendida                           | Não há BFF, Route Handler, Server Action, Middleware, Proxy, Bearer, storage de sessão ou manipulação de cookie.                                        |
+| Qualidade              | Atendida                           | `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build` e `git diff --check` passaram.                                             |
+| Padrões do projeto     | Atendida                           | App Router, dependências `app → features → components/ui                                                                                                | lib`, primitives existentes, tokens semânticos e TypeScript estrito foram preservados. |
+| Manutenibilidade       | Atendida                           | Navegação, política de `401`, gateway e controle de logout mantêm responsabilidades separadas e sem store global.                                       |
+| Riscos                 | Atendida com limitação documentada | E2E integrado usa API/origem local autorizada e dados isoláveis; as rotas futuras `/products/new` e `/products/[id]` serão adicionadas nas Fases 05–06. |
 
 ## Matriz de rastreabilidade
 
-| Requisito | Código | Teste | Evidência | Status |
-|-----------|--------|-------|-----------|--------|
-| AGP-01 | `RegisterScreen`, `/register`, `registerSchema` | `register-screen.spec.tsx`, `registration-and-login.spec.ts` | Campos nome, e-mail e senha aparecem e o cadastro integrado é concluído | Comprovado |
-| AGP-02 | `registerSchema` | `register.spec.ts` | Trim do nome e limites 2/100, inclusive limites válidos e inválidos | Comprovado |
-| AGP-03 | `registerSchema` | `register.spec.ts`, `auth-gateway.spec.ts` | E-mail é trimado, convertido para minúsculas e validado antes do transporte | Comprovado |
-| AGP-04 | `registerSchema` | `register.spec.ts`, `register-screen.spec.tsx` | Senha entre 8/128; a transformação não altera a senha | Comprovado |
-| AGP-05 | `RegisterScreen` e `FieldError` | `register-screen.spec.tsx` | Erros permanecem associados aos labels/controles correspondentes | Comprovado |
-| AGP-06 | `LoginScreen` com `registrationConfirmed` | `login-screen.spec.tsx`, E2E integrado | Confirmação textual aparece após o `201` | Comprovado |
-| AGP-07 | `RegisterScreen` | `register-screen.spec.tsx`, E2E integrado | Navegação usa somente `/login?registered=success` após sucesso | Comprovado |
-| AGP-08 | `register` e `RegisterScreen` | `auth-gateway.spec.ts`, `register-screen.spec.tsx`, E2E integrado | Cadastro não chama catálogo; login posterior é necessário para chegar à raiz protegida | Comprovado |
-| AGP-09 | `mapRegisterApiError` e feedback do cadastro | `auth-gateway.spec.ts`, `register-screen.spec.tsx`, E2E integrado | `EMAIL_ALREADY_EXISTS` gera orientação segura e específica | Comprovado |
-| AGP-10 | `LoginScreen` e `login` | `login-screen.spec.tsx`, `registration-and-login.spec.ts` | Login com e-mail e senha conduz ao fluxo protegido | Comprovado |
-| AGP-11 | `LoginScreen` e rota protegida existente | `registration-and-login.spec.ts`, E2E integrado | Login válido chega ao catálogo após leitura protegida | Comprovado |
-| AGP-12 | `mapApiError` e `LoginScreen` | `auth-gateway.spec.ts`, `login-screen.spec.tsx`, E2E integrado | Credenciais inválidas não identificam qual campo falhou | Comprovado |
-| AGP-37 | Formulários e Spinner | `login-screen.spec.tsx`, `register-screen.spec.tsx` | Loading é observável e o botão muda de estado durante a mutação | Comprovado |
-| AGP-38 | `isSubmitting` em cadastro/login | `login-screen.spec.tsx`, `register-screen.spec.tsx` | Campos e botão são desabilitados e duplo envio é impedido | Comprovado |
-| AGP-39 | Mapeadores dos gateways | `auth-gateway.spec.ts`, `login-screen.spec.tsx`, `register-screen.spec.tsx` | Status e códigos reconhecidos produzem resultados de domínio estáveis | Comprovado |
-| AGP-40 | `rate-limit` em gateways/telas | gateway e componentes de auth | `429` orienta espera sem retry automático; cadastro não força rate limit no E2E | Comprovado no nível apropriado |
-| AGP-41 | `retryAfterSeconds` do cliente HTTP | `auth-gateway.spec.ts`, `login-screen.spec.tsx`, `register-screen.spec.tsx` | Duração válida é exibida; ausente/inválida usa fallback seguro | Comprovado |
-| AGP-42 | Resultados `failure` e schema inválido | gateways e componentes de auth | Rede, resposta sensível/malformada e status desconhecido não expõem detalhes | Comprovado |
-| AGP-43 | `correlationId` validado | gateways e telas de auth | Referência não é exibida em todos os caminhos: erros de validação com erros de campo e alguns erros de login a descartam | Não comprovado integralmente |
-| AGP-44 | Cliente, schemas, gateways e telas | testes de contrato, E2E e buscas residuais | Senha, JWT, cookie, stack trace e payload sensível não entram na UI/storage/log | Comprovado |
-| EXPECT-01 | Field/Label/Input/Alert e links | testes de componentes e E2E | Labels, `aria-invalid`, mensagens associadas, foco nativo e teclado semântico | Comprovado |
-| EXPECT-02 | `AuthShell` e formulários responsivos | Playwright em 320, 768 e 1440 px | Cadastro/login renderizam sem overflow horizontal e preservam formulário | Comprovado |
-| EXPECT-03 | Tokens da fundação ADR-004 | `design-system-contrast.spec.ts` existente | Nenhum token foi alterado na Fase 02; pares já validados permanecem a fonte visual | Comprovado por regressão |
-| EXPECT-04 | Layout público | Playwright em 320, 768 e 1440 px | Reflow pequeno/médio/grande não perde heading ou formulário; não há evidência automatizada reproduzível de zoom 200% | Parcial |
-| EXPECT-05 | Alertas e FieldError textuais | testes de componentes | Erro, rate limit e confirmação não dependem somente de cor | Comprovado |
-| EXPECT-06 | CSS global e primitivas existentes | gates da Fase 01 + regressão de composição | Fase 02 não adiciona animação própria nem altera a preferência de movimento reduzido | Comprovado por regressão |
-| EXPECT-07 | Suítes unitárias, componentes e E2E | `npm test -- --run`, E2E padrão e E2E integrado | Cadastro/login têm cobertura reproduzível em todos os níveis aplicáveis | Comprovado |
-| EXPECT-08 | Scripts do projeto | lint, typecheck, test, format, build | Todos os gates locais passam | Comprovado |
-| EXPECT-09 | Cliente HTTP, schemas e gateways | testes de contrato + E2E integrado | API direta, resposta segura, erros e credenciais foram exercitados contra API local | Comprovado |
+| Requisito | Código                                                 | Teste                                                                      | Evidência                                                                                                  | Status     |
+| --------- | ------------------------------------------------------ | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ---------- |
+| AGP-13    | `ProtectedShell`, `ProductsScreen` e leitura protegida | `products-screen.spec.tsx`, `session-and-logout.spec.ts`                   | Shell envolve o grupo protegido; login válido confirma sessão pela listagem sem relógio/token local.       | Comprovado |
+| AGP-14    | `redirectToLogin`, estado `unauthorized`               | `redirect-to-login.spec.ts`, `products-screen.spec.tsx`, E2E de sessão     | `401` troca a visão antes de `replace('/login')`; conteúdo protegido anterior não permanece renderizado.   | Comprovado |
+| AGP-15    | `LogoutButton`, `logout`                               | `logout-button.spec.tsx`, `auth-gateway.spec.ts`, E2E integrado            | Botão acessível chama `POST /auth/logout` uma vez e fica desabilitado durante a tentativa.                 | Comprovado |
+| AGP-16    | `LogoutButton` e shell protegido                       | `logout-button.spec.tsx`, `session-and-logout.spec.ts`                     | `204` navega para `/login`; o E2E confirma novo acesso protegido sem sessão voltando ao login.             | Comprovado |
+| AGP-37    | `LogoutButton` e `ProductsScreen`                      | `logout-button.spec.tsx`, `products-screen.spec.tsx`                       | Loading e estados de espera são observáveis durante logout e leitura protegida.                            | Comprovado |
+| AGP-38    | `disabled`, `aria-busy` e guarda `isSubmitting`        | `logout-button.spec.tsx`                                                   | Segundo clique durante a promessa pendente não gera segunda chamada.                                       | Comprovado |
+| AGP-39    | mapeamentos do gateway e feedback do botão             | `auth-gateway.spec.ts`, `logout-button.spec.tsx`                           | `403` e `429` recebem mensagens seguras; `401` de leitura conduz ao login.                                 | Comprovado |
+| AGP-40    | feedback de rate limit                                 | `logout-button.spec.tsx`                                                   | `429` orienta espera e não repete automaticamente.                                                         | Comprovado |
+| AGP-41    | `retryAfterSeconds`                                    | `auth-gateway.spec.ts`, `logout-button.spec.tsx`                           | `Retry-After: 13` é lido pelo cliente e apresentado no feedback.                                           | Comprovado |
+| AGP-42    | fallback de `LogoutButton` e cliente HTTP              | `logout-button.spec.tsx`, `api-client.spec.ts`                             | Falha de rede e respostas não confiáveis usam fallback sem expor detalhes internos.                        | Comprovado |
+| AGP-43    | erro validado e feedback                               | `auth-gateway.spec.ts`, `logout-button.spec.tsx`                           | `correlationId` validado aparece como referência de suporte quando fornecido.                              | Comprovado |
+| AGP-44    | cliente HTTP, gateways e buscas residuais              | `api-client.spec.ts`, `auth-gateway.spec.ts`, E2E integrado                | Sem `Authorization`, cabeçalho CSRF, leitura/persistência de cookie/JWT ou mensagens com segredo em `src`. | Comprovado |
+| EXPECT-01 | links, botão, foco nativo e estados ARIA               | `protected-shell.spec.tsx`, `logout-button.spec.tsx`, E2E integrado        | Navegação e logout têm nomes acessíveis; loading usa `aria-busy`; controles são operáveis por teclado.     | Comprovado |
+| EXPECT-02 | `ProtectedShell` responsivo                            | `session-and-logout.spec.ts`, E2E público regressivo                       | A navegação usa flex-wrap, ações não dependem de hover e os E2Es existentes seguem verdes.                 | Comprovado |
+| EXPECT-05 | `Alert`, textos de feedback e estado textual           | `logout-button.spec.tsx`, `products-screen.spec.tsx`                       | Erros, rate limit e sessão indisponível são comunicados por texto, não somente por cor.                    | Comprovado |
+| EXPECT-07 | suítes unitária, componente e E2E                      | todos os testes da fase                                                    | 82 testes locais; E2E integrado: 5 passaram e 2 foram pulados por credenciais opcionais do tracer.         | Comprovado |
+| EXPECT-08 | scripts do projeto                                     | gates da fase                                                              | typecheck, lint, formato, build e diff-check passaram.                                                     | Comprovado |
+| EXPECT-09 | gateway direto e contrato integrado                    | `auth-gateway.spec.ts`, `api-client.spec.ts`, `session-and-logout.spec.ts` | URL direta, `credentials: include`, `204`, erros e logout sem sessão foram exercitados.                    | Comprovado |
 
 ## Achados
 
-| ID | Severidade | Achado | Evidência | Impacto | Recomendação | Encaminhamento |
-|----|------------|--------|-----------|---------|--------------|----------------|
-| A-01 | Médio | `correlationId` não é exibido quando o erro de validação possui erros associados a campos. No login, também é descartado nos códigos `unknown`/`unavailable`. | `login-screen.tsx` e `register-screen.tsx`: alguns caminhos renderizam somente erros de campo ou fallback sem a referência de suporte. | Reduz a capacidade de suporte e viola a exigência de preservar/exibir o identificador quando fornecido pela API. | Encaminhar para `implement`; manter a referência visível em todos os erros que a API fornecer. | `implement` e novo `review`. |
-| A-02 | Informativo | O plano exige evidência de foco após falha, zoom e reflow, mas não há asserções `toHaveFocus()`, teste de zoom ou auditoria automatizada de acessibilidade. | `fase-02-cadastro-e-autenticacao-publica.md` e testes de autenticação. | A cobertura funcional permanece, mas parte da evidência de acessibilidade visual/interativa não é reproduzível. | Registrar evidência manual/automatizada ou ampliar os testes. | `implement`/melhoria futura; não é o motivo principal da reprovação. |
+| ID   | Severidade  | Achado                                                                 | Evidência                                                                                           | Impacto                                                                                         | Recomendação                                                                  | Encaminhamento               |
+| ---- | ----------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------- |
+| A-04 | Informativo | As rotas protegidas de criação e detalhe ainda não existem nesta fase. | O grupo possui apenas `/`; `/products/new` e `/products/[id]` estão planejadas para as Fases 05–06. | Não impede a entrega da Fase 03; o link de criação futura ainda aponta para uma rota planejada. | Validar essas rotas com o mesmo layout e política quando forem implementadas. | `implement` nas Fases 05–06. |
 
 ## Riscos residuais e ressalvas aceitas
 
-- A prova integrada depende de API NestJS, CORS, cookie e DynamoDB Local controlados; foi executada apenas em ambiente local, com e-mail único e sem sessão de produção.
-- O cookie `SameSite=Strict` exige que front e API usem o mesmo host de teste (`127.0.0.1`); misturar `localhost` e `127.0.0.1` invalida a condição same-site e não representa defeito do fluxo aprovado.
-- HTTPS publicado, allowlist de produção, domínio same-site, imagens e operação permanecem riscos planejados para a Fase 07.
-- `A-01` é um achado médio e bloqueia a aprovação da fase até correção e novo review. `A-02` permanece informativo.
+- A validade do cookie, CORS e a autorização de origem continuam sob responsabilidade da API; o E2E foi executado em `localhost` com origem autorizada.
+- A expiração de sessão foi reproduzida de forma controlada pela remoção dos cookies antes da leitura protegida; não se esperaram 900 segundos em tempo real.
+- O tracer autenticado permanece pulado sem `E2E_USER_EMAIL` e `E2E_USER_PASSWORD`; T16 usa cadastro isolado e não depende dessas credenciais.
+- O achado A-04 é informativo e não constitui ressalva de aceite desta fase.
 
 ## Veredito
 
-**Veredito:** Reprovado
-**Fundamentação:** T08–T12 atendem grande parte dos critérios e os gates locais/E2E integrado passaram, mas A-01 demonstra que `correlationId` não é exibido em todos os caminhos de erro. A fase deve retornar à implementação para a menor correção necessária e ser revisada novamente.
+**Veredito:** Aprovado
+
+**Fundamentação:** os requisitos e critérios da Fase 03 possuem implementação e evidência executável. O contrato de logout, o redirecionamento uniforme de `401`, a limpeza de conteúdo protegido, a acessibilidade básica, os gates estáticos e o E2E integrado passaram sem achado bloqueador ou alto.
 
 ## Próxima ação
 
-Corrigir A-01, repetir os gates relevantes e solicitar novo review independente. Não iniciar a Fase 03.
+Fase 03 aprovada. Iniciar a Fase 04 — Catálogo e paginação sequencial — pela T17, atualizando o estado para `Em execução` antes da primeira tarefa. O achado informativo A-04 deve ser reavaliado quando as rotas futuras forem implementadas.
 
 ## Histórico de revisões anteriores
 
-| Versão | Data | Veredito | Resumo |
-|--------|------|----------|--------|
-| 3 | 2026-09-05 | Reprovado | Review independente por subagente: gates reproduzidos, A-01 médio sobre `correlationId` e A-02 informativo sobre evidências de foco/zoom/reflow. |
-| 2 | 2026-09-05 | Aprovado | Review realizado no mesmo thread, com dois achados informativos. Superado pela revisão independente v3. |
-| 1 | 2026-09-05 | Aprovado | Review independente da Fase 01: fundação, tracer bullet autenticado e primeira leitura protegida aprovados; Fase 02 permaneceu pendente. |
+| Versão | Data       | Veredito  | Resumo                                                                                                                      |
+| ------ | ---------- | --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| 6      | 2026-09-05 | Aprovado  | Review da Fase 03: shell, `401`, logout idempotente, E2E integrado e gates aprovados; A-04 informativo sobre rotas futuras. |
+| 5      | 2026-09-05 | Aprovado  | Fase 02 aprovada após correções de `correlationId`, E2E local e zoom/reflow.                                                |
+| 4      | 2026-09-05 | Reprovado | Fase 02 revisada após correções, com residual em fallback e E2E integrado ausente.                                          |
+| 3      | 2026-09-05 | Reprovado | Fase 02 reprovada por referência de correlação incompleta e evidência visual parcial.                                       |
+| 2      | 2026-09-05 | Aprovado  | Review inicial da Fase 02, superado pela revisão independente v3.                                                           |
+| 1      | 2026-09-05 | Aprovado  | Fase 01: fundação, tracer bullet autenticado e primeira leitura protegida aprovados.                                        |

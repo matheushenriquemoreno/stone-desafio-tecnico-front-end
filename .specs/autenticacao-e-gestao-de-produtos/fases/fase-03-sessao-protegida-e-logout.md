@@ -119,4 +119,4 @@ Executar testes unitários/componentes, E2E de sessão e logout, lint, tipos e b
 
 - A invalidação controlada da sessão é dependência do E2E integrado.
 - Estado local novo em fases futuras deve aderir à política de descarte desta fase.
-- A conclusão exige `review`; não iniciar a Fase 04 automaticamente.
+- A conclusão exige `review`; a avaliação v6 aprovou a fase e liberou a Fase 04, que ainda não foi iniciada neste registro.
