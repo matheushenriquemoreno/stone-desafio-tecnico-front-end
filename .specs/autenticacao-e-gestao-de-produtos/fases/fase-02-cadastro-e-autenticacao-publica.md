@@ -40,6 +40,13 @@ Adicionar `POST /auth/register` ao gateway de autenticação, validar a resposta
 - **Critérios de conclusão:** sucesso só existe após validar os três campos seguros; e-mail duplicado e origem rejeitada têm resultado específico; mutação não recebe retry automático nem cabeçalho CSRF.
 - **Riscos ou premissas:** mensagens brutas da API não são apresentadas; apenas códigos conhecidos orientam feedback específico.
 
+### Registro de T09
+
+- O gateway chama `POST /auth/register` diretamente com `credentials: include`, sem cabeçalho CSRF, Authorization ou retry automático.
+- `registeredUserSchema` aceita somente `id`, `name` e `email`; respostas com senha, hash, token ou propriedades desconhecidas viram falha de resposta inválida.
+- O mapeamento cobre validação, origem rejeitada, e-mail duplicado, rate limit com `Retry-After`, indisponibilidade e fallback desconhecido, preservando `correlationId` validado.
+- Verificação: `npm test -- --run src/features/auth/schemas/register.spec.ts src/features/auth/schemas/registered-user.spec.ts src/features/auth/api/auth-gateway.spec.ts` (25 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+
 ## Tarefa T10 — Entregar a tela de cadastro e a transição segura para login
 
 Compor `/register` com formulário acessível baseado nas primitivas compartilhadas. Durante o envio, bloquear repetição; no sucesso, descartar a senha, navegar para `/login` e transportar apenas um sinal público de confirmação que será consumido e removido/canonicalizado pelo login.
