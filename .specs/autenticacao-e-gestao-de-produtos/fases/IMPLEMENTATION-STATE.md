@@ -1,27 +1,27 @@
 # Estado da Implementação — Interface web de autenticação e gestão de produtos
 
-| Status       | Em execução |
-| ------------ | ----------- |
-| Created      | 2026-09-05  |
-| Last Updated | 2026-09-05  |
+| Status       | Aguardando review |
+| ------------ | ----------------- |
+| Created      | 2026-09-05        |
+| Last Updated | 2026-09-05        |
 
 ## Fase ativa
 
-Fase 04 — Catálogo e paginação sequencial — review v6 da Fase 03 aprovado; T21 em preparação. A Fase 04 foi ativada explicitamente.
+Fase 04 — Catálogo e paginação sequencial — T17 a T21 concluídas; aguardando review independente. A Fase 04 foi ativada explicitamente.
 
 Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase deve passar por `review` independente antes que a próxima seja marcada como ativa.
 
 ## Fases
 
-| #   | Fase                                     | Arquivo                                           | Status      | Concluída em |
-| --- | ---------------------------------------- | ------------------------------------------------- | ----------- | ------------ |
-| 01  | Fundação e tracer bullet autenticado     | fases/fase-01-fundacao-e-tracer-bullet.md         | Concluída   | 2026-09-05   |
-| 02  | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md  | Concluída   | 2026-09-05   |
-| 03  | Sessão protegida e logout                | fases/fase-03-sessao-protegida-e-logout.md        | Concluída   | 2026-09-05   |
-| 04  | Catálogo e paginação sequencial          | fases/fase-04-catalogo-e-paginacao.md             | Em execução | —            |
-| 05  | Criação de produtos                      | fases/fase-05-criacao-de-produtos.md              | Pendente    | —            |
-| 06  | Consulta, edição e exclusão              | fases/fase-06-consulta-edicao-e-exclusao.md       | Pendente    | —            |
-| 07  | Robustez e prontidão operacional         | fases/fase-07-robustez-e-prontidao-operacional.md | Pendente    | —            |
+| #   | Fase                                     | Arquivo                                           | Status            | Concluída em |
+| --- | ---------------------------------------- | ------------------------------------------------- | ----------------- | ------------ |
+| 01  | Fundação e tracer bullet autenticado     | fases/fase-01-fundacao-e-tracer-bullet.md         | Concluída         | 2026-09-05   |
+| 02  | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md  | Concluída         | 2026-09-05   |
+| 03  | Sessão protegida e logout                | fases/fase-03-sessao-protegida-e-logout.md        | Concluída         | 2026-09-05   |
+| 04  | Catálogo e paginação sequencial          | fases/fase-04-catalogo-e-paginacao.md             | Aguardando review | —            |
+| 05  | Criação de produtos                      | fases/fase-05-criacao-de-produtos.md              | Pendente          | —            |
+| 06  | Consulta, edição e exclusão              | fases/fase-06-consulta-edicao-e-exclusao.md       | Pendente          | —            |
+| 07  | Robustez e prontidão operacional         | fases/fase-07-robustez-e-prontidao-operacional.md | Pendente          | —            |
 
 ## Tarefas
 
@@ -47,7 +47,7 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | T18 | 04   | Concluída | Estado de paginação em `src/features/products/pagination.ts` mantém índice, cursores e página corrente; `ProductsScreen` controla Anterior/Próxima, aborta/ignora respostas obsoletas e reinicia em cursor inválido/página posterior vazia; `npm test -- --run 'src/features/products/pagination.spec.ts' 'src/features/products/components/products-screen.spec.tsx'` (12 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.                                                                                      |
 | T19 | 04   | Concluída | `pagination.ts` valida e serializa somente a posição humana; `ProductsScreen` sincroniza `?page=` com posições visitadas, canonicaliza URL inválida/deep link e descarta a pilha sem cursor; `npm test -- --run 'src/features/products/pagination.spec.ts' 'src/features/products/components/products-screen.spec.tsx'` (18 testes), `npm run typecheck`, `npm run lint` — todos passaram.                                                                                                                                                                                                         |
 | T20 | 04   | Concluída | `ProductCard`, `ProductImage`, formatador BRL e `next/image` com `remotePatterns` derivados de `NEXT_PUBLIC_IMAGE_ORIGINS`; fallback cobre origem não permitida e erro de carregamento; `npm test -- --run 'src/lib/image-origin-policy.spec.ts' 'src/features/products/format-product-price.spec.ts' 'src/features/products/components/product-card.spec.tsx' 'src/features/products/components/products-screen.spec.tsx'`, `npm run typecheck` e `npm run lint` — todos passaram.                                                                                                                |
-| T21 | 04   | Pendente  | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| T21 | 04   | Concluída | `e2e/product-pagination.spec.ts` cobre duas páginas, cursor opaco, anterior/próxima, fim, voltar/avançar, reload/deep link, retry, catálogo vazio, sessão expirada e viewport estreita com foco; `npm test -- --run` (100 testes), `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`, `npm run test:e2e` (7 passaram, 4 foram pulados por credenciais opcionais) e `git diff --check` — gates passaram.                                                                                                                                                                 |
 | T22 | 05   | Pendente  | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | T23 | 05   | Pendente  | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | T24 | 05   | Pendente  | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |

@@ -1,9 +1,9 @@
 # Fase 04 — Catálogo e paginação sequencial
 
-| Status       | Em execução |
-| ------------ | ----------- |
-| Created      | 2026-09-05  |
-| Last Updated | 2026-09-05  |
+| Status       | Aguardando review |
+| ------------ | ----------------- |
+| Created      | 2026-09-05        |
+| Last Updated | 2026-09-05        |
 
 **Objetivo e resultado esperado:** completar a página inicial protegida com apresentação responsiva do catálogo, estados explícitos e navegação anterior/próxima por cursor opaco.
 **Capacidade ou fluxo coberto:** primeira página → vazio ou itens → próxima por `nextCursor` → retorno por cursor visitado → reinício seguro quando a sequência é perdida.
@@ -83,6 +83,12 @@ Consolidar testes de componente e E2E para lista vazia, múltiplas páginas, ret
 - **Testes e verificações:** controlar dataset com mais de uma página; observar requests e confirmar o cursor opaco; executar gates completos e revisar responsividade/teclado dos controles.
 - **Critérios de conclusão:** cenários provam anterior/próxima sem salto, posição atual, fim, reinício e fallback; cursores não vazam; sessão inválida retorna ao login.
 - **Riscos ou premissas:** o ambiente E2E precisa oferecer dados determinísticos suficientes para mais de uma página.
+
+## Registro de T21
+
+- `e2e/product-pagination.spec.ts` usa respostas controladas no endpoint direto da API para provar duas páginas, envio byte a byte do cursor opaco, fim da sequência, retorno por controle e por histórico do navegador, reload/deep link sem cursor, retry manual, catálogo vazio e `401` durante a navegação.
+- O cenário adicional em viewport de 400px confirma ausência de overflow horizontal e foco visível/operável no controle `Próxima`.
+- Verificação: `npm test -- --run` (18 arquivos, 100 testes), `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`, `npm run test:e2e` (7 passaram, 4 foram pulados por credenciais opcionais do tracer) e `git diff --check` — todos os gates passaram.
 
 ## Orientações de implementação
 
