@@ -47,7 +47,7 @@ describe('LoginScreen', () => {
 
   it('mantém erro de credencial genérico sem apontar qual campo falhou', async () => {
     loginMock.mockResolvedValue({
-      error: { code: 'invalid-credentials' },
+      error: { code: 'invalid-credentials', correlationId: 'corr-login' },
       kind: 'error',
     })
     const user = userEvent.setup()
@@ -59,6 +59,9 @@ describe('LoginScreen', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'E-mail ou senha inválidos. Confira seus dados e tente novamente.',
+    )
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Referência de suporte: corr-login',
     )
     expect(screen.getByLabelText('E-mail')).toHaveAttribute('aria-invalid', 'false')
     expect(screen.getByLabelText('Senha')).toHaveAttribute('aria-invalid', 'false')
@@ -105,6 +108,72 @@ describe('LoginScreen', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Aguarde 7 segundos antes de tentar novamente.',
     )
+  })
+
+  it('mantém o erro de validação da API associado ao campo', async () => {
+    loginMock.mockResolvedValue({
+      error: {
+        code: 'validation',
+        fieldErrors: [
+          { code: 'invalid', field: 'email', message: 'Informe um e-mail válido.' },
+        ],
+      },
+      kind: 'error',
+    })
+    const user = userEvent.setup()
+
+    render(<LoginScreen />)
+    await user.type(screen.getByLabelText('E-mail'), 'maria@example.com')
+    await user.type(screen.getByLabelText('Senha'), 'senha-segura')
+    await user.click(screen.getByRole('button', { name: 'Entrar' }))
+
+    expect(await screen.findByText('Informe um e-mail válido.')).toBeInTheDocument()
+    expect(screen.getByLabelText('E-mail')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.queryByText('mensagem externa')).not.toBeInTheDocument()
+  })
+
+  it('usa fallback seguro para origem rejeitada e falha de rede', async () => {
+    const user = userEvent.setup()
+    render(<LoginScreen />)
+    await user.type(screen.getByLabelText('E-mail'), 'maria@example.com')
+    await user.type(screen.getByLabelText('Senha'), 'senha-segura')
+
+    loginMock.mockResolvedValueOnce({
+      error: { code: 'forbidden', correlationId: 'corr-forbidden' },
+      kind: 'error',
+    })
+    await user.click(screen.getByRole('button', { name: 'Entrar' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Esta origem não está autorizada a realizar o login.',
+    )
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Referência de suporte: corr-forbidden',
+    )
+
+    loginMock.mockResolvedValueOnce({ kind: 'failure', reason: 'network' })
+    await user.click(screen.getByRole('button', { name: 'Entrar' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Não foi possível concluir o login. Tente novamente em instantes.',
+    )
+    expect(screen.getByRole('alert')).not.toHaveTextContent('network')
+  })
+
+  it('usa fallback quando o rate limit não informa duração confiável', async () => {
+    loginMock.mockResolvedValue({
+      error: { code: 'rate-limit', retryAfterSeconds: undefined },
+      kind: 'error',
+    })
+    const user = userEvent.setup()
+
+    render(<LoginScreen />)
+    await user.type(screen.getByLabelText('E-mail'), 'maria@example.com')
+    await user.type(screen.getByLabelText('Senha'), 'senha-segura')
+    await user.click(screen.getByRole('button', { name: 'Entrar' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Aguarde alguns instantes antes de tentar novamente.',
+    )
+    expect(screen.getByRole('alert')).not.toHaveTextContent('undefined segundos')
   })
 
   it('confirma cadastro e remove o sinal enumerado da URL', async () => {

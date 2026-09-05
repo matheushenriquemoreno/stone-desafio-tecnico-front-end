@@ -78,6 +78,13 @@ Completar a tela de login do tracer bullet para tratar validação, credenciais 
 - **Critérios de conclusão:** cada resposta pública contratada gera orientação coerente; excesso de requisições informa espera sem retentar automaticamente; detalhes internos nunca chegam à interface.
 - **Riscos ou premissas:** a duração exibida é apenas a informada de modo confiável pela API e não cria um relógio de sessão.
 
+### Registro de T11
+
+- O login mantém validação de campo, credenciais inválidas, origem rejeitada, rate limit e fallback de rede/status em mensagens seguras e persistentes.
+- `Retry-After` só é exibido quando já foi validado como inteiro confiável pelo cliente HTTP; ausência ou valor inválido usa orientação genérica sem retentativa automática.
+- `correlationId` validado pode ser mostrado como referência de suporte, enquanto mensagens externas e detalhes de falhas permanecem fora da interface.
+- Verificação: `npm test -- --run src/features/auth/components/login-screen.spec.tsx src/features/auth/components/register-screen.spec.tsx src/features/auth/api/auth-gateway.spec.ts` (27 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+
 ## Tarefa T12 — Provar cadastro e login público de ponta a ponta
 
 Adicionar testes integrados que criem uma conta nova, confirmem a chegada ao login sem sessão, autentiquem essa conta e validem e-mail duplicado, credenciais inválidas, validações e rate limit nos níveis apropriados.

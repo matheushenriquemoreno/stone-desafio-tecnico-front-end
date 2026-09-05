@@ -71,6 +71,7 @@ function getFieldError(
 }
 
 function getResultError(result: LoginResult): {
+  correlationId?: string
   fieldErrors: readonly AuthFieldError[]
   generalMessage?: string
 } {
@@ -80,6 +81,9 @@ function getResultError(result: LoginResult): {
 
   if (result.error.code === 'validation') {
     return {
+      ...(result.error.correlationId
+        ? { correlationId: result.error.correlationId }
+        : {}),
       fieldErrors: result.error.fieldErrors ?? [],
       ...(result.error.fieldErrors?.length
         ? {}
@@ -89,6 +93,7 @@ function getResultError(result: LoginResult): {
 
   if (result.error.code === 'invalid-credentials') {
     return {
+      correlationId: result.error.correlationId,
       fieldErrors: [],
       generalMessage:
         'E-mail ou senha inválidos. Confira seus dados e tente novamente.',
@@ -96,11 +101,13 @@ function getResultError(result: LoginResult): {
   }
 
   if (result.error.code === 'rate-limit') {
-    const waitMessage = result.error.retryAfterSeconds
-      ? ` Aguarde ${result.error.retryAfterSeconds} segundos antes de tentar novamente.`
-      : ' Aguarde alguns instantes antes de tentar novamente.'
+    const waitMessage =
+      result.error.retryAfterSeconds === undefined
+        ? ' Aguarde alguns instantes antes de tentar novamente.'
+        : ` Aguarde ${result.error.retryAfterSeconds} segundos antes de tentar novamente.`
 
     return {
+      correlationId: result.error.correlationId,
       fieldErrors: [],
       generalMessage: `Muitas tentativas de login.${waitMessage}`,
     }
@@ -108,6 +115,7 @@ function getResultError(result: LoginResult): {
 
   if (result.error.code === 'forbidden') {
     return {
+      correlationId: result.error.correlationId,
       fieldErrors: [],
       generalMessage: 'Esta origem não está autorizada a realizar o login.',
     }
@@ -125,6 +133,7 @@ export function LoginScreen({ registrationConfirmed = false }: LoginScreenProps)
   const [values, setValues] = useState<LoginFormValues>(initialValues)
   const [fieldErrors, setFieldErrors] = useState<readonly AuthFieldError[]>([])
   const [generalError, setGeneralError] = useState<string>()
+  const [correlationId, setCorrelationId] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showRegistrationConfirmation] = useState(registrationConfirmed)
 
@@ -140,6 +149,7 @@ export function LoginScreen({ registrationConfirmed = false }: LoginScreenProps)
     setValues((current) => ({ ...current, [field]: value }))
     setFieldErrors((current) => current.filter((error) => error.field !== field))
     setGeneralError(undefined)
+    setCorrelationId(undefined)
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -154,12 +164,14 @@ export function LoginScreen({ registrationConfirmed = false }: LoginScreenProps)
     if (localErrors.length > 0) {
       setFieldErrors(localErrors)
       setGeneralError(undefined)
+      setCorrelationId(undefined)
       return
     }
 
     setIsSubmitting(true)
     setFieldErrors([])
     setGeneralError(undefined)
+    setCorrelationId(undefined)
 
     try {
       const result = await login(values)
@@ -173,6 +185,7 @@ export function LoginScreen({ registrationConfirmed = false }: LoginScreenProps)
       const mappedError = getResultError(result)
       setFieldErrors(mappedError.fieldErrors)
       setGeneralError(mappedError.generalMessage)
+      setCorrelationId(mappedError.correlationId)
     } finally {
       setIsSubmitting(false)
     }
@@ -221,7 +234,12 @@ export function LoginScreen({ registrationConfirmed = false }: LoginScreenProps)
         {generalError && (
           <Alert variant="destructive">
             <AlertTitle>Não foi possível entrar</AlertTitle>
-            <AlertDescription>{generalError}</AlertDescription>
+            <AlertDescription>
+              <p>{generalError}</p>
+              {correlationId && (
+                <p className="mt-2">Referência de suporte: {correlationId}</p>
+              )}
+            </AlertDescription>
           </Alert>
         )}
 
