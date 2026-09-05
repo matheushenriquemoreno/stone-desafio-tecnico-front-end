@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Package2 } from 'lucide-react'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -14,6 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 import { listProducts } from '@/features/products/api/products-gateway'
 import type {
   ListProductsResult,
@@ -25,6 +27,7 @@ import { redirectToLogin } from '@/lib/redirect-to-login'
 type ProductsViewState =
   | Readonly<{ kind: 'loading' }>
   | Readonly<{ kind: 'unauthorized' }>
+  | Readonly<{ kind: 'empty'; page: ProductPage }>
   | Readonly<{ kind: 'success'; page: ProductPage }>
   | Readonly<{
       correlationId?: string
@@ -118,23 +121,29 @@ function ProductsUnauthorized() {
   )
 }
 
-function ProductsContent({ page }: { page: ProductPage }) {
-  if (page.items.length === 0) {
-    return (
-      <Card>
-        <CardContent className="flex min-h-52 flex-col items-center justify-center gap-3 text-center">
-          <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-            <Package2 aria-hidden="true" className="size-5" />
-          </div>
-          <div className="space-y-1">
-            <h2 className="font-display text-2xl font-semibold">Catálogo vazio</h2>
-            <p className="text-muted-foreground">Ainda não há produtos para exibir.</p>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
+function ProductsEmpty() {
+  return (
+    <Card>
+      <CardContent className="flex min-h-52 flex-col items-center justify-center gap-3 text-center">
+        <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+          <Package2 aria-hidden="true" className="size-5" />
+        </div>
+        <div className="space-y-1">
+          <h2 className="font-display text-2xl font-semibold">Catálogo vazio</h2>
+          <p className="text-muted-foreground">Ainda não há produtos para exibir.</p>
+        </div>
+        <Link
+          className={cn(buttonVariants({ size: 'sm', variant: 'default' }))}
+          href="/products/new"
+        >
+          Criar produto
+        </Link>
+      </CardContent>
+    </Card>
+  )
+}
 
+function ProductsContent({ page }: { page: ProductPage }) {
   return (
     <ul aria-label="Produtos do catálogo" className="grid gap-4 md:grid-cols-2">
       {page.items.map((product) => (
@@ -161,7 +170,10 @@ export function ProductsScreen() {
       }
 
       if (result.kind === 'success') {
-        setViewState({ kind: 'success', page: result.page })
+        setViewState({
+          kind: result.page.items.length === 0 ? 'empty' : 'success',
+          page: result.page,
+        })
         return
       }
 
@@ -219,7 +231,7 @@ export function ProductsScreen() {
           </div>
         )}
 
-        {viewState.kind === 'success' && (
+        {(viewState.kind === 'empty' || viewState.kind === 'success') && (
           <div className="space-y-8">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div className="space-y-2">
@@ -244,7 +256,11 @@ export function ProductsScreen() {
               </p>
             </div>
 
-            <ProductsContent page={viewState.page} />
+            {viewState.kind === 'empty' ? (
+              <ProductsEmpty />
+            ) : (
+              <ProductsContent page={viewState.page} />
+            )}
           </div>
         )}
       </div>

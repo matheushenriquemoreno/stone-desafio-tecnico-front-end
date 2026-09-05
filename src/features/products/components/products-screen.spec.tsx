@@ -113,6 +113,10 @@ describe('ProductsScreen', () => {
       await screen.findByRole('heading', { name: 'Catálogo vazio' }),
     ).toBeInTheDocument()
     expect(screen.getByText('0 produtos')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Criar produto' })).toHaveAttribute(
+      'href',
+      '/products/new',
+    )
   })
 
   it('apresenta falha recuperável e permite nova tentativa manual', async () => {

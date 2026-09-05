@@ -1,9 +1,9 @@
 # Fase 04 — Catálogo e paginação sequencial
 
-| Status       | Pendente   |
-|--------------|------------|
-| Created      | 2026-09-05 |
-| Last Updated | 2026-09-05 |
+| Status       | Em execução |
+| ------------ | ----------- |
+| Created      | 2026-09-05  |
+| Last Updated | 2026-09-05  |
 
 **Objetivo e resultado esperado:** completar a página inicial protegida com apresentação responsiva do catálogo, estados explícitos e navegação anterior/próxima por cursor opaco.
 **Capacidade ou fluxo coberto:** primeira página → vazio ou itens → próxima por `nextCursor` → retorno por cursor visitado → reinício seguro quando a sequência é perdida.
@@ -75,6 +75,13 @@ Consolidar testes de componente e E2E para lista vazia, múltiplas páginas, ret
 - Usar união discriminada para o estado da leitura e manter paginação próxima da tela que a consome.
 - Não persistir cursor em query string, storage, cookie ou estado global.
 - Separar `ProductList`, `ProductCard` e estados quando cada responsabilidade existir; evitar wrappers sem semântica.
+
+## Registro de T17
+
+- `ProductsViewState` agora representa explicitamente `loading`, `empty`, `success`, `error` e `unauthorized`; somente o estado correspondente é renderizado por vez.
+- `ProductsEmpty` diferencia catálogo vazio de erro e oferece o link acessível `Criar produto` para a rota planejada.
+- A listagem preserva `items` e `total` recebidos, sem calcular páginas ou inferir ordenação; falha de rede/resposta inválida mantém retry manual e `401` usa a política da Fase 03.
+- Verificação: `npm test -- --run 'src/features/products/components/products-screen.spec.tsx'` (6 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
 
 ## Testes e verificações da fase
 

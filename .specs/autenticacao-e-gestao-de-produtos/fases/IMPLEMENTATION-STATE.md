@@ -1,27 +1,27 @@
 # Estado da Implementação — Interface web de autenticação e gestão de produtos
 
-| Status       | Concluída  |
-| ------------ | ---------- |
-| Created      | 2026-09-05 |
-| Last Updated | 2026-09-05 |
+| Status       | Em execução |
+| ------------ | ----------- |
+| Created      | 2026-09-05  |
+| Last Updated | 2026-09-05  |
 
 ## Fase ativa
 
-Fase 03 — Sessão protegida e logout — tarefas T13–T16 concluídas, gates executados e review independente v6 aprovado. A Fase 04 permanece pendente até a ativação explícita da próxima tarefa.
+Fase 04 — Catálogo e paginação sequencial — review v6 da Fase 03 aprovado; T17 em preparação. A Fase 04 foi ativada explicitamente.
 
 Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase deve passar por `review` independente antes que a próxima seja marcada como ativa.
 
 ## Fases
 
-| #   | Fase                                     | Arquivo                                           | Status    | Concluída em |
-| --- | ---------------------------------------- | ------------------------------------------------- | --------- | ------------ |
-| 01  | Fundação e tracer bullet autenticado     | fases/fase-01-fundacao-e-tracer-bullet.md         | Concluída | 2026-09-05   |
-| 02  | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md  | Concluída | 2026-09-05   |
-| 03  | Sessão protegida e logout                | fases/fase-03-sessao-protegida-e-logout.md        | Concluída | 2026-09-05   |
-| 04  | Catálogo e paginação sequencial          | fases/fase-04-catalogo-e-paginacao.md             | Pendente  | —            |
-| 05  | Criação de produtos                      | fases/fase-05-criacao-de-produtos.md              | Pendente  | —            |
-| 06  | Consulta, edição e exclusão              | fases/fase-06-consulta-edicao-e-exclusao.md       | Pendente  | —            |
-| 07  | Robustez e prontidão operacional         | fases/fase-07-robustez-e-prontidao-operacional.md | Pendente  | —            |
+| #   | Fase                                     | Arquivo                                           | Status      | Concluída em |
+| --- | ---------------------------------------- | ------------------------------------------------- | ----------- | ------------ |
+| 01  | Fundação e tracer bullet autenticado     | fases/fase-01-fundacao-e-tracer-bullet.md         | Concluída   | 2026-09-05   |
+| 02  | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md  | Concluída   | 2026-09-05   |
+| 03  | Sessão protegida e logout                | fases/fase-03-sessao-protegida-e-logout.md        | Concluída   | 2026-09-05   |
+| 04  | Catálogo e paginação sequencial          | fases/fase-04-catalogo-e-paginacao.md             | Em execução | —            |
+| 05  | Criação de produtos                      | fases/fase-05-criacao-de-produtos.md              | Pendente    | —            |
+| 06  | Consulta, edição e exclusão              | fases/fase-06-consulta-edicao-e-exclusao.md       | Pendente    | —            |
+| 07  | Robustez e prontidão operacional         | fases/fase-07-robustez-e-prontidao-operacional.md | Pendente    | —            |
 
 ## Tarefas
 
@@ -43,7 +43,7 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | T14 | 03   | Concluída | Política `redirectToLogin` criada em `src/lib/redirect-to-login.ts`; `ProductsScreen` limpa o conteúdo protegido e renderiza estado não autorizado antes de redirecionar em `401`; `npm test -- --run 'src/lib/redirect-to-login.spec.ts' 'src/features/products/components/products-screen.spec.tsx'` (7 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.                                                                                                                                                       |
 | T15 | 03   | Concluída | `logout` adicionado ao gateway para `POST /auth/logout` com `204`, `403` e `429`; `LogoutButton` bloqueia reenvio, exibe loading/feedback seguro e redireciona ao login após sucesso; `npm test -- --run 'src/features/auth/api/auth-gateway.spec.ts' 'src/features/auth/components/logout-button.spec.tsx' 'src/features/auth/components/protected-shell.spec.tsx'` (23 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.                                                                                        |
 | T16 | 03   | Concluída | `e2e/session-and-logout.spec.ts` cria conta única, autentica, executa logout, confirma retorno ao login, limpa cookies para reproduzir `401` e confirma `POST /auth/logout` sem sessão em `204`; integrado: `$env:E2E_API_URL='http://localhost:3001'; $env:E2E_WEB_URL='http://localhost:3000'; npm run test:e2e` (5 passaram, 2 foram pulados por credenciais opcionais do tracer). Gate da fase: `npm test -- --run` (82 testes), `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`, E2E padrão (3 passaram, 4 foram pulados) e `git diff --check` — todos passaram. |
-| T17 | 04   | Pendente  | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| T17 | 04   | Concluída | `ProductsViewState` separa `loading`, `empty`, `success`, `error` e `unauthorized`; catálogo vazio oferece link acessível para criação futura e `items`/`total` permanecem recebidos da API; `npm test -- --run 'src/features/products/components/products-screen.spec.tsx'` (6 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.                                                                                                                                                                                 |
 | T18 | 04   | Pendente  | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | T19 | 04   | Pendente  | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | T20 | 04   | Pendente  | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
