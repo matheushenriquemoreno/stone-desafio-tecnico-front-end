@@ -5,7 +5,7 @@
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
 
-## Fase ativa
+## Estado atual
 
 Fase 06 — Consulta, edição e exclusão — concluída e aprovada no review independente v9. A Fase 05 foi aprovada no review v8; a execução das Fases 05 e 06 foi autorizada nesta sessão.
 
@@ -67,4 +67,4 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 
 ## Bloqueios e desvios
 
-A-01, A-02 e A-03, identificados no review independente v4, foram tratados na etapa `implement` e aprovados no review independente v5. A Fase 03 foi aprovada no review v6, a Fase 04 no review v7 e a Fase 05 no review v8; os cenários integrados existentes usam API local, origem autorizada e dados isoláveis. A leitura detalhada mínima foi criada como suporte necessário da T25, embora o plano também registre a T27 na Fase 06; edição, exclusão e os estados completos do detalhe permanecem na Fase 06. Os achados informativos A-06 e A-07 ficam encaminhados à Fase 07. Dependências externas de API/OpenAPI, origem autorizada, dataset paginado, origens de imagem e publicação continuam registradas nas fases correspondentes.
+A-01, A-02 e A-03, identificados no review independente v4, foram tratados na etapa `implement` e aprovados no review independente v5. A Fase 03 foi aprovada no review v6, a Fase 04 no review v7, a Fase 05 no review v8 e a Fase 06 no review v9; os cenários integrados existentes usam API local, origem autorizada e dados isoláveis. A leitura detalhada mínima foi criada como suporte necessário da T25, embora o plano também registre a T27 na Fase 06; consulta, edição, exclusão e os estados completos do detalhe foram concluídos na Fase 06. Os achados informativos A-06, A-07 e A-08 ficam encaminhados à Fase 07. Dependências externas de API/OpenAPI, origem autorizada, dataset paginado, origens de imagem e publicação continuam registradas nas fases correspondentes.
