@@ -105,6 +105,9 @@ export function ProductDetailScreen({
 }>) {
   const { replace } = useRouter()
   const [attempt, setAttempt] = useState(0)
+  const [createdConfirmation, setCreatedConfirmation] = useState(
+    showCreatedConfirmation,
+  )
   const [state, setState] = useState<ProductDetailViewState>({ kind: 'loading' })
 
   useEffect(() => {
@@ -112,8 +115,13 @@ export function ProductDetailScreen({
       return
     }
 
-    replace(`/products/${encodeURIComponent(productId)}`, { scroll: false })
-  }, [productId, replace, showCreatedConfirmation])
+    setCreatedConfirmation(true)
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `/products/${encodeURIComponent(productId)}`,
+    )
+  }, [productId, showCreatedConfirmation])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -192,7 +200,7 @@ export function ProductDetailScreen({
             aria-labelledby="product-detail-title"
             className="mx-auto max-w-2xl space-y-6"
           >
-            {showCreatedConfirmation && (
+            {createdConfirmation && (
               <Alert>
                 <AlertTitle>Produto criado</AlertTitle>
                 <AlertDescription>

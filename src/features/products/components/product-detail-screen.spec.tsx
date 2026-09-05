@@ -55,7 +55,7 @@ describe('ProductDetailScreen', () => {
     ).toBeVisible()
     expect(screen.getByRole('alert')).toHaveTextContent('Produto criado')
     expect(screen.getByText('R$ 99,90')).toBeVisible()
-    expect(replace).toHaveBeenCalledWith('/products/product-1', { scroll: false })
+    expect(replace).not.toHaveBeenCalled()
     expect(getProductMock).toHaveBeenCalledWith(product.id, expect.any(AbortSignal))
   })
 
