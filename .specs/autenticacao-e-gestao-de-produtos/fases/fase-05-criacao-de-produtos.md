@@ -76,7 +76,8 @@ Adicionar testes integrados para proteção da rota, validação, criação bem-
 
 - T22 — **Concluída**. O schema compartilhado de entrada e o schema de formulário foram adicionados; a resposta de produto reutiliza os mesmos limites dos campos editáveis. Evidências: `npm test -- --run src/features/products/schemas/product-input-schema.spec.ts` (9 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
 - T23 — **Concluída**. `createProduct` valida o payload, chama `POST /products` uma única vez, valida `201` e mapeia os erros contratados sem cabeçalhos proibidos ou retry. Evidências: `npm test -- --run src/features/products/api/products-gateway.spec.ts` (10 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
-- T24 a T26 — **Pendentes**.
+- T24 — **Concluída**. A rota `/products/new` executa um probe único de `GET /products?limit=1`, trata `401`, erro recuperável, retry manual, aborto e Strict Mode sem duplicação. Evidências: `npm test -- --run src/features/products/components/product-creation-gate.spec.tsx src/features/products/api/products-gateway.spec.ts` (15 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+- T25 e T26 — **Pendentes**.
 
 - Reutilizar o conceito de campos de produto na edição futura, sem criar formulário universal orientado por configuração.
 - O probe é uma leitura de autorização, não cache nem carregamento antecipado do catálogo.
