@@ -2,12 +2,17 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { replace } = vi.hoisted(() => ({ replace: vi.fn() }))
+const { getSearchParam, push, replace } = vi.hoisted(() => ({
+  getSearchParam: vi.fn(),
+  push: vi.fn(),
+  replace: vi.fn(),
+}))
 const { listProductsMock } = vi.hoisted(() => ({ listProductsMock: vi.fn() }))
-const router = { replace }
+const router = { push, replace }
 
 vi.mock('next/navigation', () => ({
   useRouter: () => router,
+  useSearchParams: () => ({ get: getSearchParam }),
 }))
 
 vi.mock('@/features/products/api/products-gateway', () => ({
@@ -33,6 +38,8 @@ const productPage = {
 
 describe('ProductsScreen', () => {
   beforeEach(() => {
+    getSearchParam.mockReturnValue(null)
+    push.mockReset()
     replace.mockReset()
     listProductsMock.mockReset()
   })
@@ -196,6 +203,98 @@ describe('ProductsScreen', () => {
     expect(listProductsMock.mock.calls[4]?.[0]).not.toHaveProperty('cursor')
     expect(await screen.findByText('Produto principal')).toBeVisible()
     expect(screen.getByText('Página 1')).toBeVisible()
+  })
+
+  it('publica somente a posição humana ao navegar', async () => {
+    listProductsMock.mockResolvedValue({
+      kind: 'success',
+      page: { ...productPage, nextCursor: 'opaque/cursor' },
+    })
+    const user = userEvent.setup()
+
+    render(<ProductsScreen />)
+    await screen.findByText('Produto principal')
+
+    await user.click(screen.getByRole('button', { name: 'Próxima' }))
+
+    expect(push).toHaveBeenCalledWith('/?page=2')
+    expect(push.mock.calls[0]?.[0]).not.toContain('cursor')
+  })
+
+  it('canonicaliza um deep link impossível e carrega a primeira página sem cursor', async () => {
+    getSearchParam.mockReturnValue('2')
+    listProductsMock.mockResolvedValue({ kind: 'success', page: productPage })
+
+    render(<ProductsScreen />)
+
+    await screen.findByText('Produto principal')
+
+    expect(replace).toHaveBeenCalledWith('/')
+    expect(listProductsMock.mock.calls[0]?.[0]).not.toHaveProperty('cursor')
+  })
+
+  it('descarta a pilha quando a URL diverge para uma posição não visitada', async () => {
+    const pageOne = { ...productPage, nextCursor: 'cursor-one' }
+    const pageTwo = {
+      ...productPage,
+      items: [{ ...productPage.items[0], id: 'product-2', name: 'Produto dois' }],
+    }
+    listProductsMock
+      .mockResolvedValueOnce({ kind: 'success', page: pageOne })
+      .mockResolvedValueOnce({ kind: 'success', page: pageTwo })
+      .mockResolvedValueOnce({ kind: 'success', page: pageOne })
+    const user = userEvent.setup()
+    const rendered = render(<ProductsScreen />)
+
+    await screen.findByText('Produto principal')
+    await user.click(screen.getByRole('button', { name: 'Próxima' }))
+    await screen.findByText('Produto dois')
+
+    getSearchParam.mockReturnValue('2')
+    rendered.rerender(<ProductsScreen />)
+    getSearchParam.mockReturnValue('3')
+    rendered.rerender(<ProductsScreen />)
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/'))
+    await waitFor(() => expect(listProductsMock).toHaveBeenCalledTimes(3))
+    expect(listProductsMock.mock.calls[2]?.[0]).not.toHaveProperty('cursor')
+    expect(await screen.findByText('Produto principal')).toBeVisible()
+  })
+
+  it('sincroniza voltar e avançar do navegador somente com posições visitadas', async () => {
+    const pageOne = { ...productPage, nextCursor: 'cursor-one' }
+    const pageTwo = {
+      ...productPage,
+      items: [{ ...productPage.items[0], id: 'product-2', name: 'Produto dois' }],
+    }
+    listProductsMock
+      .mockResolvedValueOnce({ kind: 'success', page: pageOne })
+      .mockResolvedValueOnce({ kind: 'success', page: pageTwo })
+      .mockResolvedValueOnce({ kind: 'success', page: pageOne })
+      .mockResolvedValueOnce({ kind: 'success', page: pageTwo })
+    const user = userEvent.setup()
+
+    const rendered = render(<ProductsScreen />)
+    await screen.findByText('Produto principal')
+    await user.click(screen.getByRole('button', { name: 'Próxima' }))
+    await screen.findByText('Produto dois')
+
+    getSearchParam.mockReturnValue('2')
+    rendered.rerender(<ProductsScreen />)
+
+    getSearchParam.mockReturnValue(null)
+    rendered.rerender(<ProductsScreen />)
+    await waitFor(() => expect(listProductsMock).toHaveBeenCalledTimes(3))
+    expect(listProductsMock.mock.calls[2]?.[0]).not.toHaveProperty('cursor')
+    expect(await screen.findByText('Produto principal')).toBeVisible()
+
+    getSearchParam.mockReturnValue('2')
+    rendered.rerender(<ProductsScreen />)
+    await waitFor(() => expect(listProductsMock).toHaveBeenCalledTimes(4))
+    expect(listProductsMock.mock.calls[3]?.[0]).toEqual(
+      expect.objectContaining({ cursor: 'cursor-one' }),
+    )
+    expect(await screen.findByText('Produto dois')).toBeVisible()
   })
 
   it('descarta a sequência quando o cursor deixa de ser válido e reinicia sem cursor', async () => {

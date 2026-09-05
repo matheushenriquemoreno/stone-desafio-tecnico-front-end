@@ -5,8 +5,10 @@ import {
   canGoPrevious,
   createPaginationState,
   getPageRequestCursor,
+  getPublicPageUrl,
   goToNextPage,
   goToPreviousPage,
+  parsePublicPage,
   setCurrentPage,
 } from './pagination'
 
@@ -65,5 +67,22 @@ describe('pagination state', () => {
         ),
       ),
     ).toEqual(secondState)
+  })
+})
+
+describe('public pagination position', () => {
+  it('parses only a positive human page number', () => {
+    expect(parsePublicPage(null)).toEqual({ kind: 'first' })
+    expect(parsePublicPage('1')).toEqual({ kind: 'first' })
+    expect(parsePublicPage('3')).toEqual({ kind: 'visited', pageIndex: 2 })
+    expect(parsePublicPage('0')).toEqual({ kind: 'invalid' })
+    expect(parsePublicPage('abc')).toEqual({ kind: 'invalid' })
+    expect(parsePublicPage('9007199254740992')).toEqual({ kind: 'invalid' })
+  })
+
+  it('generates URLs without embedding cursors', () => {
+    expect(getPublicPageUrl(0)).toBe('/')
+    expect(getPublicPageUrl(1)).toBe('/?page=2')
+    expect(getPublicPageUrl(4)).not.toContain('cursor')
   })
 })

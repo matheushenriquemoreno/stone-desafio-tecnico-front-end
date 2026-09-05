@@ -6,6 +6,35 @@ export type PaginationState = Readonly<{
   page?: ProductPage
 }>
 
+export type PublicPage =
+  | Readonly<{ kind: 'first' }>
+  | Readonly<{ kind: 'visited'; pageIndex: number }>
+  | Readonly<{ kind: 'invalid' }>
+
+export function parsePublicPage(value: string | null): PublicPage {
+  if (value === null) {
+    return { kind: 'first' }
+  }
+
+  if (!/^[1-9]\d*$/.test(value)) {
+    return { kind: 'invalid' }
+  }
+
+  const pageNumber = Number(value)
+
+  if (!Number.isSafeInteger(pageNumber)) {
+    return { kind: 'invalid' }
+  }
+
+  return pageNumber === 1
+    ? { kind: 'first' }
+    : { kind: 'visited', pageIndex: pageNumber - 1 }
+}
+
+export function getPublicPageUrl(pageIndex: number): string {
+  return pageIndex === 0 ? '/' : `/?page=${pageIndex + 1}`
+}
+
 export function createPaginationState(): PaginationState {
   return {
     currentPageIndex: 0,

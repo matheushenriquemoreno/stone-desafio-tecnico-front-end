@@ -58,6 +58,13 @@ Criar a apresentação reutilizável dos itens com nome, descrição, preço e i
 - **Critérios de conclusão:** todos os itens permanecem compreensíveis sem imagem; a allowlist é explícita; cartões usam tokens e chave estável; ação essencial não depende de hover.
 - **Riscos ou premissas:** as origens concretas precisam ser fornecidas por ambiente; uma origem nova exige mudança de configuração revisada, não liberação genérica.
 
+## Registro de T19
+
+- `pagination.ts` valida `page` como posição humana positiva e serializa a posição visitada sem inserir cursores na URL.
+- `ProductsScreen` publica `/?page=N` ao avançar ou retornar, restaura apenas posições existentes na pilha em memória e trata reload/deep link impossível ou divergência com canonicalização para `/` e nova leitura sem cursor.
+- O boundary `Suspense` mantém a leitura de `useSearchParams` compatível com o build do App Router; a pilha continua efêmera e nenhuma posição/cursor é persistida em storage.
+- Verificação: `npm test -- --run 'src/features/products/pagination.spec.ts' 'src/features/products/components/products-screen.spec.tsx'` (18 testes), `npm run typecheck`, `npm run lint` e `git diff --check` — todos passaram.
+
 ## Tarefa T21 — Provar paginação e estados do catálogo
 
 Consolidar testes de componente e E2E para lista vazia, múltiplas páginas, retorno, fim da sequência, reload, cursor inválido, retry e sessão expirada durante navegação.

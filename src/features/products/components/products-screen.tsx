@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Package2 } from 'lucide-react'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -19,8 +19,10 @@ import {
   canGoNext,
   canGoPrevious,
   createPaginationState,
+  getPublicPageUrl,
   goToNextPage,
   goToPreviousPage,
+  parsePublicPage,
   setCurrentPage,
   type PaginationState,
 } from '@/features/products/pagination'
@@ -164,15 +166,98 @@ function ProductsContent({ page }: { page: ProductPage }) {
   )
 }
 
-export function ProductsScreen() {
+function ProductsScreenContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [attempt, setAttempt] = useState(0)
   const [pagination, setPagination] = useState<PaginationState>(createPaginationState)
   const [viewState, setViewState] = useState<ProductsViewState>({ kind: 'loading' })
   const requestVersion = useRef(0)
+  const localNavigationTarget = useRef<number | undefined>(undefined)
+  const lastCanonicalizedPage = useRef<string | null | undefined>(undefined)
+  const sequenceResetPending = useRef(false)
+  const currentPageParam = searchParams.get('page')
   const currentPageIndex = pagination.currentPageIndex
   const paginationCursors = pagination.cursors
   const requestedCursor = paginationCursors[currentPageIndex]
+
+  useEffect(() => {
+    const publicPage = parsePublicPage(currentPageParam)
+    const requestedPageIndex =
+      publicPage.kind === 'first' || publicPage.kind === 'invalid'
+        ? 0
+        : publicPage.pageIndex
+    const canRestoreRequestedPage =
+      publicPage.kind === 'first' ||
+      (publicPage.kind === 'visited' && publicPage.pageIndex < paginationCursors.length)
+    const localTarget = localNavigationTarget.current
+
+    if (localTarget !== undefined) {
+      if (requestedPageIndex === localTarget) {
+        localNavigationTarget.current = undefined
+      } else {
+        return
+      }
+    }
+
+    if (!canRestoreRequestedPage) {
+      sequenceResetPending.current = true
+
+      if (lastCanonicalizedPage.current !== currentPageParam) {
+        lastCanonicalizedPage.current = currentPageParam
+        router.replace('/')
+      }
+
+      if (currentPageIndex === 0 && paginationCursors.length === 1) {
+        return
+      }
+
+      const timeoutId = window.setTimeout(() => {
+        sequenceResetPending.current = false
+        setPagination(createPaginationState())
+        setViewState({ kind: 'loading' })
+      }, 0)
+
+      return () => window.clearTimeout(timeoutId)
+    }
+
+    if (sequenceResetPending.current) {
+      if (currentPageIndex === 0 && paginationCursors.length === 1) {
+        sequenceResetPending.current = false
+        return
+      }
+
+      const timeoutId = window.setTimeout(() => {
+        sequenceResetPending.current = false
+        setPagination(createPaginationState())
+        setViewState({ kind: 'loading' })
+      }, 0)
+
+      return () => window.clearTimeout(timeoutId)
+    }
+
+    if (currentPageParam !== null && publicPage.kind === 'first') {
+      if (lastCanonicalizedPage.current !== currentPageParam) {
+        lastCanonicalizedPage.current = currentPageParam
+        router.replace('/')
+      }
+    }
+
+    if (currentPageIndex === requestedPageIndex) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setPagination((current) => ({
+        ...current,
+        currentPageIndex: requestedPageIndex,
+        page: undefined,
+      }))
+      setViewState({ kind: 'loading' })
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [currentPageIndex, currentPageParam, paginationCursors, router])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -270,6 +355,8 @@ export function ProductsScreen() {
 
     setPagination(nextState)
     setViewState({ kind: 'loading' })
+    localNavigationTarget.current = nextState.currentPageIndex
+    router.push(getPublicPageUrl(nextState.currentPageIndex))
   }
 
   function goPrevious() {
@@ -285,6 +372,8 @@ export function ProductsScreen() {
 
     setPagination(previousState)
     setViewState({ kind: 'loading' })
+    localNavigationTarget.current = previousState.currentPageIndex
+    router.push(getPublicPageUrl(previousState.currentPageIndex))
   }
 
   const isLoaded = viewState.kind === 'empty' || viewState.kind === 'success'
@@ -374,5 +463,26 @@ export function ProductsScreen() {
         )}
       </div>
     </main>
+  )
+}
+
+function ProductsScreenFallback() {
+  return (
+    <main
+      className="min-h-svh bg-background px-4 py-6 sm:px-6 lg:px-8"
+      aria-label="Catálogo protegido"
+    >
+      <div className="mx-auto max-w-6xl">
+        <ProductsLoading />
+      </div>
+    </main>
+  )
+}
+
+export function ProductsScreen() {
+  return (
+    <Suspense fallback={<ProductsScreenFallback />}>
+      <ProductsScreenContent />
+    </Suspense>
   )
 }
