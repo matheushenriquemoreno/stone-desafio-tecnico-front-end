@@ -1,6 +1,6 @@
 # Plano de Implementação — Interface web de autenticação e gestão de produtos
 
-| Status       | Em revisão |
+| Status       | Aprovado   |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
@@ -14,6 +14,7 @@ Design técnico: `.specs/autenticacao-e-gestao-de-produtos/TECHNICAL-DESIGN.md` 
 |------------|-----------|
 | 2026-09-05 | Versão inicial do plano, com fases, tarefas, verificações e estado de implementação derivados dos Gates 1 e 2. |
 | 2026-09-05 | Plano submetido à revisão do solicitante (Gate 3). |
+| 2026-09-05 | Plano aprovado novamente pelo solicitante após reversão causada por merge antecipado (Gate 3). |
 
 ## Objetivo geral da implementação
 
