@@ -6,9 +6,9 @@ Este documento registra o contrato mínimo consumido pelo front-end. A documenta
 
 | Operação direta da API | Respostas esperadas |
 |---|---|
-| `POST /auth/register` | `201`, `400`, `403`, `409`, `429`, `500` |
-| `POST /auth/login` | `204`, `400`, `401`, `403`, `429`, `500` |
-| `POST /auth/logout` | `204`, `403`, `429`, `500` |
+| `POST /auth/register` | `201`, `400`, `403`, `409`, `429` |
+| `POST /auth/login` | `204`, `400`, `401`, `403`, `429` |
+| `POST /auth/logout` | `204`, `403`, `429` |
 
 Cadastro:
 
@@ -31,30 +31,23 @@ Login enviado pelo navegador à API:
 }
 ```
 
-Resposta da API ao navegador:
-
-```http
-HTTP/1.1 204 No Content
-Set-Cookie: __Host-stone_access_token=<jwt>; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=900
-```
-
-A API grava por 900 segundos o access token no cookie e nunca o inclui no corpo. O navegador armazena e envia o cookie automaticamente, mas o JavaScript do front-end não consegue lê-lo.
+Após credenciais válidas, a API responde `204 No Content`, cria o cookie de autenticação e nunca inclui o token no corpo. No ambiente publicado, o cookie é `HttpOnly`, `Secure`, `SameSite=Strict`, tem `Path=/`, não define `Domain` e expira em 900 segundos. O navegador o armazena e envia automaticamente; o JavaScript do front-end não lê, interpreta ou configura o nome do cookie.
 
 Logout chama `POST /auth/logout` diretamente. A API responde `204` e expira o cookie com `Max-Age=0`, mesmo quando a sessão já estiver ausente ou inválida.
 
-Todas as chamadas usam `credentials: include`. Requisições `POST`, `PATCH` e `DELETE` enviam `X-CSRF-Protection: 1`.
+Todas as chamadas usam `credentials: include`. Não há cabeçalho CSRF customizado. Em operações mutáveis, o navegador envia `Origin` automaticamente; a API aceita somente a própria origem ou uma origem HTTP(S) incluída na allowlist. O cliente não deve tentar forjar `Origin` nem `Referer`.
 
-O cliente poderá ler `Retry-After` porque a API o expõe em CORS. Requisições automáticas `OPTIONS` de preflight não representam operações da interface e não são contabilizadas nos limites dos endpoints de negócio.
+O cliente poderá ler `Retry-After` porque a API o expõe em CORS; seu valor é um número inteiro de segundos, no mínimo `1`. Requisições automáticas `OPTIONS` de preflight não representam operações da interface e não são contabilizadas nos limites dos endpoints de negócio.
 
 ## Produtos
 
 | Operação direta da API | Requisitos do cliente | Respostas de erro possíveis |
 |---|---|---|
-| `GET /products?limit=20&cursor=<cursor>` | `credentials: include` | `400`, `401`, `403`, `429`, `500` |
-| `POST /products` | Credenciais e cabeçalho CSRF | `400`, `401`, `403`, `429`, `500` |
-| `GET /products/:id` | `credentials: include` | `401`, `403`, `404`, `429`, `500` |
-| `PATCH /products/:id` | Credenciais e cabeçalho CSRF | `400`, `401`, `403`, `404`, `429`, `500` |
-| `DELETE /products/:id` | Credenciais e cabeçalho CSRF | `401`, `403`, `404`, `429`, `500` |
+| `GET /products?limit=20&cursor=<cursor>` | `credentials: include` | `400`, `401`, `429` |
+| `POST /products` | Credenciais; origem autorizada | `400`, `401`, `403`, `429` |
+| `GET /products/:id` | `credentials: include` | `401`, `404`, `429` |
+| `PATCH /products/:id` | Credenciais; origem autorizada | `400`, `401`, `403`, `404`, `429` |
+| `DELETE /products/:id` | Credenciais; origem autorizada | `401`, `403`, `404`, `429` |
 
 Um produto expõe, no mínimo:
 
@@ -70,7 +63,7 @@ Um produto expõe, no mínimo:
 }
 ```
 
-`imageUrl` deve ser uma URL HTTP(S). A listagem retorna `items` e, quando houver outra página, `nextCursor`.
+`imageUrl` deve ser uma URL HTTP(S). A listagem retorna `items`, `total` (inteiro maior ou igual a zero) e, quando houver outra página, `nextCursor`.
 
 A criação exige `name`, `description`, `price` e `imageUrl`. O `PATCH` aceita qualquer subconjunto desses campos, mas exige ao menos um. Campos omitidos não mudam; valores `null` e propriedades desconhecidas produzem `400`.
 
@@ -84,13 +77,15 @@ GET /products?limit=20&cursor=<cursor-opaco>
 
 O front-end deve reenviar `nextCursor` sem decodificá-lo ou depender de sua estrutura. A ausência de `nextCursor` indica que não há outra página.
 
+`limit` é opcional, tem padrão `20` e aceita valores de `1` a `100`. `cursor` também é opcional e é válido somente como valor opaco retornado pela página anterior.
+
 A paginação é sequencial. A interface oferecerá `Anterior` e `Próxima`, poderá manter em memória os cursores recebidos durante a sessão e reutilizá-los para retornar a páginas já visitadas. Não é possível saltar diretamente para uma página ainda não visitada, pois não existe contrato baseado em número de página ou `offset`.
 
 Os cursores armazenados valem apenas para a sequência de navegação atual. Uma nova busca, alteração dos parâmetros ou recarregamento que descarte o estado deve reiniciar a paginação sem cursor.
 
 ## Erros
 
-O front-end tratará o status e o `code` retornados diretamente pela API. Todo erro segue:
+O front-end tratará o status e o `code` retornados diretamente pela API. Os status contratados por operação são os das tabelas anteriores; falhas de rede ou respostas não previstas recebem feedback genérico e seguro. Todo erro retornado pela API segue:
 
 ```json
 {
@@ -101,19 +96,17 @@ O front-end tratará o status e o `code` retornados diretamente pela API. Todo e
 }
 ```
 
-Erros de validação acrescentam `errors`, uma lista de `{ field, code, message }`. O cliente usa `code` para decidir o comportamento, apresenta somente mensagens seguras e pode mostrar `correlationId` como referência de suporte. Códigos contratados: `VALIDATION_ERROR`, `INVALID_CREDENTIALS`, `UNAUTHORIZED`, `REQUEST_FORBIDDEN`, `PRODUCT_NOT_FOUND`, `EMAIL_ALREADY_EXISTS`, `RATE_LIMIT_EXCEEDED`, `SERVICE_UNAVAILABLE` e `INTERNAL_ERROR`.
+Erros de validação acrescentam `errors`, uma lista de `{ field, code, message }`. O cliente usa `code` quando o fluxo o reconhecer, apresenta somente mensagens seguras e pode mostrar `correlationId` como referência de suporte; códigos não reconhecidos usam o mesmo fallback seguro.
 
 - `400 Bad Request`: entrada inválida;
 - `401 Unauthorized`: credenciais ou sessão inválidas;
-- `403 Forbidden`: origem não permitida ou proteção CSRF ausente;
+- `403 Forbidden`: origem não permitida;
 - `404 Not Found`: produto inexistente;
 - `409 Conflict`: e-mail já cadastrado ou conflito equivalente;
 - `429 Too Many Requests`: limite de requisições excedido;
-- `500 Internal Server Error`: falha inesperada sem detalhes sensíveis.
-- `503 Service Unavailable`: API ainda não está pronta para receber tráfego.
 
 ## Compatibilidade
 
 Mudanças incompatíveis em campos, endpoints, autenticação, paginação ou semântica de erros exigem coordenação entre os repositórios. Os testes do cliente HTTP devem simular o contrato, e os testes E2E integrados devem detectar divergências reais.
 
-Não existem endpoints `/api/*` do Next.js para intermediar estas operações. A URL base vem de `NEXT_PUBLIC_API_URL`, e a API é responsável por CORS, cookie, CSRF, autenticação, autorização e rate limit.
+Não existem endpoints `/api/*` do Next.js para intermediar estas operações. A URL base vem de `NEXT_PUBLIC_API_URL`, e a API é responsável por CORS, cookie, validação de origem, autenticação, autorização e rate limit.

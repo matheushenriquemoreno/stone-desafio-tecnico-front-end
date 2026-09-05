@@ -33,6 +33,7 @@ Desenvolver uma interface web que permita cadastrar e autenticar usuários e ger
 - Nesta versão, o catálogo será compartilhado, sem diferenciação visual por proprietário, papel ou permissão; a autorização efetiva permanecerá na API.
 - A interface tratará estados de carregamento, sucesso, lista vazia, validação, recurso não encontrado e erro da API.
 - Os controles de paginação utilizarão o cursor opaco fornecido pela API, sem interpretar seu conteúdo.
+- O estado da listagem preservará `items`, `total` e `nextCursor` retornados pela API, sem inferir total de páginas ou ordenação global.
 - A navegação será sequencial, com ações de `Anterior` e `Próxima` e indicação da página atual.
 - O front-end poderá guardar, durante a sessão de navegação, os cursores das páginas já visitadas para permitir o retorno a elas.
 - Não será oferecido salto direto para uma página ainda não visitada, pois a API não fornece acesso por número de página ou deslocamento.
@@ -52,16 +53,16 @@ PATCH  /products/:id
 DELETE /products/:id
 ```
 
-Todas as chamadas usarão `credentials: include`. Operações mutáveis enviarão o cabeçalho de proteção CSRF exigido pelo contrato da API.
+Todas as chamadas usarão `credentials: include`. Operações mutáveis partirão de uma origem autorizada pela API e não enviarão cabeçalho CSRF customizado.
 
-As respostas `400`, `401`, `403`, `404`, `409`, `429`, `500` e `503` da API deverão ser convertidas em feedback apropriado para o usuário, sem expor detalhes internos.
+As respostas documentadas para cada operação (`400`, `401`, `403`, `404`, `409` e `429`, quando aplicáveis) deverão ser convertidas em feedback apropriado para o usuário, sem expor detalhes internos. Falhas de rede ou respostas não previstas terão fallback genérico e seguro.
 
 ## Qualidade e segurança
 
 - O código usará TypeScript em modo estrito.
 - Formulários terão validação no cliente para melhorar a experiência, sem substituir a validação da API.
 - O JWT não poderá aparecer no corpo das respostas, em logs do navegador, no `localStorage` ou no `sessionStorage`.
-- Operações que alteram estado deverão enviar o cabeçalho CSRF definido pela API.
+- Operações que alteram estado dependerão da validação de origem e da política `SameSite=Strict` da API; o cliente não enviará cabeçalho CSRF customizado nem tentará definir `Origin` ou `Referer`.
 - O front-end não implementará Route Handlers, proxy ou endpoints intermediários para operações da API.
 - Componentes e fluxos deverão ser responsivos e acessíveis por teclado.
 - A interface seguirá o [design system e a identidade visual](./adr/ADR-004-design-system-identidade-visual.md), inspirados na linguagem do Ton e adaptados a uma identidade própria.

@@ -25,7 +25,7 @@ Use este arquivo como gate. Marcar mentalmente ou na descrição da tarefa apena
 - [ ] Usei tokens semânticos, `gap-*`, `size-*`, `cn()` e variantes centralizadas.
 - [ ] Preservei semântica HTML, labels, foco, teclado e nomes acessíveis.
 - [ ] Não adicionei Route Handler, Server Action, Proxy ou Middleware para intermediar a API.
-- [ ] Mantive credenciais, CSRF, erros e cursor no cliente HTTP/feature adequados.
+- [ ] Mantive credenciais, validação de origem, erros e cursor no cliente HTTP/feature adequados.
 - [ ] Não li, persisti, registrei ou expus JWT.
 
 ## Revisão de shadcn e Tailwind

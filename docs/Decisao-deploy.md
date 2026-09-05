@@ -47,15 +47,15 @@ O build não dependerá de Route Handlers para integração com a API.
 - `NEXT_PUBLIC_API_URL` apontará para a URL pública HTTPS da API e será visível no bundle do navegador.
 - Variáveis de preview e produção poderão apontar para ambientes diferentes da API.
 - O domínio de produção usará HTTPS gerenciado pela Vercel.
-- O domínio de produção do front-end pertencerá ao mesmo site registrável da API para compatibilidade com o cookie `SameSite=Lax`.
+- A origem HTTPS de produção do front-end estará na allowlist exata da API e pertencerá ao mesmo site da API para compatibilidade com o cookie `SameSite=Strict`.
 
 ## Segurança operacional
 
-- O JWT será armazenado pela API em cookie `HttpOnly`, `Secure` e `SameSite=Lax`.
+- O JWT será armazenado pela API em cookie `HttpOnly`, `Secure` e `SameSite=Strict`.
 - O token não será enviado ao JavaScript do navegador.
 - O front-end não terá segredo de autenticação nem chave do JWT.
 - Logs do navegador não registrarão senhas, cookies ou respostas sensíveis.
-- O cliente enviará `credentials: include` e o cabeçalho CSRF nas operações mutáveis.
+- O cliente enviará `credentials: include`; em operações mutáveis, a API validará a origem do navegador sem exigir cabeçalho CSRF customizado.
 - Respostas da API serão tratadas antes de serem apresentadas ao usuário.
 
 ## Rollback e observabilidade
@@ -79,4 +79,4 @@ O rollback utilizará um deployment anterior da Vercel associado a um commit con
 
 - O navegador depende de CORS e da disponibilidade pública da API.
 - A experiência depende da disponibilidade e da compatibilidade do contrato da API.
-- Previews em domínio de terceiro não reutilizam a autenticação `SameSite=Lax` de produção.
+- Previews em domínio de terceiro não reutilizam a autenticação `SameSite=Strict` de produção.
