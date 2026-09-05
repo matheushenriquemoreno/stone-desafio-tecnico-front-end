@@ -1,6 +1,6 @@
 # Fase 01 — Fundação e tracer bullet autenticado
 
-| Status       | Pendente   |
+| Status       | Em execução |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
@@ -9,6 +9,25 @@
 **Capacidade ou fluxo coberto:** bootstrap → login → cookie controlado pela API → `GET /products` → catálogo ou redirecionamento por `401`.
 **Requisitos relacionados:** `AGP-10` a `AGP-14`, `AGP-17`, `AGP-18`, `AGP-37` a `AGP-44`, `EXPECT-01` a `EXPECT-10`.
 **Dependências externas:** API NestJS em versão compatível; origem local autorizada; Node.js 24 LTS.
+
+## Estado das tarefas
+
+| ID  | Status | Evidências |
+|-----|--------|------------|
+| T01 | Concluída | `npm install`; `npm audit --omit=optional`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check` — todos passaram. |
+| T02 | Pendente | — |
+| T03 | Pendente | — |
+| T04 | Pendente | — |
+| T05 | Pendente | — |
+| T06 | Pendente | — |
+| T07 | Pendente | — |
+
+### Registro de T01
+
+- Bootstrap criado com Next.js `16.3.4`, React `19.2.8`, TypeScript `5.9.3`, Tailwind CSS `4.3.3`, Vitest `4.1.11`, Playwright `1.63.0`, npm `11.12.1` e Node.js `24.15.0`.
+- A instalação gerou `package-lock.json`; `npm audit --omit=optional` terminou com zero vulnerabilidades.
+- O E2E de bootstrap foi executado em Chromium instalado pelo Playwright e passou com 1 teste.
+- Desvio registrado: ESLint `9.39.4` foi mantido porque ESLint 10 apresentou incompatibilidade de runtime com o `eslint-plugin-react` empacotado por `eslint-config-next` `16.3.4`; os gates de lint e auditoria passaram com a versão compatível.
 
 ## Tarefa T01 — Disponibilizar o bootstrap reproduzível da aplicação
 
