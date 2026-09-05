@@ -16,7 +16,7 @@
 |-----|--------|------------|
 | T01 | Concluída | `npm install`; `npm audit --omit=optional`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check` — todos passaram. |
 | T02 | Concluída | `npx shadcn@latest info --json`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check` — todos passaram. |
-| T03 | Pendente | — |
+| T03 | Concluída | `npm test -- --run src/lib/api-client.spec.ts`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run format:check` — todos passaram. |
 | T04 | Pendente | — |
 | T05 | Pendente | — |
 | T06 | Pendente | — |
@@ -35,6 +35,13 @@
 - `src/app/globals.css` centraliza os tokens semânticos da ADR-004, tema claro, fontes e a regra de movimento reduzido; nenhum token visual foi criado na feature.
 - `npm test -- --run` passou com 13 testes, incluindo acessibilidade básica dos componentes e 7 pares de contraste com razão mínima de 4,5:1.
 - As dependências de execução do CLI `shadcn` foram mantidas em `devDependencies`; `npm audit --omit=optional` continua sem vulnerabilidades.
+
+### Registro de T03
+
+- `requestApi` compõe a URL diretamente de `NEXT_PUBLIC_API_URL`, envia `credentials: 'include'`, serializa JSON somente quando necessário e repassa `AbortSignal`.
+- O cliente retorna uniões discriminadas para sucesso sem corpo, sucesso com resposta validada por Zod, erro padrão validado e falhas seguras de configuração, serialização, rede, aborto, schema ou status.
+- Erros preservam apenas campos confiáveis (`statusCode`, `code`, `message`, `correlationId`, erros de campo e `Retry-After` inteiro); corpos inválidos e detalhes de exceções não entram no resultado.
+- `src/lib/api-client.spec.ts` cobre URL sem `/api`, todos os métodos, headers proibidos, `204`, payload/resposta, erro `429`, `Retry-After`, `401`/status inesperado, schema malformado, rede, aborto e configuração insegura.
 
 ## Tarefa T01 — Disponibilizar o bootstrap reproduzível da aplicação
 
