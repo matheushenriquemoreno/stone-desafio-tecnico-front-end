@@ -1,6 +1,6 @@
 # Fase 01 — Fundação e tracer bullet autenticado
 
-| Status       | Em execução |
+| Status       | Aguardando review |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
@@ -20,7 +20,7 @@
 | T04 | Concluída | `npm test -- --run src/features/auth/api/auth-gateway.spec.ts src/features/products/api/products-gateway.spec.ts`; `npm run typecheck`; `npm run lint`; `npm run format:check`; `git diff --check` — todos passaram. |
 | T05 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check`; `git diff --check` — todos passaram após normalizar o artefato automático `next-env.d.ts`. |
 | T06 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check`; `git diff --check` — todos passaram; E2E de bootstrap ajustado ao título da rota protegida. |
-| T07 | Pendente | — |
+| T07 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm audit --omit=optional`; `npm run test:e2e`; E2E integrado com API local controlada `2 passed`; `npm run format:check`; `git diff --check` — todos os gates passaram. |
 
 ### Registro de T01
 
@@ -63,6 +63,13 @@
 - A primeira leitura usa `GET /products?limit=20` no navegador, mostra skeleton, diferencia sucesso, catálogo vazio e falha recuperável e apresenta o total recebido sem inferir quantidade de páginas.
 - `401` é tratado por código estável e substitui a rota por `/login`; rede, schema inválido e demais falhas exibem fallback seguro com retry manual.
 - A desmontagem aborta o `AbortController` e resultados obsoletos são ignorados; `products-screen.spec.tsx` cobre loading, sucesso, total, vazio, `401`, falha/retry e aborto.
+
+### Registro de T07
+
+- `e2e/authenticated-tracer.spec.ts` prova, em ambiente opt-in, login pela tela, confirmação da sessão por `GET /products` e retorno ao login em acesso direto sem cookie; exige `E2E_API_URL`, `E2E_USER_EMAIL` e `E2E_USER_PASSWORD` controlados pelo ambiente.
+- O E2E integrado foi executado contra API NestJS local em `http://localhost:3001`, origem web local `http://localhost:3000`, DynamoDB Local provisionado e usuário temporário local: `2 passed`.
+- A execução padrão sem credenciais externas manteve o cenário integrado como `2 skipped` e o bootstrap como `1 passed`, sem confundir ausência de ambiente com prova do fluxo autenticado.
+- A configuração do Playwright injeta somente a URL pública da API no processo do servidor Next; não há sessão de produção, JWT, Bearer, storage ou endpoint intermediário no cenário.
 
 ## Tarefa T01 — Disponibilizar o bootstrap reproduzível da aplicação
 

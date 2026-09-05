@@ -1,5 +1,8 @@
 import { requestApi, type ApiResult } from '@/lib/api-client'
-import { productPageSchema } from '@/features/products/schemas/product'
+import {
+  productPageSchema,
+  type ProductPage,
+} from '@/features/products/schemas/product'
 import type {
   ListProductsResult,
   ProductsGatewayError,
@@ -65,9 +68,7 @@ export async function listProducts(
     query.set('cursor', options.cursor)
   }
 
-  const result = await requestApi<
-    import('@/features/products/schemas/product').ProductPage
-  >({
+  const result = await requestApi<ProductPage>({
     expectedErrorStatuses: productListErrorStatuses,
     expectedStatuses: [200],
     method: 'GET',

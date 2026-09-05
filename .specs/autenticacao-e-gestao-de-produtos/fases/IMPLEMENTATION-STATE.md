@@ -1,6 +1,6 @@
 # Estado da Implementação — Interface web de autenticação e gestão de produtos
 
-| Status       | Em execução |
+| Status       | Aguardando review |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
@@ -15,7 +15,7 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 
 | #  | Fase | Arquivo | Status | Concluída em |
 |----|------|---------|--------|--------------|
-| 01 | Fundação e tracer bullet autenticado | fases/fase-01-fundacao-e-tracer-bullet.md | Em execução | — |
+| 01 | Fundação e tracer bullet autenticado | fases/fase-01-fundacao-e-tracer-bullet.md | Aguardando review | — |
 | 02 | Cadastro e autenticação pública completa | fases/fase-02-cadastro-e-autenticacao-publica.md | Pendente | — |
 | 03 | Sessão protegida e logout | fases/fase-03-sessao-protegida-e-logout.md | Pendente | — |
 | 04 | Catálogo e paginação sequencial | fases/fase-04-catalogo-e-paginacao.md | Pendente | — |
@@ -33,7 +33,7 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | T04 | 01 | Concluída | `npm test -- --run src/features/auth/api/auth-gateway.spec.ts src/features/products/api/products-gateway.spec.ts`; `npm run typecheck`; `npm run lint`; `npm run format:check`; `git diff --check` — todos passaram. |
 | T05 | 01 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check`; `git diff --check` — todos passaram após normalizar o artefato automático `next-env.d.ts`. |
 | T06 | 01 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check`; `git diff --check` — todos passaram; E2E de bootstrap ajustado ao título da rota protegida. |
-| T07 | 01 | Pendente | — |
+| T07 | 01 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm audit --omit=optional`; `npm run test:e2e`; E2E integrado com API local controlada `2 passed`; `npm run format:check`; `git diff --check` — todos os gates passaram. |
 | T08 | 02 | Pendente | — |
 | T09 | 02 | Pendente | — |
 | T10 | 02 | Pendente | — |

@@ -15,8 +15,11 @@ import {
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { listProducts } from '@/features/products/api/products-gateway'
-import type { Product, ProductPage } from '@/features/products/types'
-import type { ListProductsResult } from '@/features/products/types'
+import type {
+  ListProductsResult,
+  Product,
+  ProductPage,
+} from '@/features/products/types'
 
 type ProductsViewState =
   | Readonly<{ kind: 'loading' }>

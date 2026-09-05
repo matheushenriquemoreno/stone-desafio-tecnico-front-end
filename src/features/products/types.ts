@@ -1,4 +1,5 @@
 import type { ApiResult } from '@/lib/api-client'
+import type { ProductPage } from '@/features/products/schemas/product'
 
 export type { Product, ProductPage } from '@/features/products/schemas/product'
 
@@ -19,7 +20,7 @@ export type ProductsGatewayError = Readonly<{
 export type ListProductsResult =
   | Readonly<{
       kind: 'success'
-      page: import('@/features/products/schemas/product').ProductPage
+      page: ProductPage
     }>
   | Readonly<{ kind: 'error'; error: ProductsGatewayError }>
   | Readonly<{
