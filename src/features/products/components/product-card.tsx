@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/card'
 import { formatProductPrice } from '@/features/products/format-product-price'
 import type { Product } from '@/features/products/types'
+import Link from 'next/link'
 
 import { ProductImage } from './product-image'
 
@@ -21,7 +22,14 @@ export function ProductCard({ product }: ProductCardProps) {
         <CardHeader className="flex flex-col gap-4">
           <ProductImage alt={`Imagem de ${product.name}`} src={product.imageUrl} />
           <div className="flex flex-col gap-1">
-            <CardTitle>{product.name}</CardTitle>
+            <CardTitle>
+              <Link
+                className="rounded-sm text-link underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                href={`/products/${encodeURIComponent(product.id)}`}
+              >
+                {product.name}
+              </Link>
+            </CardTitle>
             <CardDescription>{product.description}</CardDescription>
           </div>
         </CardHeader>

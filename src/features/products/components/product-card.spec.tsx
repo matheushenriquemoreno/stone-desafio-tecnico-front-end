@@ -37,6 +37,10 @@ describe('ProductCard', () => {
 
     render(<ProductCard product={product} />)
 
+    expect(screen.getByRole('link', { name: 'Produto principal' })).toHaveAttribute(
+      'href',
+      '/products/product-1',
+    )
     expect(screen.getByText('Produto principal')).toBeInTheDocument()
     expect(screen.getByText('Descrição do produto')).toBeInTheDocument()
     expect(screen.getByText('R$ 99,90')).toBeInTheDocument()
