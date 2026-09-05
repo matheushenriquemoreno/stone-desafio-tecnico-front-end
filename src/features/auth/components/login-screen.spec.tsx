@@ -138,6 +138,29 @@ describe('LoginScreen', () => {
     expect(screen.queryByText('mensagem externa')).not.toBeInTheDocument()
   })
 
+  it.each(['unknown', 'unavailable'] as const)(
+    'preserva a referência de suporte no fallback de erro %s',
+    async (code) => {
+      loginMock.mockResolvedValue({
+        error: { code, correlationId: `corr-login-${code}` },
+        kind: 'error',
+      })
+      const user = userEvent.setup()
+
+      render(<LoginScreen />)
+      await user.type(screen.getByLabelText('E-mail'), 'maria@example.com')
+      await user.type(screen.getByLabelText('Senha'), 'senha-segura')
+      await user.click(screen.getByRole('button', { name: 'Entrar' }))
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        'Não foi possível concluir o login. Tente novamente em instantes.',
+      )
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        `Referência de suporte: corr-login-${code}`,
+      )
+    },
+  )
+
   it('usa fallback seguro para origem rejeitada e falha de rede', async () => {
     const user = userEvent.setup()
     render(<LoginScreen />)

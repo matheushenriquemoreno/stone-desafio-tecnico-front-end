@@ -127,7 +127,11 @@ function getResultError(result: LoginResult): {
     }
   }
 
-  return { fieldErrors: [], generalMessage: genericLoginError }
+  return {
+    correlationId: result.error.correlationId,
+    fieldErrors: [],
+    generalMessage: genericLoginError,
+  }
 }
 
 type LoginScreenProps = Readonly<{

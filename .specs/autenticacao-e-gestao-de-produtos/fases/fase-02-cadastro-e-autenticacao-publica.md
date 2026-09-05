@@ -136,10 +136,10 @@ Executar testes de schema, gateway e componentes, o E2E público contra ambiente
 - Rate limit pode tornar o E2E instável se os dados e a frequência não forem isolados.
 - A conclusão exige `review`; não iniciar a Fase 03 automaticamente.
 
-## Correções pós-review independente
+## Correções pós-review independente v4
 
-- **A-01:** as telas exibem a referência de suporte também quando a API retorna `correlationId` junto com erros de campo, sem mensagem geral.
-- **A-02:** o E2E acessa a rota protegida imediatamente após o cadastro e confirma o retorno ao login antes da autenticação explícita.
-- **A-03:** após erro de validação local ou erro de campo da API, o primeiro campo inválido recebe foco; os testes de componentes verificam esse comportamento.
-- **Verificação:** `npm test -- --run src/features/auth/components/register-screen.spec.tsx src/features/auth/components/login-screen.spec.tsx` (13 testes), `npm run typecheck`, `npm run lint`, `npm run format:check` e `git diff --check` — todos passaram. `npm run test:e2e` passou com 1 teste e pulou 3 sem API externa; o E2E integrado permanece dependente de API autorizada.
-- **Estado:** correções implementadas; aguarda novo `review` independente da Fase 02. A Fase 03 continua pendente.
+- **A-01:** o fallback genérico do login preserva e exibe `correlationId` quando a API retorna uma referência junto com código desconhecido ou indisponibilidade; o teste de componente cobre o código `unknown`.
+- **A-02:** o E2E público atualizado foi executado contra API NestJS local, DynamoDB Local e origem `http://127.0.0.1:3000` autorizada pela API em `http://127.0.0.1:3001`; cadastro sem sessão automática, duplicidade, credencial inválida e login até o catálogo passaram.
+- **A-03:** `e2e/public-auth-zoom.spec.ts` verifica `/register` e `/login` em viewport efetiva de 640 px, equivalente ao reflow de uma tela de 1280 px em zoom de 200%, preservando conteúdo, ações e ausência de overflow horizontal.
+- **Verificação:** suíte de autenticação `npm test -- --run src/features/auth/components/register-screen.spec.tsx src/features/auth/components/login-screen.spec.tsx src/features/auth/api/auth-gateway.spec.ts` (30 testes), suíte completa `npm test -- --run` (72 testes), `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`, `git diff --check` e `npm run test:e2e` integrado (4 passaram e 2 foram pulados por credenciais opcionais) — todos passaram.
+- **Estado:** correções implementadas e verificadas; aguarda novo `review` independente da Fase 02. A Fase 03 continua pendente.

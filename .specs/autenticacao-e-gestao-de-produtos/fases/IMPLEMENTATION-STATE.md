@@ -7,7 +7,7 @@
 
 ## Fase ativa
 
-Fase 02 — Cadastro e autenticação pública completa — correções A-01, A-02 e A-03 implementadas; aguardando novo review independente.
+Fase 02 — Cadastro e autenticação pública completa — correções do review v4 implementadas e verificadas; aguardando novo review independente.
 
 Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase deve passar por `review` independente antes que a próxima seja marcada como ativa.
 
@@ -36,9 +36,9 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | T07 | 01 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm audit --omit=optional`; `npm run test:e2e`; E2E integrado com API local controlada `2 passed`; `npm run format:check`; `git diff --check` — todos os gates passaram. |
 | T08 | 02 | Concluída | `npm test -- --run src/features/auth/schemas/register.spec.ts` (8 testes); `npm run typecheck`; `npm run lint`; `npx prettier --check src/features/auth/schemas/register.ts src/features/auth/schemas/register.spec.ts`; `git diff --check` — todos passaram. |
 | T09 | 02 | Concluída | `npm test -- --run src/features/auth/schemas/register.spec.ts src/features/auth/schemas/registered-user.spec.ts src/features/auth/api/auth-gateway.spec.ts` (25 testes); `npm run typecheck`; `npm run lint`; `npx prettier --check` nos arquivos alterados; `git diff --check` — todos passaram. |
-| T10 | 02 | Concluída | Implementa foco no primeiro campo inválido e mantém confirmação transitória; correção A-03 verificada em `npm test -- --run src/features/auth/components/register-screen.spec.tsx src/features/auth/components/login-screen.spec.tsx` (13 testes), `npm run typecheck`, `npm run lint`, `npm run format:check` e `git diff --check` — todos passaram. |
-| T11 | 02 | Concluída | Mantém `correlationId` visível também em validações com erro por campo; correção A-01 verificada nos testes de componentes (13 testes), typecheck, lint, format-check e diff-check — todos passaram. |
-| T12 | 02 | Concluída | O E2E agora confirma redirecionamento ao login ao acessar a rota protegida após cadastro, antes do login explícito; alteração verificada por lint, typecheck, format-check e diff-check. `npm run test:e2e` passou com 1 teste e pulou 3 sem API externa; execução integrada continua pendente de API autorizada. |
+| T10 | 02 | Concluída | Implementa foco no primeiro campo inválido e mantém confirmação transitória; correção de acessibilidade verificada em `npm test -- --run src/features/auth/components/register-screen.spec.tsx src/features/auth/components/login-screen.spec.tsx` (13 testes), `npm run typecheck`, `npm run lint`, `npm run format:check` e `git diff --check` — todos passaram. |
+| T11 | 02 | Concluída | Fallback genérico do login preserva `correlationId` e o exibe como referência; regressão verificada na suíte auth (30 testes), typecheck, lint, format-check e diff-check — todos passaram. |
+| T12 | 02 | Concluída | E2E integrado executado com API NestJS local, DynamoDB Local e origem autorizada: `npm run test:e2e` — 4 passaram e 2 foram pulados por credenciais opcionais do tracer; o cenário público atualizado passou. |
 | T13 | 03 | Pendente | — |
 | T14 | 03 | Pendente | — |
 | T15 | 03 | Pendente | — |
@@ -67,4 +67,4 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 
 ## Bloqueios e desvios
 
-A-01, A-02 e A-03, identificados no review independente v3, foram corrigidos na etapa `implement`. A Fase 02 permanece aguardando novo review; a reprodução E2E integrada depende de API autorizada. Dependências externas de API/OpenAPI, origem autorizada, dados E2E, origens de imagem e publicação continuam registradas nas fases correspondentes.
+A-01, A-02 e A-03, identificados no review independente v4, foram tratados na etapa `implement`: o fallback de login preserva a referência, o E2E integrado foi executado contra API autorizada e a verificação de zoom 200% equivalente foi adicionada. A Fase 02 permanece aguardando novo review independente. Dependências externas de API/OpenAPI, origem autorizada, dados E2E, origens de imagem e publicação continuam registradas nas fases correspondentes.
