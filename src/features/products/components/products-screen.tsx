@@ -157,6 +157,10 @@ function ProductsScreenContent() {
       (publicPage.kind === 'visited' && publicPage.pageIndex < paginationCursors.length)
     const localTarget = localNavigationTarget.current
 
+    if (canRestoreRequestedPage && lastCanonicalizedPage.current !== undefined) {
+      lastCanonicalizedPage.current = undefined
+    }
+
     if (localTarget !== undefined) {
       if (requestedPageIndex === localTarget) {
         localNavigationTarget.current = undefined

@@ -62,6 +62,7 @@ Criar a apresentação reutilizável dos itens com nome, descrição, preço e i
 
 - `pagination.ts` valida `page` como posição humana positiva e serializa a posição visitada sem inserir cursores na URL.
 - `ProductsScreen` publica `/?page=N` ao avançar ou retornar, restaura apenas posições existentes na pilha em memória e trata reload/deep link impossível ou divergência com canonicalização para `/` e nova leitura sem cursor.
+- O sentinel de canonicalização é limpo quando a posição volta a ser válida, garantindo que uma mesma URL inválida seja canonicalizada novamente após nova entrada.
 - O boundary `Suspense` mantém a leitura de `useSearchParams` compatível com o build do App Router; a pilha continua efêmera e nenhuma posição/cursor é persistida em storage.
 - Verificação: `npm test -- --run 'src/features/products/pagination.spec.ts' 'src/features/products/components/products-screen.spec.tsx'` (18 testes), `npm run typecheck`, `npm run lint` e `git diff --check` — todos passaram.
 

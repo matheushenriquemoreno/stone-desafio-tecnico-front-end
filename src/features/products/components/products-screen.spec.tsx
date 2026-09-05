@@ -225,12 +225,20 @@ describe('ProductsScreen', () => {
     getSearchParam.mockReturnValue('2')
     listProductsMock.mockResolvedValue({ kind: 'success', page: productPage })
 
-    render(<ProductsScreen />)
+    const rendered = render(<ProductsScreen />)
 
     await screen.findByText('Produto principal')
 
     expect(replace).toHaveBeenCalledWith('/')
     expect(listProductsMock.mock.calls[0]?.[0]).not.toHaveProperty('cursor')
+
+    getSearchParam.mockReturnValue(null)
+    rendered.rerender(<ProductsScreen />)
+    replace.mockClear()
+    getSearchParam.mockReturnValue('2')
+    rendered.rerender(<ProductsScreen />)
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/'))
   })
 
   it('descarta a pilha quando a URL diverge para uma posição não visitada', async () => {
