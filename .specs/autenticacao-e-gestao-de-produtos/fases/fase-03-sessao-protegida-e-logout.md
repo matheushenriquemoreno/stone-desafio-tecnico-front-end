@@ -1,7 +1,7 @@
 # Fase 03 — Sessão protegida e logout
 
-| Status       | Em execução |
-|--------------|------------|
+| Status       | Concluída  |
+| ------------ | ---------- |
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
 
@@ -87,6 +87,22 @@ Cobrir acesso direto a cada tipo de rota protegida sem sessão, expiração obse
 - `src/app/(protected)/layout.tsx` injeta o controle na navegação protegida.
 - `auth-gateway.spec.ts` verifica caminho, método, credenciais, ausência de corpo/cabeçalhos e mapeamentos de erro; `logout-button.spec.tsx` verifica loading, duplo clique, sucesso, feedback e retry somente manual.
 - Verificação: `npm test -- --run 'src/features/auth/api/auth-gateway.spec.ts' 'src/features/auth/components/logout-button.spec.tsx' 'src/features/auth/components/protected-shell.spec.tsx'` (23 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+
+## Registro de T16
+
+- `e2e/session-and-logout.spec.ts` cria uma conta única pelo fluxo público, autentica, verifica o shell e o logout válido, confirma que um novo acesso sem sessão retorna ao login, limpa os cookies para reproduzir a perda de sessão observada por `401` e chama o logout diretamente sem sessão para confirmar a idempotência `204`.
+- O cenário também verifica que `localStorage` e `sessionStorage` permanecem vazios após o logout e que mensagens de console não contêm credenciais, tokens ou JWTs.
+- E2E integrado: `$env:E2E_API_URL='http://localhost:3001'; $env:E2E_WEB_URL='http://localhost:3000'; npm run test:e2e` — 5 testes passaram e 2 foram pulados por credenciais opcionais do tracer.
+- Gate completo da fase: `npm test -- --run` (14 arquivos, 82 testes), `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`, `npm run test:e2e` padrão (3 passaram e 4 foram pulados) e `git diff --check` — todos passaram.
+- Limitação registrada: neste ponto do plano só existe a rota protegida `/`; as rotas `/products/new` e `/products/[id]` serão criadas nas Fases 05–06 e já estarão cobertas pelo layout do grupo protegido.
+
+## Encerramento da fase
+
+- Critério 1: `401` troca o estado protegido por `unauthorized`, descarta o conteúdo anterior e usa a política comum `redirectToLogin`, sem cookie ou estado de sessão no front-end.
+- Critério 2: `ProtectedShell` é composto pelo layout do grupo protegido, mantém navegação e não presume autorização; a API confirma a sessão por leitura protegida.
+- Critério 3: logout chama `POST /auth/logout`, bloqueia reenvio, aceita `204` e direciona ao login; o cenário integrado confirma a conclusão válida e idempotente sem sessão.
+- Critério 4: acesso sem cookie após limpeza controlada reproduz o `401` e o retorno ao login; testes de componente cobrem a perda de sessão antes e depois de conteúdo carregado.
+- Estado: tarefas T13–T16 concluídas; fase pronta para `review` independente obrigatório. A Fase 04 não foi iniciada.
 
 ## Testes e verificações da fase
 

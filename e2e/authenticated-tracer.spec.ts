@@ -27,7 +27,7 @@ test.describe('authenticated tracer', () => {
     await expect(page).toHaveURL(/\/$/)
     await expect(page.getByRole('heading', { name: 'Catálogo' })).toBeVisible()
     await expect(page.getByText(/\d+ produto/)).toBeVisible()
-    await expect(page.getByText('Área protegida')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Sair' })).toBeVisible()
   })
 
   test('retorna ao login ao acessar o catálogo sem sessão', async ({ browser }) => {

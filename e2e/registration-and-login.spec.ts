@@ -65,6 +65,5 @@ test.describe('public registration and login', () => {
 
     await expect(page).toHaveURL(/\/$/)
     await expect(page.getByRole('heading', { name: 'Catálogo' })).toBeVisible()
-    await expect(page.getByText('Área protegida')).toBeVisible()
   })
 })
