@@ -1,6 +1,6 @@
 # Fase 01 — Fundação e tracer bullet autenticado
 
-| Status       | Aguardando review |
+| Status       | Concluída |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
