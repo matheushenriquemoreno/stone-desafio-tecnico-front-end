@@ -1,4 +1,5 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { replace } = vi.hoisted(() => ({ replace: vi.fn() }))
@@ -133,10 +134,88 @@ describe('ProductsScreen', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Não foi possível carregar o catálogo. Tente novamente em instantes.',
     )
-    await userClick(screen.getByRole('button', { name: 'Tentar novamente' }))
+    await userEvent
+      .setup()
+      .click(screen.getByRole('button', { name: 'Tentar novamente' }))
 
     expect(await screen.findByText('Produto principal')).toBeInTheDocument()
     expect(listProductsMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('avança, retorna apenas por cursores visitados e bloqueia saltos inéditos', async () => {
+    const pageOne = { ...productPage, nextCursor: 'cursor-one' }
+    const pageTwo = {
+      ...productPage,
+      items: [{ ...productPage.items[0], id: 'product-2', name: 'Produto dois' }],
+      nextCursor: 'cursor-two',
+    }
+    const pageThree = {
+      ...productPage,
+      items: [{ ...productPage.items[0], id: 'product-3', name: 'Produto três' }],
+    }
+    listProductsMock
+      .mockResolvedValueOnce({ kind: 'success', page: pageOne })
+      .mockResolvedValueOnce({ kind: 'success', page: pageTwo })
+      .mockResolvedValueOnce({ kind: 'success', page: pageThree })
+      .mockResolvedValueOnce({ kind: 'success', page: pageTwo })
+      .mockResolvedValueOnce({ kind: 'success', page: pageOne })
+    const user = userEvent.setup()
+
+    render(<ProductsScreen />)
+
+    expect(await screen.findByText('Produto principal')).toBeVisible()
+    expect(screen.getByText('Página 1')).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Anterior' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Próxima' })).toBeEnabled()
+
+    await user.click(screen.getByRole('button', { name: 'Próxima' }))
+    await waitFor(() => expect(listProductsMock).toHaveBeenCalledTimes(2))
+    expect(listProductsMock.mock.calls[1]?.[0]).toEqual(
+      expect.objectContaining({ cursor: 'cursor-one' }),
+    )
+    expect(await screen.findByText('Produto dois')).toBeVisible()
+    expect(screen.getByText('Página 2')).toBeVisible()
+
+    await user.click(screen.getByRole('button', { name: 'Próxima' }))
+    await waitFor(() => expect(listProductsMock).toHaveBeenCalledTimes(3))
+    expect(listProductsMock.mock.calls[2]?.[0]).toEqual(
+      expect.objectContaining({ cursor: 'cursor-two' }),
+    )
+    expect(await screen.findByText('Produto três')).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Próxima' })).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: 'Anterior' }))
+    await waitFor(() => expect(listProductsMock).toHaveBeenCalledTimes(4))
+    expect(listProductsMock.mock.calls[3]?.[0]).toEqual(
+      expect.objectContaining({ cursor: 'cursor-one' }),
+    )
+    expect(await screen.findByText('Produto dois')).toBeVisible()
+
+    await user.click(screen.getByRole('button', { name: 'Anterior' }))
+    await waitFor(() => expect(listProductsMock).toHaveBeenCalledTimes(5))
+    expect(listProductsMock.mock.calls[4]?.[0]).not.toHaveProperty('cursor')
+    expect(await screen.findByText('Produto principal')).toBeVisible()
+    expect(screen.getByText('Página 1')).toBeVisible()
+  })
+
+  it('descarta a sequência quando o cursor deixa de ser válido e reinicia sem cursor', async () => {
+    const pageOne = { ...productPage, nextCursor: 'cursor-one' }
+    listProductsMock
+      .mockResolvedValueOnce({ kind: 'success', page: pageOne })
+      .mockResolvedValueOnce({
+        error: { code: 'validation', status: 400 },
+        kind: 'error',
+      })
+      .mockResolvedValueOnce({ kind: 'success', page: pageOne })
+    const user = userEvent.setup()
+
+    render(<ProductsScreen />)
+    await screen.findByText('Produto principal')
+    await user.click(screen.getByRole('button', { name: 'Próxima' }))
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/'))
+    await waitFor(() => expect(listProductsMock).toHaveBeenCalledTimes(3))
+    expect(listProductsMock.mock.calls[2]?.[0]).not.toHaveProperty('cursor')
   })
 
   it('aborta a leitura quando a tela é desmontada', async () => {
@@ -154,8 +233,3 @@ describe('ProductsScreen', () => {
     expect(capturedSignal?.aborted).toBe(true)
   })
 })
-
-async function userClick(element: HTMLElement) {
-  element.click()
-  await waitFor(() => undefined)
-}

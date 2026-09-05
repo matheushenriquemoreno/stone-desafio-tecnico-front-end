@@ -83,6 +83,13 @@ Consolidar testes de componente e E2E para lista vazia, múltiplas páginas, ret
 - A listagem preserva `items` e `total` recebidos, sem calcular páginas ou inferir ordenação; falha de rede/resposta inválida mantém retry manual e `401` usa a política da Fase 03.
 - Verificação: `npm test -- --run 'src/features/products/components/products-screen.spec.tsx'` (6 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
 
+## Registro de T18
+
+- `src/features/products/pagination.ts` modela a sequência em memória: primeira posição sem cursor, cursores recebidos por índice, avanço somente com `nextCursor`, retorno somente a índice visitado e substituição de ramos futuros obsoletos.
+- `ProductsScreen` envia o cursor opaco byte a byte, desabilita controles enquanto carrega, cancela/ignora respostas obsoletas e trata `400` de cursor inválido ou página posterior vazia reiniciando sem cursor.
+- `pagination.spec.ts` cobre início, avanço, retorno, fim, ramo obsoleto e opacidade; `products-screen.spec.tsx` cobre três páginas, controles, retorno e reinício após `400`.
+- Verificação: `npm test -- --run 'src/features/products/pagination.spec.ts' 'src/features/products/components/products-screen.spec.tsx'` (12 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+
 ## Testes e verificações da fase
 
 Executar unitários de paginação e formatação, componentes da lista, E2E paginado, lint, tipos e build. Validar manualmente teclado, foco, zoom de 200% e breakpoints pequeno, médio e grande.

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Package2 } from 'lucide-react'
@@ -15,6 +15,15 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  canGoNext,
+  canGoPrevious,
+  createPaginationState,
+  goToNextPage,
+  goToPreviousPage,
+  setCurrentPage,
+  type PaginationState,
+} from '@/features/products/pagination'
 import { cn } from '@/lib/utils'
 import { listProducts } from '@/features/products/api/products-gateway'
 import type {
@@ -38,6 +47,8 @@ type ProductsViewState =
 
 const genericProductsError =
   'Não foi possível carregar o catálogo. Tente novamente em instantes.'
+const paginationResetMessage =
+  'A sequência de páginas foi reiniciada. Carregando a primeira página.'
 
 function getProductCountLabel(total: number): string {
   return `${total} ${total === 1 ? 'produto' : 'produtos'}`
@@ -156,24 +167,66 @@ function ProductsContent({ page }: { page: ProductPage }) {
 export function ProductsScreen() {
   const router = useRouter()
   const [attempt, setAttempt] = useState(0)
+  const [pagination, setPagination] = useState<PaginationState>(createPaginationState)
   const [viewState, setViewState] = useState<ProductsViewState>({ kind: 'loading' })
+  const requestVersion = useRef(0)
+  const currentPageIndex = pagination.currentPageIndex
+  const paginationCursors = pagination.cursors
+  const requestedCursor = paginationCursors[currentPageIndex]
 
   useEffect(() => {
     const controller = new AbortController()
+    const currentRequestVersion = requestVersion.current + 1
+    requestVersion.current = currentRequestVersion
+    const requestedPageIndex = currentPageIndex
     let isCurrent = true
 
     async function loadProducts() {
-      const result = await listProducts({ signal: controller.signal })
+      const result = await listProducts({
+        ...(requestedCursor === undefined ? {} : { cursor: requestedCursor }),
+        signal: controller.signal,
+      })
 
-      if (!isCurrent || (result.kind === 'failure' && result.reason === 'aborted')) {
+      if (
+        !isCurrent ||
+        requestVersion.current !== currentRequestVersion ||
+        (result.kind === 'failure' && result.reason === 'aborted')
+      ) {
         return
       }
 
       if (result.kind === 'success') {
+        if (requestedPageIndex > 0 && result.page.items.length === 0) {
+          setPagination(createPaginationState())
+          setViewState({ kind: 'error', message: paginationResetMessage })
+          router.replace('/')
+          return
+        }
+
+        setPagination((current) =>
+          current.currentPageIndex === requestedPageIndex
+            ? setCurrentPage(current, result.page)
+            : current,
+        )
         setViewState({
           kind: result.page.items.length === 0 ? 'empty' : 'success',
           page: result.page,
         })
+        return
+      }
+
+      if (
+        requestedPageIndex > 0 &&
+        result.kind === 'error' &&
+        result.error.code === 'validation'
+      ) {
+        setPagination(createPaginationState())
+        setViewState({
+          correlationId: result.error.correlationId,
+          kind: 'error',
+          message: paginationResetMessage,
+        })
+        router.replace('/')
         return
       }
 
@@ -197,12 +250,46 @@ export function ProductsScreen() {
       isCurrent = false
       controller.abort()
     }
-  }, [attempt, router])
+  }, [attempt, currentPageIndex, paginationCursors, requestedCursor, router])
 
   function retry() {
     setViewState({ kind: 'loading' })
     setAttempt((current) => current + 1)
   }
+
+  function goNext() {
+    if (viewState.kind !== 'empty' && viewState.kind !== 'success') {
+      return
+    }
+
+    const nextState = goToNextPage(pagination)
+
+    if (!nextState) {
+      return
+    }
+
+    setPagination(nextState)
+    setViewState({ kind: 'loading' })
+  }
+
+  function goPrevious() {
+    if (viewState.kind !== 'empty' && viewState.kind !== 'success') {
+      return
+    }
+
+    const previousState = goToPreviousPage(pagination)
+
+    if (!previousState) {
+      return
+    }
+
+    setPagination(previousState)
+    setViewState({ kind: 'loading' })
+  }
+
+  const isLoaded = viewState.kind === 'empty' || viewState.kind === 'success'
+  const hasPreviousPage = isLoaded && canGoPrevious(pagination)
+  const hasNextPage = isLoaded && canGoNext(pagination)
 
   return (
     <main
@@ -261,6 +348,28 @@ export function ProductsScreen() {
             ) : (
               <ProductsContent page={viewState.page} />
             )}
+
+            <nav
+              aria-label="Paginação do catálogo"
+              className="flex flex-wrap items-center justify-between gap-3"
+            >
+              <Button
+                disabled={!hasPreviousPage}
+                onClick={goPrevious}
+                variant="outline"
+              >
+                Anterior
+              </Button>
+              <p
+                aria-live="polite"
+                className="text-sm font-medium text-muted-foreground"
+              >
+                Página {currentPageIndex + 1}
+              </p>
+              <Button disabled={!hasNextPage} onClick={goNext}>
+                Próxima
+              </Button>
+            </nav>
           </div>
         )}
       </div>
