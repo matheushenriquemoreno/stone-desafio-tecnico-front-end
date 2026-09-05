@@ -19,7 +19,7 @@
 | T03 | Concluída | `npm test -- --run src/lib/api-client.spec.ts`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run format:check` — todos passaram. |
 | T04 | Concluída | `npm test -- --run src/features/auth/api/auth-gateway.spec.ts src/features/products/api/products-gateway.spec.ts`; `npm run typecheck`; `npm run lint`; `npm run format:check`; `git diff --check` — todos passaram. |
 | T05 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check`; `git diff --check` — todos passaram após normalizar o artefato automático `next-env.d.ts`. |
-| T06 | Pendente | — |
+| T06 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check`; `git diff --check` — todos passaram; E2E de bootstrap ajustado ao título da rota protegida. |
 | T07 | Pendente | — |
 
 ### Registro de T01
@@ -56,6 +56,13 @@
 - O formulário possui labels associados, foco visível herdado das primitivas, `aria-invalid`, `aria-describedby`, alertas persistentes e estados de loading/disabled.
 - A senha permanece somente no estado efêmero do formulário, é limpa antes da navegação após `204` e não é armazenada, registrada ou exposta.
 - `login-screen.spec.tsx` cobre teclado implícito via `user-event`, validação local, erro seguro de credenciais, bloqueio de reenvio, loading, rate limit e navegação pós-sucesso.
+
+### Registro de T06
+
+- A rota `/` agora compõe `ProductsScreen` dentro do grupo protegido; não há Middleware, Proxy, Server Action, Route Handler ou leitura autenticada em Server Component.
+- A primeira leitura usa `GET /products?limit=20` no navegador, mostra skeleton, diferencia sucesso, catálogo vazio e falha recuperável e apresenta o total recebido sem inferir quantidade de páginas.
+- `401` é tratado por código estável e substitui a rota por `/login`; rede, schema inválido e demais falhas exibem fallback seguro com retry manual.
+- A desmontagem aborta o `AbortController` e resultados obsoletos são ignorados; `products-screen.spec.tsx` cobre loading, sucesso, total, vazio, `401`, falha/retry e aborto.
 
 ## Tarefa T01 — Disponibilizar o bootstrap reproduzível da aplicação
 
