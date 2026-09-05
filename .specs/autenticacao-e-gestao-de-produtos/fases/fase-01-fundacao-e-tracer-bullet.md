@@ -15,7 +15,7 @@
 | ID  | Status | Evidências |
 |-----|--------|------------|
 | T01 | Concluída | `npm install`; `npm audit --omit=optional`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check` — todos passaram. |
-| T02 | Pendente | — |
+| T02 | Concluída | `npx shadcn@latest info --json`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check` — todos passaram. |
 | T03 | Pendente | — |
 | T04 | Pendente | — |
 | T05 | Pendente | — |
@@ -28,6 +28,13 @@
 - A instalação gerou `package-lock.json`; `npm audit --omit=optional` terminou com zero vulnerabilidades.
 - O E2E de bootstrap foi executado em Chromium instalado pelo Playwright e passou com 1 teste.
 - Desvio registrado: ESLint `9.39.4` foi mantido porque ESLint 10 apresentou incompatibilidade de runtime com o `eslint-plugin-react` empacotado por `eslint-config-next` `16.3.4`; os gates de lint e auditoria passaram com a versão compatível.
+
+### Registro de T02
+
+- `components.json` registra `base-nova`, Base UI, RSC, TypeScript, alias `@`, Tailwind v4 e Lucide; os componentes `alert`, `button`, `card`, `field`, `input`, `label`, `separator`, `skeleton` e `spinner` foram incorporados pelo registry oficial.
+- `src/app/globals.css` centraliza os tokens semânticos da ADR-004, tema claro, fontes e a regra de movimento reduzido; nenhum token visual foi criado na feature.
+- `npm test -- --run` passou com 13 testes, incluindo acessibilidade básica dos componentes e 7 pares de contraste com razão mínima de 4,5:1.
+- As dependências de execução do CLI `shadcn` foram mantidas em `devDependencies`; `npm audit --omit=optional` continua sem vulnerabilidades.
 
 ## Tarefa T01 — Disponibilizar o bootstrap reproduzível da aplicação
 

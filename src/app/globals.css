@@ -1,13 +1,107 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 :root {
   color-scheme: light;
+  --background: #f5fbf2;
+  --foreground: #1b221f;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card-foreground: #1b221f;
+  --primary: #88ff00;
+  --primary-hover: #70d600;
+  --primary-active: #5abd00;
+  --primary-foreground: #1b221f;
+  --secondary: #203d00;
+  --secondary-foreground: #fcfdfc;
+  --muted: #eef1f0;
+  --muted-foreground: #4a5550;
+  --accent: #1e7dff;
+  --accent-foreground: #1b221f;
+  --border: #cbd5d0;
+  --input: #7c8a83;
+  --ring: #1e7dff;
+  --link: #005fcc;
+  --success: #05751a;
+  --success-foreground: #fcfdfc;
+  --warning: #8a4b00;
+  --warning-foreground: #fcfdfc;
+  --destructive: #b42318;
+  --destructive-foreground: #fcfdfc;
 }
 
 * {
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
+@theme inline {
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-barlow-condensed);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-subtle: var(--muted);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-link: var(--link);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    margin: 0;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse,
+  .animate-spin {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms;
+  }
 }

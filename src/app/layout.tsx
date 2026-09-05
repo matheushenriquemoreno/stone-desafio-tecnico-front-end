@@ -1,6 +1,21 @@
 import type { Metadata } from 'next'
+import { Barlow_Condensed, Inter } from 'next/font/google'
 
 import './globals.css'
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
+})
+
+const barlowCondensed = Barlow_Condensed({
+  subsets: ['latin'],
+  variable: '--font-barlow-condensed',
+  display: 'swap',
+  weight: ['600', '700'],
+})
 
 export const metadata: Metadata = {
   title: {
@@ -17,7 +32,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body className={`${inter.variable} ${barlowCondensed.variable}`}>
+        {children}
+      </body>
     </html>
   )
 }

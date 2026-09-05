@@ -28,7 +28,7 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | ID  | Fase | Status | Evidências |
 |-----|------|--------|------------|
 | T01 | 01 | Concluída | `npm install`; `npm audit --omit=optional`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check` — todos passaram. |
-| T02 | 01 | Pendente | — |
+| T02 | 01 | Concluída | `npx shadcn@latest info --json`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check` — todos passaram. |
 | T03 | 01 | Pendente | — |
 | T04 | 01 | Pendente | — |
 | T05 | 01 | Pendente | — |
