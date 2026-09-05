@@ -38,6 +38,7 @@ describe('LoginScreen', () => {
 
     expect(screen.getByLabelText('E-mail')).toHaveAttribute('aria-invalid', 'true')
     expect(screen.getByLabelText('Senha')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText('E-mail')).toHaveFocus()
     expect(screen.getByText('Informe um e-mail válido.')).toBeInTheDocument()
     expect(
       screen.getByText('A senha deve ter entre 8 e 128 caracteres.'),
@@ -114,6 +115,7 @@ describe('LoginScreen', () => {
     loginMock.mockResolvedValue({
       error: {
         code: 'validation',
+        correlationId: 'corr-login-validation',
         fieldErrors: [
           { code: 'invalid', field: 'email', message: 'Informe um e-mail válido.' },
         ],
@@ -128,7 +130,11 @@ describe('LoginScreen', () => {
     await user.click(screen.getByRole('button', { name: 'Entrar' }))
 
     expect(await screen.findByText('Informe um e-mail válido.')).toBeInTheDocument()
+    expect(
+      screen.getByText('Referência de suporte: corr-login-validation'),
+    ).toBeVisible()
     expect(screen.getByLabelText('E-mail')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText('E-mail')).toHaveFocus()
     expect(screen.queryByText('mensagem externa')).not.toBeInTheDocument()
   })
 

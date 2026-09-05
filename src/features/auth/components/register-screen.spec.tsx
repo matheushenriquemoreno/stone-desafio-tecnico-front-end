@@ -39,6 +39,7 @@ describe('RegisterScreen', () => {
     expect(screen.getByLabelText('Nome')).toHaveAttribute('aria-invalid', 'true')
     expect(screen.getByLabelText('E-mail')).toHaveAttribute('aria-invalid', 'true')
     expect(screen.getByLabelText('Senha')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText('Nome')).toHaveFocus()
     expect(
       screen.getByText('O nome deve ter entre 2 e 100 caracteres.'),
     ).toBeInTheDocument()
@@ -69,6 +70,31 @@ describe('RegisterScreen', () => {
     expect(alert).toHaveTextContent('Referência de suporte: corr-register')
     expect(alert).not.toHaveTextContent('mensagem externa')
     expect(push).not.toHaveBeenCalled()
+  })
+
+  it('mostra a referência quando a validação da API aponta um campo', async () => {
+    registerMock.mockResolvedValue({
+      error: {
+        code: 'validation',
+        correlationId: 'corr-register-validation',
+        fieldErrors: [
+          { code: 'invalid', field: 'email', message: 'Informe um e-mail válido.' },
+        ],
+      },
+      kind: 'error',
+    })
+    const user = userEvent.setup()
+
+    render(<RegisterScreen />)
+    await user.type(screen.getByLabelText('Nome'), 'Maria Silva')
+    await user.type(screen.getByLabelText('E-mail'), 'maria@example.com')
+    await user.type(screen.getByLabelText('Senha'), 'senha-segura')
+    await user.click(screen.getByRole('button', { name: 'Criar conta' }))
+
+    expect(
+      await screen.findByText('Referência de suporte: corr-register-validation'),
+    ).toBeVisible()
+    expect(screen.getByLabelText('E-mail')).toHaveFocus()
   })
 
   it('bloqueia reenvio, limpa a senha e segue ao login somente após sucesso', async () => {

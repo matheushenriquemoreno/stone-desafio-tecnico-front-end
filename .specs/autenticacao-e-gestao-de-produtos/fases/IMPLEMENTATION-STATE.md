@@ -1,13 +1,13 @@
 # Estado da Implementação — Interface web de autenticação e gestão de produtos
 
-| Status       | Aguardando correção |
+| Status       | Aguardando novo review |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
 
 ## Fase ativa
 
-Fase 02 — Cadastro e autenticação pública completa — review independente v3 reprovado; aguardando correção de A-01 e novo review.
+Fase 02 — Cadastro e autenticação pública completa — correções A-01, A-02 e A-03 implementadas; aguardando novo review independente.
 
 Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase deve passar por `review` independente antes que a próxima seja marcada como ativa.
 
@@ -36,9 +36,9 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | T07 | 01 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm audit --omit=optional`; `npm run test:e2e`; E2E integrado com API local controlada `2 passed`; `npm run format:check`; `git diff --check` — todos os gates passaram. |
 | T08 | 02 | Concluída | `npm test -- --run src/features/auth/schemas/register.spec.ts` (8 testes); `npm run typecheck`; `npm run lint`; `npx prettier --check src/features/auth/schemas/register.ts src/features/auth/schemas/register.spec.ts`; `git diff --check` — todos passaram. |
 | T09 | 02 | Concluída | `npm test -- --run src/features/auth/schemas/register.spec.ts src/features/auth/schemas/registered-user.spec.ts src/features/auth/api/auth-gateway.spec.ts` (25 testes); `npm run typecheck`; `npm run lint`; `npx prettier --check` nos arquivos alterados; `git diff --check` — todos passaram. |
-| T10 | 02 | Concluída | `npm test -- --run src/features/auth/components/login-screen.spec.tsx src/features/auth/components/register-screen.spec.tsx` (9 testes); `npm run typecheck`; `npm run lint`; `npx prettier --check` nos arquivos alterados; `git diff --check` — todos passaram. |
-| T11 | 02 | Concluída | `npm test -- --run src/features/auth/components/login-screen.spec.tsx src/features/auth/components/register-screen.spec.tsx src/features/auth/api/auth-gateway.spec.ts` (27 testes); `npm run typecheck`; `npm run lint`; `npx prettier --check` nos arquivos alterados; `git diff --check` — todos passaram. |
-| T12 | 02 | Concluída | `npm test -- --run` (69 testes); `npm run typecheck`; `npm run lint`; `npm run format:check`; `npm run build`; `npm run test:e2e` (1 passou, 3 pulados sem API externa); `E2E_API_URL=http://127.0.0.1:3001 npm run test:e2e -- e2e/registration-and-login.spec.ts` (1 passou); `git diff --check` — gates locais e E2E integrado controlado passaram. |
+| T10 | 02 | Concluída | Implementa foco no primeiro campo inválido e mantém confirmação transitória; correção A-03 verificada em `npm test -- --run src/features/auth/components/register-screen.spec.tsx src/features/auth/components/login-screen.spec.tsx` (13 testes), `npm run typecheck`, `npm run lint`, `npm run format:check` e `git diff --check` — todos passaram. |
+| T11 | 02 | Concluída | Mantém `correlationId` visível também em validações com erro por campo; correção A-01 verificada nos testes de componentes (13 testes), typecheck, lint, format-check e diff-check — todos passaram. |
+| T12 | 02 | Concluída | O E2E agora confirma redirecionamento ao login ao acessar a rota protegida após cadastro, antes do login explícito; alteração verificada por lint, typecheck, format-check e diff-check. `npm run test:e2e` passou com 1 teste e pulou 3 sem API externa; execução integrada continua pendente de API autorizada. |
 | T13 | 03 | Pendente | — |
 | T14 | 03 | Pendente | — |
 | T15 | 03 | Pendente | — |
@@ -67,4 +67,4 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 
 ## Bloqueios e desvios
 
-A-01, identificado no review independente v3, é um bloqueio de qualidade: `correlationId` não é exibido em todos os caminhos de erro. Corrigir na etapa `implement` e repetir o review antes de considerar a Fase 02 concluída. Dependências externas de API/OpenAPI, origem autorizada, dados E2E, origens de imagem e publicação continuam registradas nas fases correspondentes.
+A-01, A-02 e A-03, identificados no review independente v3, foram corrigidos na etapa `implement`. A Fase 02 permanece aguardando novo review; a reprodução E2E integrada depende de API autorizada. Dependências externas de API/OpenAPI, origem autorizada, dados E2E, origens de imagem e publicação continuam registradas nas fases correspondentes.

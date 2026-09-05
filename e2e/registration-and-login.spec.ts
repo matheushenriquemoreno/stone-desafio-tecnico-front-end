@@ -35,6 +35,10 @@ test.describe('public registration and login', () => {
       ),
     ).toBeVisible()
 
+    await page.goto('/')
+    await expect(page).toHaveURL(/\/login$/)
+    await expect(page.getByRole('heading', { name: 'Boas-vindas' })).toBeVisible()
+
     await page.goto('/register')
     await page.getByLabel('Nome').fill('Usuário E2E')
     await page.getByLabel('E-mail').fill(email)

@@ -135,3 +135,11 @@ Executar testes de schema, gateway e componentes, o E2E público contra ambiente
 - Cadastro público depende dos limites e códigos vigentes da OpenAPI.
 - Rate limit pode tornar o E2E instável se os dados e a frequência não forem isolados.
 - A conclusão exige `review`; não iniciar a Fase 03 automaticamente.
+
+## Correções pós-review independente
+
+- **A-01:** as telas exibem a referência de suporte também quando a API retorna `correlationId` junto com erros de campo, sem mensagem geral.
+- **A-02:** o E2E acessa a rota protegida imediatamente após o cadastro e confirma o retorno ao login antes da autenticação explícita.
+- **A-03:** após erro de validação local ou erro de campo da API, o primeiro campo inválido recebe foco; os testes de componentes verificam esse comportamento.
+- **Verificação:** `npm test -- --run src/features/auth/components/register-screen.spec.tsx src/features/auth/components/login-screen.spec.tsx` (13 testes), `npm run typecheck`, `npm run lint`, `npm run format:check` e `git diff --check` — todos passaram. `npm run test:e2e` passou com 1 teste e pulou 3 sem API externa; o E2E integrado permanece dependente de API autorizada.
+- **Estado:** correções implementadas; aguarda novo `review` independente da Fase 02. A Fase 03 continua pendente.

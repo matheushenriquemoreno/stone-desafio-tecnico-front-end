@@ -1,7 +1,7 @@
 'use client'
 
 import type { FormEvent } from 'react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -28,6 +28,8 @@ type RegisterFormValues = {
 }
 
 type RegisterField = keyof RegisterFormValues
+
+const registerFieldOrder = ['name', 'email', 'password'] as const
 
 const initialValues: RegisterFormValues = {
   email: '',
@@ -63,6 +65,14 @@ function getFieldError(
   field: RegisterField,
 ): RegisterFieldError | undefined {
   return errors.find((error) => error.field === field)
+}
+
+function getFirstErrorField(
+  errors: readonly RegisterFieldError[],
+): RegisterField | undefined {
+  return registerFieldOrder.find((field) =>
+    errors.some((error) => error.field === field),
+  )
 }
 
 function getResultError(result: RegisterResult): {
@@ -130,8 +140,26 @@ export function RegisterScreen() {
   const [generalError, setGeneralError] = useState<string>()
   const [correlationId, setCorrelationId] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const inputRefs = useRef<Record<RegisterField, HTMLInputElement | null>>({
+    email: null,
+    name: null,
+    password: null,
+  })
+  const fieldToFocus = useRef<RegisterField | undefined>(undefined)
+
+  useEffect(() => {
+    const field = fieldToFocus.current
+
+    if (!field) {
+      return
+    }
+
+    fieldToFocus.current = undefined
+    inputRefs.current[field]?.focus()
+  }, [fieldErrors])
 
   function updateField(field: RegisterField, value: string) {
+    fieldToFocus.current = undefined
     setValues((current) => ({ ...current, [field]: value }))
     setFieldErrors((current) => current.filter((error) => error.field !== field))
     setGeneralError(undefined)
@@ -148,6 +176,7 @@ export function RegisterScreen() {
     const localErrors = getValidationErrors(values)
 
     if (localErrors.length > 0) {
+      fieldToFocus.current = getFirstErrorField(localErrors)
       setFieldErrors(localErrors)
       setGeneralError(undefined)
       setCorrelationId(undefined)
@@ -169,6 +198,7 @@ export function RegisterScreen() {
       }
 
       const mappedError = getResultError(result)
+      fieldToFocus.current = getFirstErrorField(mappedError.fieldErrors)
       setFieldErrors(mappedError.fieldErrors)
       setGeneralError(mappedError.generalMessage)
       setCorrelationId(mappedError.correlationId)
@@ -216,6 +246,12 @@ export function RegisterScreen() {
           </Alert>
         )}
 
+        {correlationId && !generalError && (
+          <p aria-live="polite" className="text-sm text-muted-foreground" role="status">
+            Referência de suporte: {correlationId}
+          </p>
+        )}
+
         <FieldGroup>
           <Field data-invalid={nameError !== undefined}>
             <FieldLabel htmlFor="register-name">Nome</FieldLabel>
@@ -229,6 +265,9 @@ export function RegisterScreen() {
                 name="name"
                 onChange={(event) => updateField('name', event.target.value)}
                 placeholder="Maria Silva"
+                ref={(element) => {
+                  inputRefs.current.name = element
+                }}
                 type="text"
                 value={values.name}
               />
@@ -252,6 +291,9 @@ export function RegisterScreen() {
                 name="email"
                 onChange={(event) => updateField('email', event.target.value)}
                 placeholder="voce@empresa.com"
+                ref={(element) => {
+                  inputRefs.current.email = element
+                }}
                 type="email"
                 value={values.email}
               />
@@ -273,6 +315,9 @@ export function RegisterScreen() {
                 id="register-password"
                 name="password"
                 onChange={(event) => updateField('password', event.target.value)}
+                ref={(element) => {
+                  inputRefs.current.password = element
+                }}
                 type="password"
                 value={values.password}
               />
