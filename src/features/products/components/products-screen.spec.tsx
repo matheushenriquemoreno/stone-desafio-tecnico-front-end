@@ -169,6 +169,23 @@ describe('ProductsScreen', () => {
     expect(alert).toHaveTextContent('Referência: corr-products-limit')
   })
 
+  it('confirma remoção no catálogo e lê somente o sinal público', async () => {
+    getSearchParam.mockImplementation((name: string) =>
+      name === 'deleted' ? 'success' : null,
+    )
+    listProductsMock.mockResolvedValue({ kind: 'success', page: productPage })
+
+    render(<ProductsScreen />)
+
+    expect(await screen.findByRole('heading', { name: 'Catálogo' })).toBeVisible()
+    expect(screen.getByRole('alert')).toHaveTextContent('Produto removido')
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'O produto foi removido e o catálogo foi atualizado.',
+    )
+    expect(listProductsMock.mock.calls[0]?.[0]).not.toHaveProperty('cursor')
+    expect(window.location.pathname).toBe('/')
+  })
+
   it('avança, retorna apenas por cursores visitados e bloqueia saltos inéditos', async () => {
     const pageOne = { ...productPage, nextCursor: 'cursor-one' }
     const pageTwo = {

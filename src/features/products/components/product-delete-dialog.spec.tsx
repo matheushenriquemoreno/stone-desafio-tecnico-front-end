@@ -25,7 +25,7 @@ describe('ProductDeleteDialog', () => {
     expect(screen.getByRole('button', { name: 'Cancelar' })).toHaveFocus()
     expect(onConfirm).not.toHaveBeenCalled()
 
-    await user.click(screen.getByRole('button', { name: 'Excluir produto' }))
+    await user.click(screen.getByRole('button', { name: 'Confirmar exclusão' }))
 
     expect(onConfirm).toHaveBeenCalledOnce()
   })

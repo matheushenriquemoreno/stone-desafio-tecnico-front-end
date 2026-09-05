@@ -14,10 +14,12 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getProduct } from '@/features/products/api/products-gateway'
+import { deleteProduct, getProduct } from '@/features/products/api/products-gateway'
+import { ProductDeleteDialog } from '@/features/products/components/product-delete-dialog'
 import { ProductEditForm } from '@/features/products/components/product-edit-form'
 import { ProductImage } from '@/features/products/components/product-image'
 import { formatProductPrice } from '@/features/products/format-product-price'
+import { getProductMutationFeedback } from '@/features/products/product-mutation-feedback'
 import type { Product } from '@/features/products/types'
 import { redirectToLogin } from '@/lib/redirect-to-login'
 import { cn } from '@/lib/utils'
@@ -36,6 +38,8 @@ type ProductDetailViewState =
 
 const genericDetailError =
   'Não foi possível carregar o produto. Tente novamente em instantes.'
+const genericDeleteError =
+  'Não foi possível excluir o produto. Tente novamente em instantes.'
 
 function DetailLoading() {
   return (
@@ -108,6 +112,10 @@ export function ProductDetailScreen({
   const [attempt, setAttempt] = useState(0)
   const [createdConfirmation] = useState(showCreatedConfirmation)
   const [isEditing, setIsEditing] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteFeedback, setDeleteFeedback] = useState<
+    Readonly<{ correlationId?: string; message: string }> | undefined
+  >()
   const [updatedConfirmation, setUpdatedConfirmation] = useState(false)
   const [state, setState] = useState<ProductDetailViewState>({ kind: 'loading' })
 
@@ -166,6 +174,52 @@ export function ProductDetailScreen({
   function retry() {
     setState({ kind: 'loading' })
     setAttempt((current) => current + 1)
+  }
+
+  async function handleDelete() {
+    if (isDeleting) {
+      return
+    }
+
+    setIsDeleting(true)
+    setDeleteFeedback(undefined)
+
+    try {
+      const result = await deleteProduct(productId)
+
+      if (result.kind === 'success') {
+        replace('/?deleted=success')
+        return
+      }
+
+      if (result.kind === 'error' && result.error.code === 'unauthorized') {
+        setState({ kind: 'unauthorized' })
+        redirectToLogin({ replace })
+        return
+      }
+
+      if (result.kind === 'error' && result.error.code === 'not-found') {
+        setState({ kind: 'not-found', correlationId: result.error.correlationId })
+        return
+      }
+
+      if (result.kind === 'error') {
+        const feedback = getProductMutationFeedback(
+          result.error,
+          genericDeleteError,
+          'Esta origem não está autorizada a excluir produtos.',
+        )
+        setDeleteFeedback({
+          correlationId: feedback.correlationId,
+          message: feedback.generalMessage ?? genericDeleteError,
+        })
+        return
+      }
+
+      setDeleteFeedback({ message: genericDeleteError })
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   return (
@@ -253,6 +307,18 @@ export function ProductDetailScreen({
                   </p>
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <Button onClick={() => setIsEditing(true)}>Editar produto</Button>
+                    <ProductDeleteDialog
+                      correlationId={deleteFeedback?.correlationId}
+                      errorMessage={deleteFeedback?.message}
+                      isConfirming={isDeleting}
+                      onConfirm={handleDelete}
+                      onOpenChange={(open) => {
+                        if (open) {
+                          setDeleteFeedback(undefined)
+                        }
+                      }}
+                      productName={state.product.name}
+                    />
                     <Link
                       className={cn(buttonVariants({ variant: 'outline' }))}
                       href="/"

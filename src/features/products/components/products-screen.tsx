@@ -142,9 +142,18 @@ function ProductsScreenContent() {
   const lastCanonicalizedPage = useRef<string | null | undefined>(undefined)
   const sequenceResetPending = useRef(false)
   const currentPageParam = searchParams.get('page')
+  const deletedConfirmation = searchParams.get('deleted') === 'success'
   const currentPageIndex = pagination.currentPageIndex
   const paginationCursors = pagination.cursors
   const requestedCursor = paginationCursors[currentPageIndex]
+
+  useEffect(() => {
+    if (!deletedConfirmation) {
+      return
+    }
+
+    window.history.replaceState(window.history.state, '', '/')
+  }, [deletedConfirmation])
 
   useEffect(() => {
     const publicPage = parsePublicPage(currentPageParam)
@@ -378,6 +387,14 @@ function ProductsScreenContent() {
 
         {(viewState.kind === 'empty' || viewState.kind === 'success') && (
           <div className="space-y-8">
+            {deletedConfirmation && (
+              <Alert>
+                <AlertTitle>Produto removido</AlertTitle>
+                <AlertDescription>
+                  O produto foi removido e o catálogo foi atualizado.
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div className="space-y-2">
                 <p className="text-sm font-semibold tracking-[0.18em] text-muted-foreground uppercase">

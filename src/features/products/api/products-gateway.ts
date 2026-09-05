@@ -9,6 +9,7 @@ import { productInputSchema } from '@/features/products/schemas/product-input-sc
 import { productPatchSchema } from '@/features/products/product-patch'
 import type {
   CreateProductResult,
+  DeleteProductResult,
   ListProductsResult,
   ProductFieldError,
   ProductDetailResult,
@@ -21,6 +22,7 @@ import type {
 const defaultProductPageLimit = 20
 const productListErrorStatuses = [400, 401, 429] as const
 const productCreateErrorStatuses = [400, 401, 403, 429, 503] as const
+const productDeleteErrorStatuses = [401, 403, 404, 429, 503] as const
 
 const productFieldMessages: Record<ProductInputField, string> = {
   description: 'A descrição deve ter entre 1 e 500 caracteres.',
@@ -336,6 +338,41 @@ export async function patchProduct(
 
   if (result.kind === 'success') {
     return { kind: 'success', product: result.data }
+  }
+
+  if (result.kind === 'api-error') {
+    return { error: mapProductMutationApiError(result), kind: 'error' }
+  }
+
+  if (result.kind !== 'failure') {
+    return {
+      kind: 'failure',
+      reason: 'invalid-response',
+      status: result.status,
+    }
+  }
+
+  return {
+    kind: 'failure',
+    reason: result.reason,
+    ...(result.status === undefined ? {} : { status: result.status }),
+  }
+}
+
+export async function deleteProduct(
+  productId: string,
+  signal?: AbortSignal,
+): Promise<DeleteProductResult> {
+  const result = await requestApi({
+    expectedErrorStatuses: productDeleteErrorStatuses,
+    expectedStatuses: [204],
+    method: 'DELETE',
+    path: `/products/${encodeURIComponent(productId)}`,
+    signal,
+  })
+
+  if (result.kind === 'success-empty') {
+    return { kind: 'success' }
   }
 
   if (result.kind === 'api-error') {

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   createProduct,
+  deleteProduct,
   getProduct,
   listProducts,
   patchProduct,
@@ -392,6 +393,80 @@ describe('products gateway', () => {
     await expect(
       patchProduct('product-1', { description: 'Nova descrição' }),
     ).resolves.toEqual({ kind: 'failure', reason: 'network' })
+  })
+
+  it('exclui produto com 204, caminho codificado e credenciais', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response(null, { status: 204 })),
+    )
+
+    await expect(deleteProduct('product/id')).resolves.toEqual({ kind: 'success' })
+
+    const [requestUrl, requestInit] = vi.mocked(fetch).mock.calls[0] ?? []
+    const requestHeaders = new Headers(requestInit?.headers)
+    expect(String(requestUrl)).toBe('https://api.example.test/products/product%2Fid')
+    expect(requestInit?.credentials).toBe('include')
+    expect(requestInit?.method).toBe('DELETE')
+    expect(requestHeaders.get('Authorization')).toBeNull()
+    expect(requestHeaders.get('X-CSRF-Protection')).toBeNull()
+  })
+
+  it.each([
+    [401, 'UNAUTHORIZED', 'unauthorized'],
+    [403, 'REQUEST_FORBIDDEN', 'forbidden'],
+    [404, 'PRODUCT_NOT_FOUND', 'not-found'],
+    [429, 'RATE_LIMIT_EXCEEDED', 'rate-limit'],
+  ] as const)(
+    'mapeia erro de exclusão %s sem expor mensagem externa',
+    async (status, code, expectedCode) => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(
+          async () =>
+            new Response(
+              JSON.stringify({
+                code,
+                correlationId: 'corr-delete',
+                message: 'mensagem externa',
+                statusCode: status,
+              }),
+              {
+                headers: status === 429 ? { 'Retry-After': '9' } : undefined,
+                status,
+              },
+            ),
+        ),
+      )
+
+      const result = await deleteProduct('product-1')
+
+      expect(result.kind).toBe('error')
+      if (result.kind === 'error') {
+        expect(result.error.code).toBe(expectedCode)
+        expect(result.error.correlationId).toBe('corr-delete')
+        expect(JSON.stringify(result)).not.toContain('mensagem externa')
+        if (status === 429) {
+          expect(result.error.retryAfterSeconds).toBe(9)
+        }
+      }
+      expect(vi.mocked(fetch)).toHaveBeenCalledOnce()
+    },
+  )
+
+  it('converge falha de rede na exclusão sem repetir a mutação', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new Error('falha interna de rede')
+      }),
+    )
+
+    await expect(deleteProduct('product-1')).resolves.toEqual({
+      kind: 'failure',
+      reason: 'network',
+    })
+    expect(vi.mocked(fetch)).toHaveBeenCalledOnce()
   })
 
   it('lê produto por id codificado e valida a resposta', async () => {

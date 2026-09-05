@@ -78,3 +78,12 @@ export type ProductDetailResult =
     }>
 
 export type UpdateProductResult = ProductDetailResult
+
+export type DeleteProductResult =
+  | Readonly<{ kind: 'success' }>
+  | Readonly<{ kind: 'error'; error: ProductMutationGatewayError }>
+  | Readonly<{
+      kind: 'failure'
+      reason: Extract<ApiResult<never>, { kind: 'failure' }>['reason']
+      status?: number
+    }>

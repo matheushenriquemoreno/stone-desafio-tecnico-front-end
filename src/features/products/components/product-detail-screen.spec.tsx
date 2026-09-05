@@ -5,7 +5,8 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { replace } = vi.hoisted(() => ({ replace: vi.fn() }))
-const { getProductMock, patchProductMock } = vi.hoisted(() => ({
+const { deleteProductMock, getProductMock, patchProductMock } = vi.hoisted(() => ({
+  deleteProductMock: vi.fn(),
   getProductMock: vi.fn(),
   patchProductMock: vi.fn(),
 }))
@@ -15,6 +16,7 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/features/products/api/products-gateway', () => ({
+  deleteProduct: deleteProductMock,
   getProduct: getProductMock,
   patchProduct: patchProductMock,
 }))
@@ -39,6 +41,7 @@ const product = {
 
 describe('ProductDetailScreen', () => {
   beforeEach(() => {
+    deleteProductMock.mockReset()
     getProductMock.mockReset()
     patchProductMock.mockReset()
     replace.mockReset()
@@ -221,6 +224,73 @@ describe('ProductDetailScreen', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Referência: corr-gone')
     expect(
       screen.queryByRole('button', { name: 'Editar produto' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('só exclui após confirmação e retorna ao catálogo com confirmação pública', async () => {
+    getProductMock.mockResolvedValue({ kind: 'success', product })
+    deleteProductMock.mockResolvedValue({ kind: 'success' })
+    const user = userEvent.setup()
+
+    render(<ProductDetailScreen productId={product.id} />)
+    await user.click(await screen.findByRole('button', { name: 'Excluir produto' }))
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }))
+
+    expect(deleteProductMock).not.toHaveBeenCalled()
+    expect(screen.getByRole('heading', { name: 'Produto principal' })).toBeVisible()
+
+    await user.click(screen.getByRole('button', { name: 'Excluir produto' }))
+    await user.click(screen.getByRole('button', { name: 'Confirmar exclusão' }))
+
+    await vi.waitFor(() => expect(deleteProductMock).toHaveBeenCalledWith(product.id))
+    expect(replace).toHaveBeenCalledWith('/?deleted=success')
+    expect(deleteProductMock).toHaveBeenCalledOnce()
+  })
+
+  it('mantém o contexto seguro no rate limit da exclusão e não repete automaticamente', async () => {
+    getProductMock.mockResolvedValue({ kind: 'success', product })
+    deleteProductMock.mockResolvedValue({
+      error: {
+        code: 'rate-limit',
+        correlationId: 'corr-delete-limit',
+        retryAfterSeconds: 9,
+        status: 429,
+      },
+      kind: 'error',
+    })
+    const user = userEvent.setup()
+
+    render(<ProductDetailScreen productId={product.id} />)
+    await user.click(await screen.findByRole('button', { name: 'Excluir produto' }))
+    await user.click(screen.getByRole('button', { name: 'Confirmar exclusão' }))
+
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('Aguarde 9 segundos')
+    expect(alert).toHaveTextContent('Referência: corr-delete-limit')
+    expect(screen.getByRole('alertdialog')).toBeVisible()
+    expect(
+      screen.getByRole('heading', { hidden: true, name: 'Produto principal' }),
+    ).toBeInTheDocument()
+    expect(deleteProductMock).toHaveBeenCalledOnce()
+    expect(replace).not.toHaveBeenCalled()
+  })
+
+  it('substitui o detalhe por não encontrado quando o produto já foi removido', async () => {
+    getProductMock.mockResolvedValue({ kind: 'success', product })
+    deleteProductMock.mockResolvedValue({
+      error: { code: 'not-found', correlationId: 'corr-delete-gone', status: 404 },
+      kind: 'error',
+    })
+    const user = userEvent.setup()
+
+    render(<ProductDetailScreen productId={product.id} />)
+    await user.click(await screen.findByRole('button', { name: 'Excluir produto' }))
+    await user.click(screen.getByRole('button', { name: 'Confirmar exclusão' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Produto não encontrado')
+    expect(screen.getByRole('alert')).toHaveTextContent('Referência: corr-delete-gone')
+    expect(
+      screen.queryByRole('button', { name: 'Excluir produto' }),
     ).not.toBeInTheDocument()
   })
 })
