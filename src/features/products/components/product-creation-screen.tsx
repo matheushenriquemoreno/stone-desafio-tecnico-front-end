@@ -72,6 +72,7 @@ export function ProductCreationScreen() {
           result.error,
           genericCreationError,
           'Esta origem não está autorizada a criar produtos.',
+          'Muitas tentativas de criação.',
         )
         setFieldErrors(mappedError.fieldErrors)
         setGeneralError(mappedError.generalMessage)

@@ -160,11 +160,14 @@ export function ProductForm({
           <AlertTitle>Não foi possível salvar o produto</AlertTitle>
           <AlertDescription>
             <p>{generalError}</p>
+            {correlationId && (
+              <p className="mt-2">Referência de suporte: {correlationId}</p>
+            )}
           </AlertDescription>
         </Alert>
       )}
 
-      {correlationId && (
+      {correlationId && !generalError && (
         <p aria-live="polite" className="text-sm text-muted-foreground" role="status">
           Referência de suporte: {correlationId}
         </p>

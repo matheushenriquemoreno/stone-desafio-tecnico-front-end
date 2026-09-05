@@ -104,6 +104,7 @@ export function ProductEditForm({
           result.error,
           genericUpdateError,
           'Esta origem não está autorizada a atualizar produtos.',
+          'Muitas tentativas de atualização.',
         )
         setFieldErrors(feedback.fieldErrors)
         setGeneralError(feedback.generalMessage)

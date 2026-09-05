@@ -15,6 +15,7 @@ export function getProductMutationFeedback(
   error: ProductMutationGatewayError,
   genericMessage: string,
   forbiddenMessage: string,
+  rateLimitPrefix = 'Muitas tentativas.',
 ): ProductMutationFeedback {
   if (error.code === 'validation') {
     const fieldErrors = error.fieldErrors ?? []
@@ -40,8 +41,8 @@ export function getProductMutationFeedback(
       fieldErrors: [],
       generalMessage:
         error.retryAfterSeconds === undefined
-          ? 'Muitas tentativas. Aguarde alguns instantes antes de tentar novamente.'
-          : `Muitas tentativas. Aguarde ${error.retryAfterSeconds} segundos antes de tentar novamente.`,
+          ? `${rateLimitPrefix} Aguarde alguns instantes antes de tentar novamente.`
+          : `${rateLimitPrefix} Aguarde ${error.retryAfterSeconds} segundos antes de tentar novamente.`,
     }
   }
 

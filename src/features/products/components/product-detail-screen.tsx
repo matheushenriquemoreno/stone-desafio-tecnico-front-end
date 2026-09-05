@@ -208,6 +208,7 @@ export function ProductDetailScreen({
           result.error,
           genericDeleteError,
           'Esta origem não está autorizada a excluir produtos.',
+          'Muitas tentativas de exclusão.',
         )
         setDeleteFeedback({
           correlationId: feedback.correlationId,
