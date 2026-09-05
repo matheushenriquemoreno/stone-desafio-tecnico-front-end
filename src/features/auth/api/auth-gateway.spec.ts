@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { login, register } from '@/features/auth/api/auth-gateway'
+import { login, logout, register } from '@/features/auth/api/auth-gateway'
 
 describe('auth gateway', () => {
   const originalApiUrl = process.env.NEXT_PUBLIC_API_URL
@@ -260,4 +260,60 @@ describe('auth gateway', () => {
       }),
     ).resolves.toEqual({ kind: 'failure', reason: 'network' })
   })
+
+  it('encerra a sessão com POST idempotente e resposta 204', async () => {
+    const result = await logout()
+    const fetchMock = vi.mocked(fetch)
+    const request = fetchMock.mock.calls[0]?.[1]
+    const headers = new Headers(request?.headers)
+
+    expect(result).toEqual({ kind: 'success' })
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+      'https://api.example.test/auth/logout',
+    )
+    expect(request?.method).toBe('POST')
+    expect(request?.credentials).toBe('include')
+    expect(request?.body).toBeUndefined()
+    expect(headers.has('Authorization')).toBe(false)
+    expect(headers.has('X-CSRF-Protection')).toBe(false)
+  })
+
+  it.each([
+    [403, 'REQUEST_FORBIDDEN', 'forbidden'],
+    [429, 'RATE_LIMIT_EXCEEDED', 'rate-limit'],
+  ] as const)(
+    'mapeia logout %s/%s para erro estável',
+    async (status, code, expectedCode) => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(
+          async () =>
+            new Response(
+              JSON.stringify({
+                code,
+                correlationId: 'corr-logout',
+                message: 'mensagem externa',
+                statusCode: status,
+              }),
+              {
+                headers: status === 429 ? { 'Retry-After': '13' } : undefined,
+                status,
+              },
+            ),
+        ),
+      )
+
+      const result = await logout()
+
+      expect(result).toEqual({
+        error: {
+          code: expectedCode,
+          correlationId: 'corr-logout',
+          ...(status === 429 ? { retryAfterSeconds: 13 } : {}),
+          status,
+        },
+        kind: 'error',
+      })
+    },
+  )
 })

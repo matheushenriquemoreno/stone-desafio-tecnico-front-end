@@ -69,4 +69,22 @@ export type RegisterResult =
       status?: number
     }>
 
+export type LogoutGatewayErrorCode = 'forbidden' | 'rate-limit' | 'unknown'
+
+export type LogoutGatewayError = Readonly<{
+  code: LogoutGatewayErrorCode
+  correlationId?: string
+  retryAfterSeconds?: number
+  status?: number
+}>
+
+export type LogoutResult =
+  | Readonly<{ kind: 'success' }>
+  | Readonly<{ kind: 'error'; error: LogoutGatewayError }>
+  | Readonly<{
+      kind: 'failure'
+      reason: Extract<ApiResult<never>, { kind: 'failure' }>['reason']
+      status?: number
+    }>
+
 export type AuthApiError = ApiErrorDetails

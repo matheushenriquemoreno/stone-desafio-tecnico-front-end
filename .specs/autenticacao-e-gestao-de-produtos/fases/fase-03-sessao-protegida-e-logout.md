@@ -80,6 +80,14 @@ Cobrir acesso direto a cada tipo de rota protegida sem sessão, expiração obse
 - `403` continua sendo erro de operação e não passa pela política de sessão expirada.
 - Verificação: `npm test -- --run 'src/lib/redirect-to-login.spec.ts' 'src/features/products/components/products-screen.spec.tsx'` (7 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
 
+## Registro de T15
+
+- `src/features/auth/api/auth-gateway.ts` adiciona `logout`, que chama `POST /auth/logout` diretamente, com `credentials: 'include'`, sem corpo, sem Bearer e sem cabeçalho CSRF customizado.
+- `src/features/auth/components/logout-button.tsx` compõe a ação no shell, bloqueia repetição enquanto aguarda, redireciona ao login após `204` e mantém feedback seguro para `403`, `429` e falha de transporte; não manipula cookie ou token.
+- `src/app/(protected)/layout.tsx` injeta o controle na navegação protegida.
+- `auth-gateway.spec.ts` verifica caminho, método, credenciais, ausência de corpo/cabeçalhos e mapeamentos de erro; `logout-button.spec.tsx` verifica loading, duplo clique, sucesso, feedback e retry somente manual.
+- Verificação: `npm test -- --run 'src/features/auth/api/auth-gateway.spec.ts' 'src/features/auth/components/logout-button.spec.tsx' 'src/features/auth/components/protected-shell.spec.tsx'` (23 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+
 ## Testes e verificações da fase
 
 Executar testes unitários/componentes, E2E de sessão e logout, lint, tipos e build. Fazer busca residual por cookie, token, storage, Middleware, Proxy e endpoints `/api/*`.

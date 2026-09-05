@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 
+import { LogoutButton } from '@/features/auth/components/logout-button'
 import { ProtectedShell } from '@/features/auth/components/protected-shell'
 
 export default function ProtectedLayout({
@@ -7,5 +8,5 @@ export default function ProtectedLayout({
 }: Readonly<{
   children: ReactNode
 }>) {
-  return <ProtectedShell>{children}</ProtectedShell>
+  return <ProtectedShell actions={<LogoutButton />}>{children}</ProtectedShell>
 }

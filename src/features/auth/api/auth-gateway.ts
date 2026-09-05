@@ -6,6 +6,8 @@ import type {
   AuthFieldError,
   AuthGatewayError,
   LoginResult,
+  LogoutGatewayError,
+  LogoutResult,
   RegisterFieldError,
   RegisterGatewayError,
   RegisterResult,
@@ -13,6 +15,7 @@ import type {
 
 const loginErrorStatuses = [400, 401, 403, 429] as const
 const registerErrorStatuses = [400, 403, 409, 429, 503] as const
+const logoutErrorStatuses = [403, 429] as const
 
 function fieldError(field: AuthFieldError['field']): AuthFieldError {
   return {
@@ -190,6 +193,35 @@ function mapRegisterApiError(
   }
 }
 
+function mapLogoutApiError(
+  result: Extract<ApiResult<never>, { kind: 'api-error' }>,
+): LogoutGatewayError {
+  const { error, status } = result
+
+  if (status === 403 && error.code === 'REQUEST_FORBIDDEN') {
+    return {
+      code: 'forbidden',
+      correlationId: error.correlationId,
+      status,
+    }
+  }
+
+  if (status === 429 && error.code === 'RATE_LIMIT_EXCEEDED') {
+    return {
+      code: 'rate-limit',
+      correlationId: error.correlationId,
+      retryAfterSeconds: error.retryAfterSeconds,
+      status,
+    }
+  }
+
+  return {
+    code: 'unknown',
+    correlationId: error.correlationId,
+    status,
+  }
+}
+
 export async function login(
   input: unknown,
   signal?: AbortSignal,
@@ -270,6 +302,38 @@ export async function register(
 
   if (result.kind === 'api-error') {
     return { error: mapRegisterApiError(result), kind: 'error' }
+  }
+
+  if (result.kind !== 'failure') {
+    return {
+      kind: 'failure',
+      reason: 'invalid-response',
+      status: result.status,
+    }
+  }
+
+  return {
+    kind: 'failure',
+    reason: result.reason,
+    ...(result.status === undefined ? {} : { status: result.status }),
+  }
+}
+
+export async function logout(signal?: AbortSignal): Promise<LogoutResult> {
+  const result = await requestApi<void>({
+    expectedErrorStatuses: logoutErrorStatuses,
+    expectedStatuses: [204],
+    method: 'POST',
+    path: '/auth/logout',
+    signal,
+  })
+
+  if (result.kind === 'success-empty') {
+    return { kind: 'success' }
+  }
+
+  if (result.kind === 'api-error') {
+    return { error: mapLogoutApiError(result), kind: 'error' }
   }
 
   if (result.kind !== 'failure') {
