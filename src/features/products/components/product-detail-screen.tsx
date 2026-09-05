@@ -105,9 +105,7 @@ export function ProductDetailScreen({
 }>) {
   const { replace } = useRouter()
   const [attempt, setAttempt] = useState(0)
-  const [createdConfirmation, setCreatedConfirmation] = useState(
-    showCreatedConfirmation,
-  )
+  const [createdConfirmation] = useState(showCreatedConfirmation)
   const [state, setState] = useState<ProductDetailViewState>({ kind: 'loading' })
 
   useEffect(() => {
@@ -115,7 +113,6 @@ export function ProductDetailScreen({
       return
     }
 
-    setCreatedConfirmation(true)
     window.history.replaceState(
       window.history.state,
       '',
