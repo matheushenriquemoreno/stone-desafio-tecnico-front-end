@@ -1,13 +1,13 @@
 # Estado da Implementação — Interface web de autenticação e gestão de produtos
 
-| Status       | Aguardando review |
+| Status       | Concluída |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
 
 ## Fase ativa
 
-Fase 02 — Cadastro e autenticação pública completa — aguardando review independente.
+Fase 02 — Cadastro e autenticação pública completa — review v2 aprovado; aguardando autorização para a Fase 03.
 
 Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase deve passar por `review` independente antes que a próxima seja marcada como ativa.
 

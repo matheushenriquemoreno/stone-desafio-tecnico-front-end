@@ -5,93 +5,95 @@
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
 
-**Escopo revisado:** Fase 01 — Fundação e tracer bullet autenticado
-**Versão da avaliação:** 1
+**Escopo revisado:** Fase 02 — Cadastro e autenticação pública completa
+**Versão da avaliação:** 2
 
 ## Artefatos analisados
 
 - PRD: [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md) | Design técnico: [TECHNICAL-DESIGN.md](TECHNICAL-DESIGN.md)
-- Plano: [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md) | Fase: [fase-01-fundacao-e-tracer-bullet.md](fases/fase-01-fundacao-e-tracer-bullet.md)
+- Plano: [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md) | Fase: [fase-02-cadastro-e-autenticacao-publica.md](fases/fase-02-cadastro-e-autenticacao-publica.md)
 - Estado: [IMPLEMENTATION-STATE.md](fases/IMPLEMENTATION-STATE.md)
-- Regras: `AGENTS.md` e `rules/README.md`, `principios-de-implementacao.md`, `componentes-e-reutilizacao.md`, `nextjs.md`, `tailwind-css.md`, `shadcn-ui.md`, `testes-e-qualidade.md` e `checklist-de-implementacao.md`.
-- Implementação: commits `a7da2d3`, `d431540`, `d577f4e`, `10d7768`, `290b222`, `a2c0de3` e `b61f696`; código em `src/`, testes em `src/**/*.spec.*` e `e2e/`.
+- Regras: `AGENTS.md` e os arquivos aplicáveis em `rules/`
+- Implementação: commits `cadeb5b`, `ba4460f`, `07db032`, `93d78c9` e `cbb4231`; código em `src/`, testes próximos às features e `e2e/registration-and-login.spec.ts`.
 
 ## Resumo executivo
 
-A Fase 01 foi reavaliada desde o bootstrap até o caminho integrado de login e primeira leitura protegida. O cliente browser, os gateways, a tela de login e a rota protegida respeitam o consumo direto da API, o cookie controlado pelo navegador e os resultados seguros tipados. Os gates automatizados passaram, a checagem de reflow nos viewports pequeno, médio e grande não encontrou overflow, e o cenário Playwright contra API NestJS/DynamoDB Local controlados passou em `2/2`. Veredito: **Aprovado**; a Fase 02 permanece pendente e não deve ser iniciada automaticamente.
+A Fase 02 entrega cadastro público, validação e normalização dos campos, resposta segura, tratamento dos erros contratados, transição sem PII para o login e feedback público completo. O cenário integrado contra API NestJS e DynamoDB Local controlados passou após usar o mesmo host `127.0.0.1` nos dois lados, preservando o contrato `SameSite=Strict`; a execução padrão permanece opt-in quando a API externa não está configurada. Os gates locais passaram com 69 testes, typecheck, lint, format, build e E2E padrão. Veredito: **Aprovado**; a Fase 03 não foi iniciada.
 
 ## Resultado das verificações obrigatórias
 
 | Verificação | Resultado | Evidência |
 |-------------|-----------|-----------|
-| Requisitos | Atendida no escopo da Fase 01 | Matriz abaixo; requisitos de cadastro, logout, paginação completa e CRUD estão explicitamente adiados para fases posteriores. |
-| Critérios de aceitação | Atendida | `src/lib/api-client.spec.ts`, gateways, `login-screen.spec.tsx`, `products-screen.spec.tsx` e `e2e/authenticated-tracer.spec.ts`. |
-| Testes | Atendida | `npm test -- --run`: 8 arquivos, 42 testes aprovados; E2E padrão: 1 aprovado e 2 ignorados sem credenciais; E2E integrado controlado: 2 aprovados. |
-| Design técnico | Atendida | Rotas em `app`, interatividade em boundaries clientes das features, gateways delegando transporte e schemas validando a fronteira externa. |
-| Plano | Atendida | T01 a T07 concluídas em commits atômicos; Fase 02 continua `Pendente`. |
-| Escopo | Atendida | Busca em runtime não encontrou BFF, `/api/*`, Bearer, JWT, storage, cookie acessado pelo JavaScript, Middleware, Proxy, Server Action ou Route Handler. As ocorrências de `Authorization` e `X-CSRF-Protection` estão somente nas asserções dos testes que garantem ausência dos headers. |
-| Qualidade | Atendida | `npm run lint`, `npm run typecheck`, `npm test -- --run`, `npm run build`, `npm run format:check`, `git diff --check` e `npm audit --omit=optional` passaram. |
-| Padrões do projeto | Atendida | Tokens semânticos, shadcn/Base UI, Tailwind v4, `next/font`, composição `app → features → components/ui|lib` e `credentials: 'include'`. |
-| Manutenibilidade | Atendida | Cliente HTTP comum, contratos por feature, uniões discriminadas, funções de mapeamento estável e nenhum acesso duplicado a transporte ou persistência. |
-| Riscos | Atendida com limites registrados | API/CORS/cookie foram exercitados localmente; origem publicada HTTPS, deploy e operação permanecem escopo da Fase 07. |
+| Requisitos | Atendida | Matriz abaixo cobre `AGP-01` a `AGP-12` e os requisitos transversais aplicáveis da Fase 02. |
+| Critérios de aceitação | Atendida | Os cinco critérios da fase possuem implementação e teste observável; o fluxo integrado cadastro → login → catálogo passou. |
+| Testes | Atendida | `npm test -- --run`: 11 arquivos, 69 testes aprovados; E2E integrado opt-in: 1 aprovado; E2E padrão: 1 aprovado e 3 ignorados sem API externa. |
+| Design técnico | Atendida | Rotas permanecem composição; cadastro/login são Client Components mínimos; gateways usam cliente HTTP direto; schemas validam as fronteiras; sinal de sucesso é enumerado. |
+| Plano | Atendida | T08, T09, T10, T11 e T12 estão concluídas, com evidências na fase e no estado. |
+| Escopo | Atendida | Não foram introduzidos BFF, `/api/*`, Server Action, Middleware, Proxy, Bearer, storage, leitura de cookie/JWT ou retry de mutação. |
+| Qualidade | Atendida | `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build` e `git diff --check` passaram; o build lista `/register` e `/login` conforme esperado. |
+| Padrões do projeto | Atendida | Componentes Field/Alert/Button/Input/Spinner existentes foram reutilizados; layout compartilhado ficou em `AuthShell`; tokens semânticos e aliases foram preservados. |
+| Manutenibilidade | Atendida | Schemas, gateways, estados e mensagens de cadastro permanecem separados do login; tipos são uniões discriminadas e derivados de Zod. |
+| Riscos | Atendida com limites registrados | E2E usa dados únicos e ambiente local; a configuração same-site é explicitada; publicação HTTPS, CORS de produção e operação permanecem Fase 07. |
 
 ## Matriz de rastreabilidade
 
 | Requisito | Código | Teste | Evidência | Status |
 |-----------|--------|-------|-----------|--------|
-| AGP-10 | `src/features/auth/components/login-screen.tsx`, `auth-gateway.ts` | `login-screen.spec.tsx`, `authenticated-tracer.spec.ts` | Formulário acessível e login real local | Comprovado |
-| AGP-11 | `LoginScreen` e `ProductsScreen` | E2E integrado | `204` navega para `/`; a leitura protegida apresenta Catálogo | Comprovado |
-| AGP-12 | `mapApiError` e `getResultError` | `auth-gateway.spec.ts`, `login-screen.spec.tsx` | `INVALID_CREDENTIALS` vira mensagem geral sem identificar campo | Comprovado |
-| AGP-13 | `requestApi` com `credentials: 'include'` | `api-client.spec.ts`, E2E integrado | Cookie é controlado pelo navegador e a listagem protegida sucede | Comprovado |
-| AGP-14 | `ProductsScreen` trata `unauthorized` com `router.replace('/login')` | `products-screen.spec.tsx`, E2E integrado | `401` redireciona acesso sem sessão | Comprovado |
-| AGP-17 | `src/app/(protected)/page.tsx`, `ProductsScreen` | `products-screen.spec.tsx`, E2E integrado | Catálogo apresentado na raiz protegida | Comprovado |
-| AGP-18 | `productPageSchema`, `ProductsScreen` | `products-gateway.spec.ts`, `products-screen.spec.tsx` | `items`, `total` e `nextCursor` são validados/preservados; UI não deriva páginas | Comprovado |
-| AGP-37 | `ProductsLoading`, `LoginScreen` | `products-screen.spec.tsx`, `login-screen.spec.tsx` | Skeleton e loading do envio são observáveis | Comprovado |
-| AGP-38 | `LoginScreen` | `login-screen.spec.tsx` | Botão e campos ficam desabilitados durante a mutação | Comprovado no escopo aplicável |
-| AGP-39 | Mapeadores de auth/produtos | gateways e tela de login | Validação, autenticação, origem e rate limit aplicáveis produzem resultados seguros | Comprovado no escopo aplicável |
-| AGP-40 | Mapeamento `rate-limit` | gateway e tela de login | `429` orienta espera sem retry automático | Comprovado |
-| AGP-41 | `Retry-After` no cliente/gateway | `api-client.spec.ts`, `auth-gateway.spec.ts` | Inteiro válido é preservado e exibido | Comprovado |
-| AGP-42 | Fallbacks de `requestApi` e telas | `api-client.spec.ts`, `products-screen.spec.tsx` | Rede, schema e status inesperado não expõem corpo bruto | Comprovado |
-| AGP-43 | `correlationId` validado e exibido no erro de produtos | `api-client.spec.ts`, gateways | Referência somente quando fornecida pela resposta validada | Comprovado |
-| AGP-44 | Cliente, gateways, telas e E2E | testes de headers/fallback + busca estática | Sem JWT, Bearer, cookie, stack trace, senha ou detalhe bruto acessível | Comprovado |
-| EXPECT-01 | Primitivas shadcn e campos da tela | `components.spec.tsx`, `login-screen.spec.tsx`, E2E | Labels, teclado/foco visível, estados e nomes acessíveis | Comprovado |
-| EXPECT-02 | Classes responsivas em login/catálogo | checagem Playwright em 320, 768 e 1440 px | Conteúdo e controles presentes, sem overflow horizontal nos três viewports | Comprovado |
-| EXPECT-03 | Tokens ADR-004 e estados semânticos | `design-system-contrast.spec.ts`, `components.spec.tsx` | 7 pares com contraste mínimo 4,5:1 e foco semântico | Comprovado |
-| EXPECT-04 | Layout mobile-first e reflow | checagem Playwright em viewport pequena | Formulário permanece utilizável em largura CSS equivalente ao reflow de 200% | Comprovado no escopo da fase |
-| EXPECT-05 | Alertas e textos de estado | `components.spec.tsx`, telas | Erro, loading e indisponibilidade não dependem apenas de cor | Comprovado |
-| EXPECT-06 | Regra global de movimento reduzido | `design-system-contrast.spec.ts` | `prefers-reduced-motion` desativa pulse/spin e transições | Comprovado |
-| EXPECT-07 | Suítes unitárias, componentes e E2E | comandos de testes | Contratos, login, proteção e listagem têm cobertura; demais fluxos estão adiados | Comprovado no escopo da fase |
-| EXPECT-08 | Configuração e scripts do projeto | lint, typecheck, test, build, format, audit | Todos os gates passaram | Comprovado |
-| EXPECT-09 | `requestApi`, schemas e gateways | testes de contrato + E2E integrado | Compatibilidade observável com API local e fallback seguro | Comprovado |
-| EXPECT-10 | Configuração de origem/API | E2E integrado local | Origem autorizada `http://localhost:3000` e API local; HTTPS publicado é Fase 07 | Comprovado no escopo local |
-| AGP-01 a AGP-09 | Gateway/tela de cadastro | — | Cadastro não pertence à Fase 01 | Adiado por fase |
-| AGP-15 a AGP-16 | Shell/logout | — | Logout não pertence à Fase 01 | Adiado por fase |
-| AGP-19 a AGP-25 | Catálogo/paginação | — | Paginação e estado vazio completo serão ampliados na Fase 04 | Adiado por fase |
-| AGP-26 a AGP-36 | CRUD de produtos | — | Criação, consulta, edição e exclusão serão implementadas nas Fases 05 e 06 | Adiado por fase |
+| AGP-01 | `RegisterScreen`, `/register`, `registerSchema` | `register-screen.spec.tsx`, `registration-and-login.spec.ts` | Campos nome, e-mail e senha aparecem e o cadastro integrado é concluído | Comprovado |
+| AGP-02 | `registerSchema` | `register.spec.ts` | Trim do nome e limites 2/100, inclusive limites válidos e inválidos | Comprovado |
+| AGP-03 | `registerSchema` | `register.spec.ts`, `auth-gateway.spec.ts` | E-mail é trimado, convertido para minúsculas e validado antes do transporte | Comprovado |
+| AGP-04 | `registerSchema` | `register.spec.ts`, `register-screen.spec.tsx` | Senha entre 8/128; a transformação não altera a senha | Comprovado |
+| AGP-05 | `RegisterScreen` e `FieldError` | `register-screen.spec.tsx` | Erros permanecem associados aos labels/controles correspondentes | Comprovado |
+| AGP-06 | `LoginScreen` com `registrationConfirmed` | `login-screen.spec.tsx`, E2E integrado | Confirmação textual aparece após o `201` | Comprovado |
+| AGP-07 | `RegisterScreen` | `register-screen.spec.tsx`, E2E integrado | Navegação usa somente `/login?registered=success` após sucesso | Comprovado |
+| AGP-08 | `register` e `RegisterScreen` | `auth-gateway.spec.ts`, `register-screen.spec.tsx`, E2E integrado | Cadastro não chama catálogo; login posterior é necessário para chegar à raiz protegida | Comprovado |
+| AGP-09 | `mapRegisterApiError` e feedback do cadastro | `auth-gateway.spec.ts`, `register-screen.spec.tsx`, E2E integrado | `EMAIL_ALREADY_EXISTS` gera orientação segura e específica | Comprovado |
+| AGP-10 | `LoginScreen` e `login` | `login-screen.spec.tsx`, `registration-and-login.spec.ts` | Login com e-mail e senha conduz ao fluxo protegido | Comprovado |
+| AGP-11 | `LoginScreen` e rota protegida existente | `registration-and-login.spec.ts`, E2E integrado | Login válido chega ao catálogo após leitura protegida | Comprovado |
+| AGP-12 | `mapApiError` e `LoginScreen` | `auth-gateway.spec.ts`, `login-screen.spec.tsx`, E2E integrado | Credenciais inválidas não identificam qual campo falhou | Comprovado |
+| AGP-37 | Formulários e Spinner | `login-screen.spec.tsx`, `register-screen.spec.tsx` | Loading é observável e o botão muda de estado durante a mutação | Comprovado |
+| AGP-38 | `isSubmitting` em cadastro/login | `login-screen.spec.tsx`, `register-screen.spec.tsx` | Campos e botão são desabilitados e duplo envio é impedido | Comprovado |
+| AGP-39 | Mapeadores dos gateways | `auth-gateway.spec.ts`, `login-screen.spec.tsx`, `register-screen.spec.tsx` | Status e códigos reconhecidos produzem resultados de domínio estáveis | Comprovado |
+| AGP-40 | `rate-limit` em gateways/telas | gateway e componentes de auth | `429` orienta espera sem retry automático; cadastro não força rate limit no E2E | Comprovado no nível apropriado |
+| AGP-41 | `retryAfterSeconds` do cliente HTTP | `auth-gateway.spec.ts`, `login-screen.spec.tsx`, `register-screen.spec.tsx` | Duração válida é exibida; ausente/inválida usa fallback seguro | Comprovado |
+| AGP-42 | Resultados `failure` e schema inválido | gateways e componentes de auth | Rede, resposta sensível/malformada e status desconhecido não expõem detalhes | Comprovado |
+| AGP-43 | `correlationId` validado | gateways e telas de auth | Referência de suporte é preservada e exibida sem mensagem externa | Comprovado |
+| AGP-44 | Cliente, schemas, gateways e telas | testes de contrato, E2E e buscas residuais | Senha, JWT, cookie, stack trace e payload sensível não entram na UI/storage/log | Comprovado |
+| EXPECT-01 | Field/Label/Input/Alert e links | testes de componentes e E2E | Labels, `aria-invalid`, mensagens associadas, foco nativo e teclado semântico | Comprovado |
+| EXPECT-02 | `AuthShell` e formulários responsivos | Playwright em 320, 768 e 1440 px | Cadastro/login renderizam sem overflow horizontal e preservam formulário | Comprovado |
+| EXPECT-03 | Tokens da fundação ADR-004 | `design-system-contrast.spec.ts` existente | Nenhum token foi alterado na Fase 02; pares já validados permanecem a fonte visual | Comprovado por regressão |
+| EXPECT-04 | Layout público | Playwright em 320, 768 e 1440 px | Reflow pequeno/médio/grande não perde heading ou formulário; zoom manual 200% não foi reexecutado nesta fase | Comprovado no escopo automatizado |
+| EXPECT-05 | Alertas e FieldError textuais | testes de componentes | Erro, rate limit e confirmação não dependem somente de cor | Comprovado |
+| EXPECT-06 | CSS global e primitivas existentes | gates da Fase 01 + regressão de composição | Fase 02 não adiciona animação própria nem altera a preferência de movimento reduzido | Comprovado por regressão |
+| EXPECT-07 | Suítes unitárias, componentes e E2E | `npm test -- --run`, E2E padrão e E2E integrado | Cadastro/login têm cobertura reproduzível em todos os níveis aplicáveis | Comprovado |
+| EXPECT-08 | Scripts do projeto | lint, typecheck, test, format, build | Todos os gates locais passam | Comprovado |
+| EXPECT-09 | Cliente HTTP, schemas e gateways | testes de contrato + E2E integrado | API direta, resposta segura, erros e credenciais foram exercitados contra API local | Comprovado |
 
 ## Achados
 
 | ID | Severidade | Achado | Evidência | Impacto | Recomendação | Encaminhamento |
 |----|------------|--------|-----------|---------|--------------|----------------|
-| — | — | Nenhum achado bloqueador, alto ou médio encontrado no escopo revisado. | Todos os gates e o E2E integrado passaram; requisitos fora da Fase 01 estão marcados como adiados. | — | Manter a fronteira de fase e executar review novamente após a próxima fase. | `implement` para a Fase 02 somente após autorização |
+| I-01 | Informativo | O plano de T10 menciona uma verificação específica de devolução de foco após falha, mas os testes atuais comprovam associação de erros, foco nativo e teclado, não uma asserção de foco restaurado. | `register-screen.spec.tsx` e `login-screen.spec.tsx` cobrem `aria-invalid`, mensagens e disabled; não há `toHaveFocus()` após erro. | Não bloqueia o fluxo nem viola o contrato de labels/foco visível; pode deixar a revisão de teclado menos explícita. | Acrescentar uma asserção de foco ou formalizar o comportamento esperado quando o fluxo de foco for ampliado. | `implement` em melhoria futura; não bloqueia esta fase. |
+| I-02 | Informativo | O rate limit não é provocado artificialmente no E2E integrado para não consumir a janela da API; é coberto nos gateways e componentes. | `auth-gateway.spec.ts`, `login-screen.spec.tsx`, `register-screen.spec.tsx`; E2E usa somente um cadastro e uma duplicidade. | Não há risco de dados ou instabilidade; a cobertura permanece adequada ao nível de contrato. | Manter o cenário de `429` em testes controlados de contrato ou fixture da API. | `implement`/ambiente de testes; não bloqueia esta fase. |
 
 ## Riscos residuais e ressalvas aceitas
 
-- A prova integrada depende de API NestJS, CORS, cookie e DynamoDB Local controlados; a execução registrada usa somente ambiente local, usuário temporário local e não usa sessão de produção.
-- HTTPS de publicação, allowlist de produção, domínio same-site e prontidão operacional permanecem riscos planejados para a Fase 07; não impedem o veredito desta fase local.
-- O cenário integrado é opt-in e exige credenciais por variáveis de ambiente; a execução padrão sem essas variáveis ignora os dois testes integrados em vez de mascarar a indisponibilidade.
+- A prova integrada depende de API NestJS, CORS, cookie e DynamoDB Local controlados; foi executada apenas em ambiente local, com e-mail único e sem sessão de produção.
+- O cookie `SameSite=Strict` exige que front e API usem o mesmo host de teste (`127.0.0.1`); misturar `localhost` e `127.0.0.1` invalida a condição same-site e não representa defeito do fluxo aprovado.
+- HTTPS publicado, allowlist de produção, domínio same-site, imagens e operação permanecem riscos planejados para a Fase 07.
+- `I-01` e `I-02` são observações informativas, sem aceite especial necessário para o veredito; não há achado bloqueador, alto ou médio.
 
 ## Veredito
 
 **Veredito:** Aprovado
-**Fundamentação:** Todas as tarefas T01–T07 foram executadas, os contratos e estados previstos para o tracer possuem evidência automatizada, a responsividade básica foi verificada nos três viewports e o fluxo navegador → API → cookie → leitura protegida passou contra ambiente local controlado. Não há achados bloqueadores ou altos.
+**Fundamentação:** T08–T12 atendem aos critérios da Fase 02, os requisitos funcionais e de segurança aplicáveis possuem evidência objetiva, o fluxo integrado cadastro → login → catálogo passou e os gates locais estão verdes. Os dois achados são informativos e não comprometem a entrega nem exigem aceite de risco para liberar a próxima fase.
 
 ## Próxima ação
 
-Trabalho da Fase 01 concluído. Não iniciar a Fase 02 automaticamente; aguardar autorização explícita para executar a próxima fase do plano.
+Fase 02 aprovada. Não iniciar a Fase 03 automaticamente; aguardar autorização explícita do solicitante para executar a próxima fase do plano.
 
 ## Histórico de revisões anteriores
 
 | Versão | Data | Veredito | Resumo |
 |--------|------|----------|--------|
-| — | — | — | Primeira avaliação da Fase 01. |
+| 1 | 2026-09-05 | Aprovado | Review independente da Fase 01: fundação, tracer bullet autenticado e primeira leitura protegida aprovados; Fase 02 permaneceu pendente. |
