@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test'
 
 const webBaseUrl = process.env.E2E_WEB_URL ?? 'http://127.0.0.1:3000'
 const apiBaseUrl =
-  process.env.E2E_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000'
+  process.env.E2E_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
 
 export default defineConfig({
   testDir: './e2e',
