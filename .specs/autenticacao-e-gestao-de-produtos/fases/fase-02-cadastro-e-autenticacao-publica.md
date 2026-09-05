@@ -100,9 +100,9 @@ Adicionar testes integrados que criem uma conta nova, confirmem a chegada ao log
 ### Registro de T12
 
 - `e2e/registration-and-login.spec.ts` usa um e-mail único por execução e cobre validação local, cadastro, confirmação no login, duplicidade, credencial inválida e login até o catálogo.
-- E2E integrado controlado: `E2E_API_URL=http://127.0.0.1:3001 npm run test:e2e -- e2e/registration-and-login.spec.ts` — 1 teste passou com API NestJS local, DynamoDB Local e origem `http://127.0.0.1:3000` autorizada.
-- Gate padrão: `npm test -- --run` (69 testes), `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`, `npm run test:e2e` (1 passou e 3 foram pulados por ausência de API externa) e `git diff --check` — todos passaram.
-- O E2E integrado usa o mesmo host `127.0.0.1` no front e na API porque o cookie aprovado é `SameSite=Strict`; configurar `localhost` de um lado e `127.0.0.1` do outro não representa uma origem same-site e não é tratado como falha do fluxo da aplicação.
+- E2E integrado controlado: `$env:E2E_API_URL='http://localhost:3001'; $env:E2E_WEB_URL='http://localhost:3000'; npm run test:e2e -- e2e/registration-and-login.spec.ts` — 1 teste passou com API NestJS local, DynamoDB Local e origem `http://localhost:3000` autorizada.
+- Gate padrão: `npm test -- --run` (72 testes), `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`, `npm audit --omit=optional`, `npm run test:e2e` com API local (4 passaram e 2 foram pulados por credenciais opcionais do tracer) e `git diff --check` — todos passaram.
+- O E2E integrado usa o mesmo host `localhost` no front e na API porque o cookie aprovado é `SameSite=Strict`; configurar `localhost` de um lado e `127.0.0.1` do outro não representa uma origem same-site.
 
 ## Encerramento da fase
 
@@ -110,7 +110,7 @@ Adicionar testes integrados que criem uma conta nova, confirmem a chegada ao log
 - Critério 2: sucesso navega somente com o sinal enumerado `registered=success`, sem PII, e o login o canonicaliza sem iniciar sessão no cadastro.
 - Critério 3: login trata validação, credenciais, origem, rate limit, falhas não confiáveis e referências de correlação sem mensagens externas.
 - Critério 4: cadastro e login bloqueiam reenvio enquanto a mutação está em andamento e não fazem retry automático.
-- Critério 5: schemas, gateways, componentes e E2E possuem cobertura reproduzível; a fase aguarda apenas o review independente obrigatório.
+- Critério 5: schemas, gateways, componentes e E2E possuem cobertura reproduzível; a fase foi aprovada pelo review independente v5.
 
 ## Orientações de implementação
 
@@ -134,12 +134,12 @@ Executar testes de schema, gateway e componentes, o E2E público contra ambiente
 
 - Cadastro público depende dos limites e códigos vigentes da OpenAPI.
 - Rate limit pode tornar o E2E instável se os dados e a frequência não forem isolados.
-- A conclusão exige `review`; não iniciar a Fase 03 automaticamente.
+- A conclusão foi registrada após o `review` independente v5; não iniciar a Fase 03 automaticamente.
 
 ## Correções pós-review independente v4
 
 - **A-01:** o fallback genérico do login preserva e exibe `correlationId` quando a API retorna uma referência junto com código desconhecido ou indisponibilidade; o teste de componente cobre o código `unknown`.
-- **A-02:** o E2E público atualizado foi executado contra API NestJS local, DynamoDB Local e origem `http://127.0.0.1:3000` autorizada pela API em `http://127.0.0.1:3001`; cadastro sem sessão automática, duplicidade, credencial inválida e login até o catálogo passaram.
+- **A-02:** o E2E público atualizado foi executado contra API NestJS local, DynamoDB Local e origem `http://localhost:3000` autorizada pela API em `http://localhost:3001`; cadastro sem sessão automática, duplicidade, credencial inválida e login até o catálogo passaram.
 - **A-03:** `e2e/public-auth-zoom.spec.ts` verifica `/register` e `/login` em viewport efetiva de 640 px, equivalente ao reflow de uma tela de 1280 px em zoom de 200%, preservando conteúdo, ações e ausência de overflow horizontal.
 - **Verificação:** suíte de autenticação `npm test -- --run src/features/auth/components/register-screen.spec.tsx src/features/auth/components/login-screen.spec.tsx src/features/auth/api/auth-gateway.spec.ts` (30 testes), suíte completa `npm test -- --run` (72 testes), `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`, `git diff --check` e `npm run test:e2e` integrado (4 passaram e 2 foram pulados por credenciais opcionais) — todos passaram.
-- **Estado:** correções implementadas e verificadas; aguarda novo `review` independente da Fase 02. A Fase 03 continua pendente.
+- **Estado:** correções implementadas, verificadas e aprovadas no `review` independente v5. A Fase 03 continua pendente.
