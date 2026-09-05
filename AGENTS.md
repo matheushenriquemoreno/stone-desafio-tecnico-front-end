@@ -28,7 +28,7 @@ Também ler os requisitos, o contrato e as ADRs relacionados à tarefa. As regra
 - Buscar componente e implementação existentes antes de criar novos.
 - Manter Server Components como padrão e limitar `'use client'` à menor fronteira interativa.
 - Não criar Route Handlers, Server Actions, Proxy ou Middleware para intermediar a API.
-- Centralizar acesso HTTP, usar `credentials: 'include'` e adicionar `X-CSRF-Protection: 1` em mutações.
+- Centralizar acesso HTTP e usar `credentials: 'include'`; mutações devem partir de uma origem autorizada pela API, sem cabeçalho CSRF customizado.
 - Nunca ler, persistir, registrar ou expor o JWT.
 - Usar tokens semânticos da ADR-004; não introduzir valores visuais locais ou framework concorrente.
 - Com shadcn/ui, conferir `components.json`, contexto do projeto e documentação da versão antes de compor ou alterar componentes.

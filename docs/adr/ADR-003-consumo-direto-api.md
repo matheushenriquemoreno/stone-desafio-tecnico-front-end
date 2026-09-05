@@ -19,7 +19,7 @@ Aceita
 
 O desafio tem como objetivo principal a API. A integração direta mantém autenticação, contratos e regras de segurança concentrados na API NestJS, sem duplicar implementações no projeto Next.js.
 
-A API passa a controlar o JWT em cookie `HttpOnly`, CORS e CSRF. Com isso, o navegador pode consumi-la diretamente sem acessar o token e sem uma camada intermediária no Next.js.
+A API passa a controlar o JWT em cookie `HttpOnly`, CORS e a validação de origem das mutações. Com isso, o navegador pode consumi-la diretamente sem acessar o token e sem uma camada intermediária no Next.js.
 
 ## Decisão
 
@@ -39,7 +39,7 @@ flowchart LR
 - Renderizar formulários, dados e estados da experiência.
 - Chamar os endpoints públicos da API configurada.
 - Usar `credentials: include` em todas as requisições.
-- Enviar `X-CSRF-Protection: 1` nas operações mutáveis.
+- Fazer mutações apenas a partir de uma origem autorizada pela API, sem cabeçalho CSRF customizado.
 - Tratar `401` redirecionando para o login e apresentar os demais erros com mensagens seguras.
 - Nunca ler, persistir, copiar ou registrar o JWT.
 
@@ -47,7 +47,7 @@ flowchart LR
 
 - Cadastrar usuários e validar credenciais.
 - Criar, validar e remover o cookie JWT.
-- Aplicar CORS, CSRF, autenticação, autorização e rate limit.
+- Aplicar CORS, validação de origem, autenticação, autorização e rate limit.
 - Validar todos os dados independentemente da validação da interface.
 
 ### Execução no servidor do front-end
@@ -62,7 +62,7 @@ A URL base será exposta como configuração pública:
 NEXT_PUBLIC_API_URL=https://api.example.com
 ```
 
-Um cliente HTTP compartilhado aplicará a URL base, `credentials: include`, o cabeçalho CSRF para métodos mutáveis e o tratamento comum de respostas. Funções específicas de cada feature definirão caminhos, payloads e tipos.
+Um cliente HTTP compartilhado aplicará a URL base, `credentials: include` e o tratamento comum de respostas. Ele não adicionará cabeçalho CSRF customizado; funções específicas de cada feature definirão caminhos, payloads e tipos.
 
 ## Autenticação e proteção de páginas
 
@@ -75,11 +75,11 @@ O cookie é host-only da API e não pode ser lido pelo JavaScript nem pelo servi
 
 Não haverá verificação otimista de cookie em Middleware do Next.js. Esconder uma rota no front-end não será tratado como autorização; a API continuará sendo a autoridade.
 
-## CORS, CSRF e domínios
+## CORS, origem e domínios
 
-O front-end só funcionará com uma origem cadastrada explicitamente pela API. Produção usará domínio HTTPS pertencente ao mesmo site registrável da API, permitindo o cookie `SameSite=Lax`.
+O front-end só funcionará com uma origem cadastrada explicitamente pela API. Produção usará uma origem HTTPS na allowlist exata e pertencente ao mesmo site da API, permitindo o cookie `SameSite=Strict`.
 
-Operações `POST`, `PATCH` e `DELETE` enviarão `X-CSRF-Protection: 1`. Esse cabeçalho será incluído apenas pelo cliente HTTP compartilhado e nunca conterá segredo.
+Operações `POST`, `PATCH` e `DELETE` não enviam `X-CSRF-Protection` nem outro cabeçalho CSRF customizado. O navegador fornece `Origin` automaticamente; a API o valida e usa `Referer` apenas quando `Origin` estiver ausente. O cliente não deve tentar definir nenhum desses cabeçalhos.
 
 Previews hospedados em domínio de terceiro não usarão a sessão da API de produção. Testes integrados deverão executar em origem controlada e autorizada.
 
@@ -87,7 +87,7 @@ Previews hospedados em domínio de terceiro não usarão a sessão da API de pro
 
 - O cliente HTTP chama `NEXT_PUBLIC_API_URL` sem prefixo intermediário `/api`.
 - Todas as chamadas usam `credentials: include`.
-- Métodos mutáveis enviam o cabeçalho CSRF e métodos seguros não o exigem.
+- Métodos mutáveis não enviam cabeçalho CSRF customizado e funcionam somente a partir de origem autorizada.
 - Login bem-sucedido funciona sem expor o JWT ao JavaScript.
 - A sessão expira após 900 segundos e retorna ao fluxo de login.
 - Resposta `401` em página protegida redireciona para o login.
@@ -107,10 +107,10 @@ Previews hospedados em domínio de terceiro não usarão a sessão da API de pro
 
 ### Negativas
 
-- A API precisa configurar CORS, cookie e CSRF corretamente.
+- A API precisa configurar CORS, cookie e validação de origem corretamente.
 - O front-end não consegue validar a sessão no servidor do Next.js.
 - Páginas protegidas precisam de estado de carregamento enquanto a API confirma a sessão.
-- Domínios de preview de terceiros não compartilham a sessão `SameSite=Lax` de produção.
+- Domínios de preview de terceiros não compartilham a sessão `SameSite=Strict` de produção.
 
 ## Alternativas consideradas
 

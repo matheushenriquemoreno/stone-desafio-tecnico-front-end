@@ -104,7 +104,7 @@ Contém cenários Playwright que atravessam páginas e serviços. Testes unitár
 - Arquivos unitários usarão `*.spec.ts` ou `*.spec.tsx` próximos ao código.
 - Chamadas da API serão simuladas nos testes unitários.
 - Playwright cobrirá os fluxos em `e2e`.
-- O cliente HTTP terá testes para URL, credenciais, cabeçalho CSRF, status e erros da API.
+- O cliente HTTP terá testes para URL, credenciais, ausência de cabeçalho CSRF customizado, status e erros da API.
 
 ## Consequências
 

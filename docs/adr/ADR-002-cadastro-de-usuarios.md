@@ -46,7 +46,7 @@ A validação do cliente melhora a experiência, mas a resposta da API é defini
 O navegador chamará `POST /auth/register` diretamente na URL pública da API. A validação do formulário melhora o feedback, mas não substitui a validação definitiva do back-end.
 
 - A senha não será armazenada nem registrada em logs.
-- O cliente enviará `credentials: include` e o cabeçalho CSRF exigido pela API.
+- O cliente enviará `credentials: include`; o cadastro não exige cabeçalho CSRF customizado.
 - A API não criará sessão durante o cadastro.
 - A resposta nunca conterá senha, hash ou credenciais internas.
 

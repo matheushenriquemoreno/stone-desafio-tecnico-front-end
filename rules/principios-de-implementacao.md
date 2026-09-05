@@ -81,7 +81,7 @@ type ProductListState =
 - O navegador DEVE chamar `NEXT_PUBLIC_API_URL` diretamente.
 - NÃO criar Route Handlers, Server Actions, `proxy.ts`, `middleware.ts` ou endpoints `/api/*` para intermediar autenticação e CRUD.
 - Todas as chamadas usam `credentials: 'include'`.
-- `POST`, `PATCH` e `DELETE` incluem `X-CSRF-Protection: 1` no cliente HTTP compartilhado.
+- `POST`, `PATCH` e `DELETE` não incluem cabeçalho CSRF customizado; devem partir de uma origem autorizada pela API.
 - O JWT NÃO pode ser lido, armazenado, logado ou enviado no corpo pela aplicação.
 - Validação no cliente melhora a experiência, mas NÃO substitui a validação da API.
 - O cursor de paginação é opaco: armazenar e reenviar, nunca decodificar ou inferir sua estrutura.

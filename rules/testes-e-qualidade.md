@@ -31,10 +31,10 @@ Os testes DEVEM provar:
 
 - URL baseada em `NEXT_PUBLIC_API_URL`, sem prefixo intermediário `/api`;
 - `credentials: 'include'` em todas as chamadas;
-- `X-CSRF-Protection: 1` em `POST`, `PATCH` e `DELETE`, sem tratá-lo como segredo;
+- ausência de `X-CSRF-Protection` ou outro cabeçalho CSRF customizado em `POST`, `PATCH` e `DELETE`;
 - ausência de `Authorization: Bearer`, leitura de cookie ou persistência de JWT;
 - interpretação do schema de erro e preservação de `correlationId`;
-- tratamento de `400`, `401`, `403`, `404`, `409`, `429`, `500` e `503` conforme o fluxo;
+- tratamento dos status documentados para cada operação e fallback seguro para falha de rede ou resposta não prevista;
 - cursor reenviado sem transformação;
 - payload e resposta compatíveis com o contrato.
 
@@ -45,6 +45,7 @@ Os testes DEVEM provar:
 - Seletores priorizam papel, label e nome acessível.
 - Cobrir navegação anterior/próxima sem assumir conteúdo interno do cursor.
 - Confirmar que sessão expirada ou resposta `401` retorna ao login.
+- Confirmar que mutações da origem autorizada passam sem cabeçalho CSRF customizado e que origem não autorizada recebe `403`.
 - Não usar sessão da API de produção nem domínios de preview não autorizados.
 
 ## Acessibilidade e visual

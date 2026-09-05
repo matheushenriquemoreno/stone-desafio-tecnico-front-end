@@ -32,8 +32,8 @@ O navegador chamará a API NestJS diretamente por um cliente HTTP compartilhado.
 - A URL pública da API ficará em `NEXT_PUBLIC_API_URL`.
 - Todas as chamadas usarão `credentials: include`.
 - A API criará e removerá o cookie JWT `HttpOnly`; o front-end não lerá nem persistirá o token.
-- Operações mutáveis incluirão `X-CSRF-Protection: 1`.
-- A API continuará sendo a autoridade de autenticação, autorização, CORS e CSRF.
+- Operações mutáveis dependerão da origem autorizada e do cookie `SameSite=Strict`, sem cabeçalho CSRF customizado.
+- A API continuará sendo a autoridade de autenticação, autorização, CORS e validação de origem.
 - Não existirão Route Handlers que espelhem endpoints da API.
 
 Os detalhes estão na [ADR-003](./adr/ADR-003-consumo-direto-api.md).
@@ -65,7 +65,7 @@ O arquivo `.env.example` documentará as variáveis necessárias sem conter segr
 
 - Testes unitários dos formulários de cadastro, login e produtos.
 - Testes dos estados de carregamento, lista vazia, sucesso e erro.
-- Testes do cliente HTTP para credenciais, cabeçalho CSRF, status e respostas da API.
+- Testes do cliente HTTP para credenciais, ausência de cabeçalho CSRF customizado, status e respostas da API.
 - API simulada nos testes unitários para manter rapidez e determinismo.
 - Testes E2E integrados cobrindo cadastro, login, listagem protegida, paginação, CRUD e logout.
 - Verificação de que o JWT não aparece no corpo das respostas nem fica disponível ao JavaScript do navegador.
