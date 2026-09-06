@@ -11,7 +11,7 @@ Fase 06 — Consulta, edição e exclusão — concluída e aprovada no review i
 
 Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase deve passar por `review` independente antes que a próxima seja marcada como ativa.
 
-A Fase 07 está em execução. T33, T34 e T35 foram concluídas; T36 está implementada no worktree e será registrada em seguida. T37 permanece pendente por solicitação do usuário, pois depende de publicação e configurações externas.
+A Fase 07 está em execução. T33, T34, T35 e T36 foram concluídas. T37 permanece pendente por solicitação do usuário, pois depende de publicação e configurações externas.
 
 ## Fases
 
@@ -64,7 +64,7 @@ A Fase 07 está em execução. T33, T34 e T35 foram concluídas; T36 está imple
 | T33 | 07   | Concluída | `e2e/accessibility.spec.ts` com axe WCAG 2A/2AA, rotas públicas/protegidas, viewport 400x900, ausência de overflow, reflow, teclado/foco do diálogo e `prefers-reduced-motion`; execução dedicada: 2 testes passaram. Composições legadas de `space-y-*` foram alinhadas às regras de `flex`/`gap`. |
 | T34 | 07   | Concluída | `src/lib/security-contract.spec.ts` verifica ausência de Web Storage, `Authorization`/`Bearer`, acesso a cookie, cabeçalho CSRF customizado, `Origin`/`Referer` forjados, silenciadores TypeScript e endpoints intermediários; regressão de resposta atrasada no detalhe; suíte dedicada e suíte completa (25 arquivos, 172 testes) passaram. |
 | T35 | 07   | Concluída | `.env.example`, `Dockerfile` standalone com usuário não-root, `.dockerignore`, `README.md` e `next.config.ts`; `npm audit --omit=optional`, `npm run format:check` e `npm run build` passaram. Imagem construída/executada localmente, `/login` respondeu HTTP 200 e o processo usou o usuário `nextjs`. |
-| T36 | 07   | Pendente  | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| T36 | 07   | Concluída | `.github/workflows/quality.yml` instala pelo lockfile e executa format-check, lint, typecheck, testes e build com falha bloqueante; E2E integrado isolado em execução manual com preflight para `E2E_API_URL`. Gates equivalentes passaram localmente; execução remota e proteção de branch permanecem não validadas. |
 | T37 | 07   | Pendente  | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ## Bloqueios e desvios

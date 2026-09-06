@@ -1,0 +1,101 @@
+name: Quality gates
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+    inputs:
+      run_e2e:
+        description: Run the integrated E2E job against a controlled API
+        required: true
+        default: false
+        type: boolean
+      e2e_web_url:
+        description: Authorized origin used by the local web server in the E2E job
+        required: true
+        default: http://127.0.0.1:3000
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Format, lint, types, tests and build
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:3001
+      NEXT_PUBLIC_IMAGE_ORIGINS: ''
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit and component tests
+        run: npm test -- --run
+
+      - name: Build
+        run: npm run build
+
+  e2e:
+    name: Integrated E2E
+    if: ${{ inputs.run_e2e == true }}
+    needs: quality
+    runs-on: ubuntu-latest
+    env:
+      E2E_API_URL: ${{ secrets.E2E_API_URL }}
+      E2E_WEB_URL: ${{ inputs.e2e_web_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
+          node-version-file: .nvmrc
+
+      - name: Validate integrated E2E dependencies
+        shell: bash
+        run: |
+          set -eu
+          if [ -z "$E2E_API_URL" ]; then
+            echo '::error::Configure the E2E_API_URL secret with a controlled API.'
+            exit 1
+          fi
+          if [ -z "$E2E_WEB_URL" ]; then
+            echo '::error::Provide an authorized E2E web origin.'
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run integrated E2E
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.E2E_API_URL }}
+        run: npm run test:e2e

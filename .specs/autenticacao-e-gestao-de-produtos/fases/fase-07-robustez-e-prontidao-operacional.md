@@ -70,7 +70,9 @@ Criar workflow do GitHub Actions com instalação reproduzível, formatação, l
 - **Critérios de conclusão:** instalação usa lockfile; gates não são ignorados; build depende apenas de configuração pública permitida; E2E integrado declara e valida suas dependências externas.
 - **Riscos ou premissas:** credenciais de ambiente não entram em pull requests de terceiros; previews sem domínio compatível não são tratados como validação de sessão de produção.
 
-**Status desta tarefa:** Pendente nesta etapa de commits; a implementação será registrada após T35.
+**Status desta tarefa:** Concluída nesta execução.
+
+**Evidências:** `.github/workflows/quality.yml` instala pelo lockfile e executa format-check, lint, typecheck, testes e build em sequência com falha bloqueante; o E2E integrado está isolado em execução manual e valida `E2E_API_URL` antes de iniciar. Os mesmos gates passaram localmente; a execução remota do GitHub Actions e a configuração de proteção de branch permanecem dependências externas não exercitadas nesta sessão.
 
 ## Tarefa T37 — Publicar, executar smoke tests e provar reversão
 
