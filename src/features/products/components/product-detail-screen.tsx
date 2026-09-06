@@ -278,7 +278,7 @@ export function ProductDetailScreen({
                   setState({ kind: 'success', product })
                   toast.add({
                     description: 'As alterações foram salvas no catálogo.',
-                    timeout: 10_000,
+                    timeout: 4000,
                     title: 'Produto atualizado',
                     type: 'success',
                   })
