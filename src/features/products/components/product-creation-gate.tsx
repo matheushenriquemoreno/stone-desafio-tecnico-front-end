@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { listProducts } from '@/features/products/api/products-gateway'
+import { shouldRedirectToLoginForProtectedRead } from '@/features/products/protected-read'
 import { redirectToLogin } from '@/lib/redirect-to-login'
 
 type ProductCreationGateState =
@@ -104,6 +105,12 @@ export function ProductCreationGate({
         !probe.mounted ||
         (result.kind === 'failure' && result.reason === 'aborted')
       ) {
+        return
+      }
+
+      if (shouldRedirectToLoginForProtectedRead(result)) {
+        setState({ kind: 'unauthorized' })
+        redirectToLogin({ replace })
         return
       }
 

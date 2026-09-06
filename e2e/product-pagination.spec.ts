@@ -97,14 +97,24 @@ test.describe('catálogo e paginação por cursor', () => {
     })
   })
 
-  test('permite retry manual e oferece ação no catálogo vazio', async ({ page }) => {
-    let attempts = 0
+  test('permite retry manual após rate limit e oferece ação no catálogo vazio', async ({
+    page,
+  }) => {
+    let shouldSucceed = false
 
     await page.route(/\/products(?:\?.*)?$/, async (route) => {
-      attempts += 1
-
-      if (attempts <= 2) {
-        await route.fulfill({ status: 500 })
+      if (!shouldSucceed) {
+        await route.fulfill({
+          body: JSON.stringify({
+            code: 'RATE_LIMIT_EXCEEDED',
+            correlationId: 'e2e-products-rate-limit',
+            message: 'Limite excedido.',
+            statusCode: 429,
+          }),
+          contentType: 'application/json',
+          headers: { 'Retry-After': '1' },
+          status: 429,
+        })
         return
       }
 
@@ -118,9 +128,10 @@ test.describe('catálogo e paginação por cursor', () => {
     await page.goto('/')
     await expect(
       page.getByRole('alert').filter({
-        hasText: 'Não foi possível carregar o catálogo',
+        hasText: 'Muitas consultas em sequência',
       }),
     ).toBeVisible()
+    shouldSucceed = true
     await page.getByRole('button', { name: 'Tentar novamente' }).click()
     await expect(page.getByRole('heading', { name: 'Catálogo vazio' })).toBeVisible()
     await expect(page.getByText('0 produtos')).toBeVisible()
@@ -128,6 +139,22 @@ test.describe('catálogo e paginação por cursor', () => {
       'href',
       '/products/new',
     )
+  })
+
+  test('redireciona para login sem expor a área protegida quando a API cai', async ({
+    page,
+  }) => {
+    await page.route(/\/products(?:\?.*)?$/, (route) => route.abort('failed'))
+
+    await page.goto('/')
+
+    await expect(page).toHaveURL(/\/login$/)
+    await expect(page.getByRole('heading', { name: 'Boas-vindas' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Catálogo' })).not.toBeVisible()
+    await expect(page.getByRole('link', { name: 'Novo produto' })).not.toBeVisible()
+    await expect(
+      page.getByText('Não foi possível carregar o catálogo'),
+    ).not.toBeVisible()
   })
 
   test('redireciona para login quando a sessão expira na próxima página', async ({
