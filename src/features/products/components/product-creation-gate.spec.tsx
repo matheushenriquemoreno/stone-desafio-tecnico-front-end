@@ -1,6 +1,5 @@
 import { StrictMode } from 'react'
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { replace } = vi.hoisted(() => ({ replace: vi.fn() }))
@@ -92,10 +91,8 @@ describe('ProductCreationGate', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('mantém falha recuperável e executa novo probe somente após retry manual', async () => {
-    listProductsMock
-      .mockResolvedValueOnce({ kind: 'failure', reason: 'network' })
-      .mockResolvedValueOnce({ kind: 'success', page: { items: [], total: 0 } })
+  it('redireciona quando a API fica indisponível durante a confirmação da sessão', async () => {
+    listProductsMock.mockResolvedValueOnce({ kind: 'failure', reason: 'network' })
 
     render(
       <ProductCreationGate>
@@ -103,15 +100,12 @@ describe('ProductCreationGate', () => {
       </ProductCreationGate>,
     )
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Não foi possível confirmar sua sessão. Tente novamente em instantes.',
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'))
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Sua sessão não está mais disponível. Redirecionando para o login…',
     )
-    await userEvent
-      .setup()
-      .click(screen.getByRole('button', { name: 'Tentar novamente' }))
-
-    await screen.findByText('Formulário liberado')
-    expect(listProductsMock).toHaveBeenCalledTimes(2)
+    expect(screen.queryByText('Formulário liberado')).not.toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('aborta probe pendente ao desmontar fora do Strict Mode', async () => {

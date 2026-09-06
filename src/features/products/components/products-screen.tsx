@@ -23,6 +23,7 @@ import {
 import { cn } from '@/lib/utils'
 import { listProducts } from '@/features/products/api/products-gateway'
 import { ProductCard } from '@/features/products/components/product-card'
+import { shouldRedirectToLoginForProtectedRead } from '@/features/products/protected-read'
 import type { ListProductsResult, ProductPage } from '@/features/products/types'
 import { redirectToLogin } from '@/lib/redirect-to-login'
 
@@ -310,6 +311,12 @@ function ProductsScreenContent() {
           message: paginationResetMessage,
         })
         router.replace('/')
+        return
+      }
+
+      if (shouldRedirectToLoginForProtectedRead(result)) {
+        setViewState({ kind: 'unauthorized' })
+        redirectToLogin(router)
         return
       }
 

@@ -21,6 +21,7 @@ import { ProductEditForm } from '@/features/products/components/product-edit-for
 import { ProductImage } from '@/features/products/components/product-image'
 import { formatProductPrice } from '@/features/products/format-product-price'
 import { getProductMutationFeedback } from '@/features/products/product-mutation-feedback'
+import { shouldRedirectToLoginForProtectedRead } from '@/features/products/protected-read'
 import type { Product } from '@/features/products/types'
 import { redirectToLogin } from '@/lib/redirect-to-login'
 import { cn } from '@/lib/utils'
@@ -145,6 +146,12 @@ export function ProductDetailScreen({
       if (result.kind === 'success') {
         setState({ kind: 'success', product: result.product })
         setIsEditing(false)
+        return
+      }
+
+      if (shouldRedirectToLoginForProtectedRead(result)) {
+        setState({ kind: 'unauthorized' })
+        redirectToLogin({ replace })
         return
       }
 

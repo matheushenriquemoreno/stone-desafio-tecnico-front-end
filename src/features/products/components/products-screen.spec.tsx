@@ -87,6 +87,20 @@ describe('ProductsScreen', () => {
     expect(screen.queryByText('mensagem externa')).not.toBeInTheDocument()
   })
 
+  it('redireciona para login quando a API fica indisponível na primeira leitura', async () => {
+    listProductsMock.mockResolvedValue({ kind: 'failure', reason: 'network' })
+
+    render(<ProductsScreen />)
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'))
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Sua sessão não está mais disponível. Redirecionando para o login…',
+    )
+    expect(
+      screen.queryByText('Não foi possível carregar o catálogo'),
+    ).not.toBeInTheDocument()
+  })
+
   it('remove conteúdo protegido anterior antes de redirecionar após nova leitura 401', async () => {
     listProductsMock
       .mockResolvedValueOnce({ kind: 'success', page: productPage })
@@ -127,26 +141,20 @@ describe('ProductsScreen', () => {
     )
   })
 
-  it('apresenta falha recuperável e permite nova tentativa manual', async () => {
-    listProductsMock
-      .mockResolvedValueOnce({
-        kind: 'failure',
-        reason: 'invalid-response',
-        status: 200,
-      })
-      .mockResolvedValueOnce({ kind: 'success', page: productPage })
+  it('redireciona quando a resposta protegida não pode ser validada', async () => {
+    listProductsMock.mockResolvedValue({
+      kind: 'failure',
+      reason: 'invalid-response',
+      status: 200,
+    })
 
     render(<ProductsScreen />)
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Não foi possível carregar o catálogo. Tente novamente em instantes.',
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'))
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Sua sessão não está mais disponível. Redirecionando para o login…',
     )
-    await userEvent
-      .setup()
-      .click(screen.getByRole('button', { name: 'Tentar novamente' }))
-
-    expect(await screen.findByText('Produto principal')).toBeInTheDocument()
-    expect(listProductsMock).toHaveBeenCalledTimes(2)
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('orienta a espera do rate limit e exibe a referência segura', async () => {

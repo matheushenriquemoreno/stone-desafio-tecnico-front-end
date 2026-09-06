@@ -105,7 +105,7 @@ describe('ProductDetailScreen', () => {
     expect(screen.queryByText('Produto principal')).not.toBeInTheDocument()
   })
 
-  it('mostra rate limit com referência e permite retry manual de falha de rede', async () => {
+  it('mostra rate limit e redireciona quando a leitura fica indisponível', async () => {
     getProductMock
       .mockResolvedValueOnce({
         error: {
@@ -117,7 +117,6 @@ describe('ProductDetailScreen', () => {
         kind: 'error',
       })
       .mockResolvedValueOnce({ kind: 'failure', reason: 'network' })
-      .mockResolvedValueOnce({ kind: 'success', product })
     const user = userEvent.setup()
 
     render(<ProductDetailScreen productId={product.id} />)
@@ -127,15 +126,12 @@ describe('ProductDetailScreen', () => {
     expect(rateLimitAlert).toHaveTextContent('Referência: corr-detail-rate-limit')
 
     await user.click(screen.getByRole('button', { name: 'Tentar novamente' }))
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Não foi possível carregar',
+    await vi.waitFor(() => expect(replace).toHaveBeenCalledWith('/login'))
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Sua sessão não está mais disponível. Redirecionando para o login…',
     )
-    await user.click(screen.getByRole('button', { name: 'Tentar novamente' }))
-
-    expect(
-      await screen.findByRole('heading', { name: 'Produto principal' }),
-    ).toBeVisible()
-    expect(getProductMock).toHaveBeenCalledTimes(3)
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(getProductMock).toHaveBeenCalledTimes(2)
   })
 
   it('edita somente o campo alterado e confirma o sucesso com toast transitório', async () => {
