@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormEvent } from 'react'
+import type { FormEvent, ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -31,6 +31,7 @@ type ProductFormProps = Readonly<{
   isSubmitting?: boolean
   onFieldChange?: (field: ProductInputField) => void
   onSubmit: (input: ProductInput) => void | Promise<void>
+  secondaryAction?: ReactNode
   submitLabel: string
 }>
 
@@ -89,6 +90,7 @@ export function ProductForm({
   isSubmitting = false,
   onFieldChange,
   onSubmit,
+  secondaryAction,
   submitLabel,
 }: ProductFormProps) {
   const [values, setValues] = useState<ProductFormValues>(initialValues)
@@ -277,10 +279,13 @@ export function ProductForm({
         </Field>
       </FieldGroup>
 
-      <Button className="w-full sm:w-fit" disabled={isSubmitting} type="submit">
-        {isSubmitting && <Spinner />}
-        {isSubmitting ? 'Salvando…' : submitLabel}
-      </Button>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Button className="w-full sm:w-fit" disabled={isSubmitting} type="submit">
+          {isSubmitting && <Spinner />}
+          {isSubmitting ? 'Salvando…' : submitLabel}
+        </Button>
+        {secondaryAction}
+      </div>
     </form>
   )
 }

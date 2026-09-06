@@ -135,18 +135,19 @@ export function ProductEditForm({
         isSubmitting={isSubmitting}
         onFieldChange={clearErrors}
         onSubmit={handleSubmit}
+        secondaryAction={
+          <Button
+            className="w-full sm:w-fit"
+            disabled={isSubmitting}
+            onClick={onCancel}
+            type="button"
+            variant="ghost"
+          >
+            Cancelar
+          </Button>
+        }
         submitLabel="Salvar alterações"
       />
-
-      <Button
-        className="w-full sm:w-fit"
-        disabled={isSubmitting}
-        onClick={onCancel}
-        type="button"
-        variant="ghost"
-      >
-        Cancelar
-      </Button>
     </ProductFormLayout>
   )
 }

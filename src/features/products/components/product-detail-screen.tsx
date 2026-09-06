@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from '@/components/ui/toast'
 import { deleteProduct, getProduct } from '@/features/products/api/products-gateway'
 import { ProductDeleteDialog } from '@/features/products/components/product-delete-dialog'
 import { ProductEditForm } from '@/features/products/components/product-edit-form'
@@ -116,7 +117,6 @@ export function ProductDetailScreen({
   const [deleteFeedback, setDeleteFeedback] = useState<
     Readonly<{ correlationId?: string; message: string }> | undefined
   >()
-  const [updatedConfirmation, setUpdatedConfirmation] = useState(false)
   const [state, setState] = useState<ProductDetailViewState>({ kind: 'loading' })
 
   useEffect(() => {
@@ -145,7 +145,6 @@ export function ProductDetailScreen({
       if (result.kind === 'success') {
         setState({ kind: 'success', product: result.product })
         setIsEditing(false)
-        setUpdatedConfirmation(false)
         return
       }
 
@@ -266,15 +265,6 @@ export function ProductDetailScreen({
               </Alert>
             )}
 
-            {updatedConfirmation && (
-              <Alert>
-                <AlertTitle>Produto atualizado</AlertTitle>
-                <AlertDescription>
-                  As alterações foram salvas no catálogo.
-                </AlertDescription>
-              </Alert>
-            )}
-
             {isEditing ? (
               <ProductEditForm
                 key={`${state.product.id}:${state.product.updatedAt}`}
@@ -285,8 +275,13 @@ export function ProductDetailScreen({
                 }}
                 onProductUpdated={(product) => {
                   setIsEditing(false)
-                  setUpdatedConfirmation(true)
                   setState({ kind: 'success', product })
+                  toast.add({
+                    description: 'As alterações foram salvas no catálogo.',
+                    timeout: 10_000,
+                    title: 'Produto atualizado',
+                    type: 'success',
+                  })
                 }}
                 product={state.product}
               />

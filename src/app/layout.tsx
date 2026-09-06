@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Barlow_Condensed, Inter } from 'next/font/google'
 
+import { Toaster } from '@/components/ui/toast'
+
 import './globals.css'
 
 const inter = Inter({
@@ -34,6 +36,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${inter.variable} ${barlowCondensed.variable}`}>
         {children}
+        <Toaster />
       </body>
     </html>
   )

@@ -151,6 +151,18 @@ test.describe('consulta, edição e exclusão de produtos', () => {
     await expect(page.getByLabel('Nome')).toHaveValue(initialProduct.name)
     await expect(page.getByLabel('Preço')).toHaveValue('R$ 99,90')
     expect(await getProductFormCardWidth(page)).toBe(creationCardWidth)
+    const saveButtonBox = await page
+      .getByRole('button', { name: 'Salvar alterações' })
+      .boundingBox()
+    const cancelButtonBox = await page
+      .getByRole('button', { name: 'Cancelar' })
+      .boundingBox()
+    expect(saveButtonBox).not.toBeNull()
+    expect(cancelButtonBox).not.toBeNull()
+    expect(Math.abs((saveButtonBox?.y ?? 0) - (cancelButtonBox?.y ?? 0))).toBeLessThan(
+      1,
+    )
+    expect(cancelButtonBox?.x ?? 0).toBeGreaterThan(saveButtonBox?.x ?? 0)
     await page.getByRole('button', { name: 'Cancelar' }).click()
     expect(patchRequests).toBe(0)
 
@@ -161,9 +173,14 @@ test.describe('consulta, edição e exclusão de produtos', () => {
     await expect(
       page.getByRole('heading', { name: 'Produto detalhe atualizado' }),
     ).toBeVisible()
+    const updateToast = page
+      .locator('[data-slot="toast"]')
+      .filter({ hasText: 'Produto atualizado' })
+    await expect(updateToast).toBeVisible()
     await expect(
       page.locator('[data-slot="alert"]').filter({ hasText: 'Produto atualizado' }),
-    ).toBeVisible()
+    ).toHaveCount(0)
+    await expect(updateToast).toBeHidden({ timeout: 12_000 })
     expect(patchRequests).toBe(1)
     expect(patchBody).toEqual({ name: 'Produto detalhe atualizado' })
 

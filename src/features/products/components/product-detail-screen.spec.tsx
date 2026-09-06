@@ -10,6 +10,7 @@ const { deleteProductMock, getProductMock, patchProductMock } = vi.hoisted(() =>
   getProductMock: vi.fn(),
   patchProductMock: vi.fn(),
 }))
+const { toastAddMock } = vi.hoisted(() => ({ toastAddMock: vi.fn() }))
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace }),
@@ -19,6 +20,10 @@ vi.mock('@/features/products/api/products-gateway', () => ({
   deleteProduct: deleteProductMock,
   getProduct: getProductMock,
   patchProduct: patchProductMock,
+}))
+
+vi.mock('@/components/ui/toast', () => ({
+  toast: { add: toastAddMock },
 }))
 
 vi.mock('next/image', () => ({
@@ -46,6 +51,7 @@ describe('ProductDetailScreen', () => {
     getProductMock.mockReset()
     patchProductMock.mockReset()
     replace.mockReset()
+    toastAddMock.mockReset()
   })
 
   afterEach(() => {
@@ -132,7 +138,7 @@ describe('ProductDetailScreen', () => {
     expect(getProductMock).toHaveBeenCalledTimes(3)
   })
 
-  it('edita somente o campo alterado, atualiza o detalhe e confirma o sucesso', async () => {
+  it('edita somente o campo alterado e confirma o sucesso com toast transitório', async () => {
     const updatedProduct = { ...product, name: 'Produto atualizado' }
     getProductMock.mockResolvedValue({ kind: 'success', product })
     patchProductMock.mockResolvedValue({ kind: 'success', product: updatedProduct })
@@ -153,7 +159,20 @@ describe('ProductDetailScreen', () => {
     expect(
       await screen.findByRole('heading', { name: 'Produto atualizado' }),
     ).toBeVisible()
-    expect(screen.getByRole('alert')).toHaveTextContent('Produto atualizado')
+    expect(toastAddMock).toHaveBeenCalledWith({
+      description: 'As alterações foram salvas no catálogo.',
+      timeout: 10_000,
+      title: 'Produto atualizado',
+      type: 'success',
+    })
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Editar produto' }))
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Editar produto' }),
+    ).toBeVisible()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('abre a edição com preço em Real e a mesma composição da criação', async () => {
@@ -169,6 +188,13 @@ describe('ProductDetailScreen', () => {
     expect(screen.getByText('Catálogo compartilhado')).toBeVisible()
     expect(screen.getByText('Dados do produto')).toBeVisible()
     expect(screen.getByLabelText('Preço')).toHaveValue('R$ 99,90')
+    const cancelButton = screen.getByRole<HTMLButtonElement>('button', {
+      name: 'Cancelar',
+    })
+    const saveButton = screen.getByRole<HTMLButtonElement>('button', {
+      name: 'Salvar alterações',
+    })
+    expect(cancelButton.form).toBe(saveButton.form)
   })
 
   it('impede salvar sem alteração e preserva os dados editáveis', async () => {
