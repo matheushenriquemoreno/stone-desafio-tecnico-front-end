@@ -5,7 +5,6 @@ import { ImageOff } from 'lucide-react'
 import { useState } from 'react'
 
 import { cn } from '@/lib/utils'
-import { getConfiguredImageOrigins, isAllowedImageUrl } from '@/lib/image-origin-policy'
 
 type ProductImageProps = Readonly<{
   alt: string
@@ -31,8 +30,7 @@ function ProductImageFallback({ alt, className }: Omit<ProductImageProps, 'src'>
 
 export function ProductImage({ alt, className, src }: ProductImageProps) {
   const [failedSource, setFailedSource] = useState<string | undefined>()
-  const isRenderable =
-    failedSource !== src && isAllowedImageUrl(src, getConfiguredImageOrigins())
+  const isRenderable = failedSource !== src
 
   if (!isRenderable) {
     return <ProductImageFallback alt={alt} className={className} />
@@ -50,6 +48,7 @@ export function ProductImage({ alt, className, src }: ProductImageProps) {
         className="object-cover"
         fill
         onError={() => setFailedSource(src)}
+        unoptimized
         sizes="(min-width: 768px) 50vw, 100vw"
         src={src}
       />

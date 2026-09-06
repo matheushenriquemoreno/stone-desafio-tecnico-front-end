@@ -16,11 +16,9 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY package.json package-lock.json ./
 COPY . .
 
-# NEXT_PUBLIC_* é incorporada ao bundle durante o build do Next.js.
+# NEXT_PUBLIC_API_URL é incorporada ao bundle durante o build do Next.js.
 ARG NEXT_PUBLIC_API_URL=http://localhost:3001
-ARG NEXT_PUBLIC_IMAGE_ORIGINS=
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_IMAGE_ORIGINS=$NEXT_PUBLIC_IMAGE_ORIGINS
 
 RUN npm run build
 

@@ -29,7 +29,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_API_URL: http://127.0.0.1:3001
-      NEXT_PUBLIC_IMAGE_ORIGINS: ''
     steps:
       - name: Checkout
         uses: actions/checkout@v4

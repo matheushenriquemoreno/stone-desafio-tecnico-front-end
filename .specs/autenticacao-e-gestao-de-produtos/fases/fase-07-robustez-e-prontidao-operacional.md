@@ -51,7 +51,7 @@ Criar `.env.example` sem segredos, Dockerfile independente para desenvolvimento/
 - **Dependências:** `T34`.
 - **Parte do sistema afetada:** `.env.example`, `Dockerfile`, arquivos de ignore e `README.md`.
 - **Testes e verificações:** construir a imagem a partir de checkout limpo, executar com configuração pública controlada, repetir comandos documentados, validar links relativos e confirmar ausência de segredos/cópia indevida de arquivos.
-- **Critérios de conclusão:** outra pessoa consegue instalar, desenvolver, testar e buildar pelos passos publicados; imagem é reproduzível; configuração explica origem autorizada, same-site, allowlist de imagem e preview sem prometer sessão de produção.
+- **Critérios de conclusão:** outra pessoa consegue instalar, desenvolver, testar e buildar pelos passos publicados; imagem é reproduzível; configuração explica origem autorizada, same-site, carregamento direto de imagens e preview sem prometer sessão de produção.
 - **Riscos ou premissas:** Docker não resolve CORS/cookie; a documentação deve separar execução local, integração autorizada e publicação.
 
 **Status desta tarefa:** Concluída nesta execução.

@@ -27,14 +27,16 @@ Copie `.env.example` para `.env.local` e ajuste os valores:
 
 ```text
 NEXT_PUBLIC_API_URL=http://localhost:3001
-NEXT_PUBLIC_IMAGE_ORIGINS=https://images.example.com
 ```
 
 `NEXT_PUBLIC_API_URL` é uma URL pública e direta da API. A origem exata usada pelo navegador deve estar autorizada no CORS e na política de origem da API. Em ambiente publicado, use HTTPS e coordene a compatibilidade de mesmo site exigida pelo cookie `SameSite=Strict`.
 
-`NEXT_PUBLIC_IMAGE_ORIGINS` aceita somente origens HTTP(S) explícitas separadas por vírgula. URLs de produto fora dessa allowlist usam o fallback acessível da interface.
+As imagens dos produtos são carregadas diretamente pelo navegador a partir da
+`imageUrl` retornada pela API. O componente mantém um fallback acessível quando
+a URL falha, sem exigir configuração de origens no front-end.
 
-As variáveis `NEXT_PUBLIC_*` são incorporadas ao bundle durante o build; alterá-las exige executar o build novamente.
+`NEXT_PUBLIC_API_URL` é incorporada ao bundle durante o build; alterá-la exige
+executar o build novamente.
 
 ## Instalação e desenvolvimento
 
@@ -77,11 +79,11 @@ Não use sessão, credenciais ou domínio da API de produção nos testes.
 A imagem usa o build standalone do Next.js e executa como usuário não-root. Os argumentos públicos precisam ser informados no build:
 
 ```bash
-docker build --build-arg NEXT_PUBLIC_API_URL=http://host.docker.internal:3001 --build-arg NEXT_PUBLIC_IMAGE_ORIGINS=https://images.example.com -t stone-front .
+docker build --build-arg NEXT_PUBLIC_API_URL=http://host.docker.internal:3001 -t stone-front .
 docker run --rm -p 3000:3000 stone-front
 ```
 
-O container expõe a interface em `http://localhost:3000`. Docker não configura CORS, cookie, DNS ou allowlists da API.
+O container expõe a interface em `http://localhost:3000`. Docker não configura CORS, cookie ou DNS da API.
 
 ## CI
 

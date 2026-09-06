@@ -46,12 +46,10 @@ describe('ProductDetailScreen', () => {
     getProductMock.mockReset()
     patchProductMock.mockReset()
     replace.mockReset()
-    vi.stubEnv('NEXT_PUBLIC_IMAGE_ORIGINS', 'https://images.example.com')
   })
 
   afterEach(() => {
     cleanup()
-    vi.unstubAllEnvs()
     vi.clearAllMocks()
   })
 

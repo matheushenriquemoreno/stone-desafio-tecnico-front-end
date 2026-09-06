@@ -73,7 +73,7 @@ A Fase 01 cria o runtime, o design system mínimo, o cliente HTTP e o primeiro f
 - CORS, origem autorizada e cookie `SameSite=Strict` podem impedir a integração mesmo com a interface correta — validar cedo no tracer bullet e novamente no ambiente integrado.
 - A OpenAPI e os schemas locais podem divergir — validar respostas em runtime, cobrir o cliente por contrato e executar E2E contra versão controlada da API.
 - O probe de sessão da criação consome rate limit — limitar a `GET /products?limit=1`, impedir chamadas duplicadas e provar o comportamento em teste.
-- URLs de imagem aceitas pela API podem não pertencer à allowlist do front-end — usar allowlist explícita por ambiente e fallback acessível.
+- URLs de imagem aceitas pela API podem apontar para serviços externos indisponíveis — carregar diretamente no navegador e manter fallback acessível.
 - Cursores podem expirar ou se perder após reload — nunca interpretá-los; reiniciar e canonicalizar a sequência quando o estado em memória não existir.
 - Respostas atrasadas podem substituir estado recente — cancelar ou ignorar leituras obsoletas e testar trocas rápidas de página.
 - Mutações podem ser duplicadas por reenvio ou retry — desabilitar a ação durante o envio e não aplicar retry automático.

@@ -99,5 +99,5 @@ Executar unitários do schema/gateway, testes do formulário, E2E de criação, 
 ## Riscos, premissas e dependências externas da fase
 
 - O probe e o E2E dependem de rate limit e origem corretamente configurados.
-- A renderização da imagem depende da allowlist, mas sempre deve existir fallback.
+- A renderização da imagem usa diretamente a URL HTTP(S) validada pela API, mas sempre deve existir fallback.
 - A conclusão exige `review`; não iniciar a Fase 06 automaticamente.
