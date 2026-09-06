@@ -45,7 +45,7 @@ export function ProductImage({ alt, className, src }: ProductImageProps) {
     >
       <Image
         alt={alt}
-        className="object-cover"
+        className="object-contain p-3"
         fill
         onError={() => setFailedSource(src)}
         unoptimized

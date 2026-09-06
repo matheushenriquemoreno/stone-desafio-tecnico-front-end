@@ -125,12 +125,13 @@ test.describe('acessibilidade e reflow transversal', () => {
     await expectAccessible(page)
     await expectNoHorizontalOverflow(page)
 
-    await page.goto('/products/new')
-    await expect(page.getByRole('heading', { name: 'Novo produto' })).toBeVisible()
-    await expectAccessible(page)
-    await expectNoHorizontalOverflow(page)
-
-    await page.goto(`/products/${product.id}`)
+    const productLink = page.getByRole('link', {
+      name: `Ver e editar ${product.name}`,
+    })
+    await productLink.focus()
+    await expect(productLink).toBeFocused()
+    await page.keyboard.press('Enter')
+    await expect(page).toHaveURL(new RegExp(`/products/${product.id}$`))
     await expect(page.getByRole('heading', { name: product.name })).toBeVisible()
     await expectAccessible(page)
     await expectNoHorizontalOverflow(page)
@@ -150,5 +151,10 @@ test.describe('acessibilidade e reflow transversal', () => {
     await page.keyboard.press('Escape')
     await expect(page.getByRole('alertdialog')).not.toBeVisible()
     await expect(deleteTrigger).toBeFocused()
+
+    await page.goto('/products/new')
+    await expect(page.getByRole('heading', { name: 'Novo produto' })).toBeVisible()
+    await expectAccessible(page)
+    await expectNoHorizontalOverflow(page)
   })
 })

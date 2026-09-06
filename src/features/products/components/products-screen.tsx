@@ -7,7 +7,7 @@ import { Package2 } from 'lucide-react'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   canGoNext,
@@ -83,9 +83,26 @@ function ProductsLoading() {
         <Skeleton className="h-12 w-64" />
         <Skeleton className="h-5 w-80 max-w-full" />
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <Skeleton className="h-52 rounded-xl" />
-        <Skeleton className="h-52 rounded-xl" />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {[0, 1, 2].map((index) => (
+          <Card className={cn(index === 2 && 'hidden lg:flex')} key={index}>
+            <CardHeader className="flex flex-col gap-4">
+              <Skeleton className="aspect-[16/9] w-full rounded-lg" />
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-6 w-2/3" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-4/5" />
+              </div>
+            </CardHeader>
+            <CardContent className="mt-auto">
+              <Skeleton className="h-7 w-24" />
+            </CardContent>
+            <CardFooter className="justify-between gap-3">
+              <Skeleton className="h-5 w-24" />
+              <Skeleton className="size-4" />
+            </CardFooter>
+          </Card>
+        ))}
       </div>
     </div>
   )
@@ -123,7 +140,10 @@ function ProductsEmpty() {
 
 function ProductsContent({ page }: { page: ProductPage }) {
   return (
-    <ul aria-label="Produtos do catálogo" className="grid gap-4 md:grid-cols-2">
+    <ul
+      aria-label="Produtos do catálogo"
+      className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+    >
       {page.items.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}

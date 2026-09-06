@@ -165,6 +165,61 @@ test.describe('catálogo e paginação por cursor', () => {
     await expect(page.getByRole('heading', { name: 'Boas-vindas' })).toBeVisible()
   })
 
+  test('adapta a grade e preserva a imagem completa nos breakpoints', async ({
+    page,
+  }) => {
+    await page.route('https://example.com/product.png', async (route) => {
+      await route.fulfill({
+        body: Buffer.from(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+          'base64',
+        ),
+        contentType: 'image/png',
+        status: 200,
+      })
+    })
+    await page.route(/\/products(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        body: JSON.stringify(pageOne),
+        contentType: 'application/json',
+        status: 200,
+      })
+    })
+
+    await page.goto('/')
+
+    const productList = page.getByRole('list', { name: 'Produtos do catálogo' })
+    const cardLink = page.getByRole('link', { name: 'Ver e editar Produto um' })
+
+    await expect(cardLink).toBeVisible()
+    await expect(cardLink.getByText('Ver e editar')).toBeVisible()
+
+    for (const viewport of [
+      { columns: 1, height: 900, width: 320 },
+      { columns: 2, height: 900, width: 768 },
+      { columns: 3, height: 900, width: 1440 },
+    ]) {
+      await page.setViewportSize({ height: viewport.height, width: viewport.width })
+
+      await expect
+        .poll(() =>
+          productList.evaluate(
+            (element) =>
+              getComputedStyle(element).gridTemplateColumns.split(' ').filter(Boolean)
+                .length,
+          ),
+        )
+        .toBe(viewport.columns)
+    }
+
+    await expect(page.getByRole('img', { name: 'Imagem de Produto um' })).toHaveCSS(
+      'object-fit',
+      'contain',
+    )
+    await cardLink.focus()
+    await expect(cardLink).toBeFocused()
+  })
+
   test('mantém catálogo e controles acessíveis em viewport estreita', async ({
     page,
   }) => {
