@@ -54,7 +54,9 @@ Criar `.env.example` sem segredos, Dockerfile independente para desenvolvimento/
 - **Critérios de conclusão:** outra pessoa consegue instalar, desenvolver, testar e buildar pelos passos publicados; imagem é reproduzível; configuração explica origem autorizada, same-site, allowlist de imagem e preview sem prometer sessão de produção.
 - **Riscos ou premissas:** Docker não resolve CORS/cookie; a documentação deve separar execução local, integração autorizada e publicação.
 
-**Status desta tarefa:** Pendente nesta etapa de commits; a implementação será registrada após T34.
+**Status desta tarefa:** Concluída nesta execução.
+
+**Evidências:** `.env.example` documenta somente configuração pública e as restrições de origem; `Dockerfile` usa build standalone, lockfile e usuário não-root; `.dockerignore` restringe o contexto; `README.md` documenta instalação, execução, testes, E2E integrado, build, Docker e a pendência de publicação. `npm audit --omit=optional`, `npm run format:check` e `npm run build` passaram. A imagem foi construída e executada localmente: a rota `/login` respondeu HTTP 200 e o processo rodou como `nextjs`.
 
 ## Tarefa T36 — Configurar CI com gates que bloqueiam promoção
 

@@ -15,6 +15,7 @@ const remotePatterns = parseImageOrigins(process.env.NEXT_PUBLIC_IMAGE_ORIGINS).
 )
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   images: {
     remotePatterns,
   },
