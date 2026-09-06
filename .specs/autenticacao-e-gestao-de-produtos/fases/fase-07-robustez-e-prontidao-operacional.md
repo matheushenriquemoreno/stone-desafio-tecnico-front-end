@@ -114,4 +114,4 @@ Executar `npm ci`, `npm run format:check`, `npm run lint`, `npm run typecheck`, 
 
 ## Estado desta execução
 
-T33 foi concluída e registrada. T34, T35 e T36 serão registradas em commits atômicos subsequentes. T37 permanece pendente para configuração e execução pelo usuário; portanto, a Fase 07 ainda não está concluída nem pronta para o review final.
+T33, T34, T35 e T36 foram concluídas e registradas em commits atômicos. T37 permanece pendente para configuração e execução pelo usuário; portanto, a Fase 07 ainda não está concluída nem pronta para o review final.
