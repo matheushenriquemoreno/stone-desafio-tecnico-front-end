@@ -1,6 +1,6 @@
 # Fase 01 — Fundação e tracer bullet autenticado
 
-| Status       | Pendente   |
+| Status       | Concluída |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
@@ -9,6 +9,67 @@
 **Capacidade ou fluxo coberto:** bootstrap → login → cookie controlado pela API → `GET /products` → catálogo ou redirecionamento por `401`.
 **Requisitos relacionados:** `AGP-10` a `AGP-14`, `AGP-17`, `AGP-18`, `AGP-37` a `AGP-44`, `EXPECT-01` a `EXPECT-10`.
 **Dependências externas:** API NestJS em versão compatível; origem local autorizada; Node.js 24 LTS.
+
+## Estado das tarefas
+
+| ID  | Status | Evidências |
+|-----|--------|------------|
+| T01 | Concluída | `npm install`; `npm audit --omit=optional`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check` — todos passaram. |
+| T02 | Concluída | `npx shadcn@latest info --json`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check` — todos passaram. |
+| T03 | Concluída | `npm test -- --run src/lib/api-client.spec.ts`; `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run format:check` — todos passaram. |
+| T04 | Concluída | `npm test -- --run src/features/auth/api/auth-gateway.spec.ts src/features/products/api/products-gateway.spec.ts`; `npm run typecheck`; `npm run lint`; `npm run format:check`; `git diff --check` — todos passaram. |
+| T05 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check`; `git diff --check` — todos passaram após normalizar o artefato automático `next-env.d.ts`. |
+| T06 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm run test:e2e`; `npm run format:check`; `git diff --check` — todos passaram; E2E de bootstrap ajustado ao título da rota protegida. |
+| T07 | Concluída | `npm run lint`; `npm run typecheck`; `npm test -- --run`; `npm run build`; `npm audit --omit=optional`; `npm run test:e2e`; E2E integrado com API local controlada `2 passed`; `npm run format:check`; `git diff --check` — todos os gates passaram. |
+
+### Registro de T01
+
+- Bootstrap criado com Next.js `16.3.4`, React `19.2.8`, TypeScript `5.9.3`, Tailwind CSS `4.3.3`, Vitest `4.1.11`, Playwright `1.63.0`, npm `11.12.1` e Node.js `24.15.0`.
+- A instalação gerou `package-lock.json`; `npm audit --omit=optional` terminou com zero vulnerabilidades.
+- O E2E de bootstrap foi executado em Chromium instalado pelo Playwright e passou com 1 teste.
+- Desvio registrado: ESLint `9.39.4` foi mantido porque ESLint 10 apresentou incompatibilidade de runtime com o `eslint-plugin-react` empacotado por `eslint-config-next` `16.3.4`; os gates de lint e auditoria passaram com a versão compatível.
+
+### Registro de T02
+
+- `components.json` registra `base-nova`, Base UI, RSC, TypeScript, alias `@`, Tailwind v4 e Lucide; os componentes `alert`, `button`, `card`, `field`, `input`, `label`, `separator`, `skeleton` e `spinner` foram incorporados pelo registry oficial.
+- `src/app/globals.css` centraliza os tokens semânticos da ADR-004, tema claro, fontes e a regra de movimento reduzido; nenhum token visual foi criado na feature.
+- `npm test -- --run` passou com 13 testes, incluindo acessibilidade básica dos componentes e 7 pares de contraste com razão mínima de 4,5:1.
+- As dependências de execução do CLI `shadcn` foram mantidas em `devDependencies`; `npm audit --omit=optional` continua sem vulnerabilidades.
+
+### Registro de T03
+
+- `requestApi` compõe a URL diretamente de `NEXT_PUBLIC_API_URL`, envia `credentials: 'include'`, serializa JSON somente quando necessário e repassa `AbortSignal`.
+- O cliente retorna uniões discriminadas para sucesso sem corpo, sucesso com resposta validada por Zod, erro padrão validado e falhas seguras de configuração, serialização, rede, aborto, schema ou status.
+- Erros preservam apenas campos confiáveis (`statusCode`, `code`, `message`, `correlationId`, erros de campo e `Retry-After` inteiro); corpos inválidos e detalhes de exceções não entram no resultado.
+- `src/lib/api-client.spec.ts` cobre URL sem `/api`, todos os métodos, headers proibidos, `204`, payload/resposta, erro `429`, `Retry-After`, `401`/status inesperado, schema malformado, rede, aborto e configuração insegura.
+
+### Registro de T04
+
+- `login` valida e-mail/senha, normaliza somente o e-mail, chama `POST /auth/login` com sucesso `204` e converte `401`, `403`, `429`, validação e falhas de transporte em resultados discriminados.
+- `listProducts` chama `GET /products?limit=20`, reenvia cursor opaco por query string e valida `items`, `total`, `nextCursor` e cada campo do produto antes de retornar sucesso.
+- Os gateways reconhecem somente códigos estáveis da API para decidir estados de domínio; mensagens externas não controlam comportamento e nenhum gateway acessa cookie ou storage.
+- `auth-gateway.spec.ts` e `products-gateway.spec.ts` cobrem payloads, caminhos, respostas `204`/`200`, normalização, limite, cursor, `401`, `403`, `429`, schema inválido e falha de rede.
+
+### Registro de T05
+
+- A rota pública `/login` compõe `LoginScreen` e mantém a regra de formulário na menor fronteira cliente da feature.
+- O formulário possui labels associados, foco visível herdado das primitivas, `aria-invalid`, `aria-describedby`, alertas persistentes e estados de loading/disabled.
+- A senha permanece somente no estado efêmero do formulário, é limpa antes da navegação após `204` e não é armazenada, registrada ou exposta.
+- `login-screen.spec.tsx` cobre teclado implícito via `user-event`, validação local, erro seguro de credenciais, bloqueio de reenvio, loading, rate limit e navegação pós-sucesso.
+
+### Registro de T06
+
+- A rota `/` agora compõe `ProductsScreen` dentro do grupo protegido; não há Middleware, Proxy, Server Action, Route Handler ou leitura autenticada em Server Component.
+- A primeira leitura usa `GET /products?limit=20` no navegador, mostra skeleton, diferencia sucesso, catálogo vazio e falha recuperável e apresenta o total recebido sem inferir quantidade de páginas.
+- `401` é tratado por código estável e substitui a rota por `/login`; rede, schema inválido e demais falhas exibem fallback seguro com retry manual.
+- A desmontagem aborta o `AbortController` e resultados obsoletos são ignorados; `products-screen.spec.tsx` cobre loading, sucesso, total, vazio, `401`, falha/retry e aborto.
+
+### Registro de T07
+
+- `e2e/authenticated-tracer.spec.ts` prova, em ambiente opt-in, login pela tela, confirmação da sessão por `GET /products` e retorno ao login em acesso direto sem cookie; exige `E2E_API_URL`, `E2E_USER_EMAIL` e `E2E_USER_PASSWORD` controlados pelo ambiente.
+- O E2E integrado foi executado contra API NestJS local em `http://localhost:3001`, origem web local `http://localhost:3000`, DynamoDB Local provisionado e usuário temporário local: `2 passed`.
+- A execução padrão sem credenciais externas manteve o cenário integrado como `2 skipped` e o bootstrap como `1 passed`, sem confundir ausência de ambiente com prova do fluxo autenticado.
+- A configuração do Playwright injeta somente a URL pública da API no processo do servidor Next; não há sessão de produção, JWT, Bearer, storage ou endpoint intermediário no cenário.
 
 ## Tarefa T01 — Disponibilizar o bootstrap reproduzível da aplicação
 

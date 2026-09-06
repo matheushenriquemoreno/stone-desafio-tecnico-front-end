@@ -1,6 +1,6 @@
 # Fase 02 — Cadastro e autenticação pública completa
 
-| Status       | Pendente   |
+| Status       | Concluída   |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
@@ -22,6 +22,12 @@ Criar o schema da feature de autenticação para normalizar nome e e-mail, valid
 - **Critérios de conclusão:** entradas válidas produzem payload normalizado; cada limite inválido falha antes do transporte; o tipo do formulário é derivado sem `any` ou coerção insegura.
 - **Riscos ou premissas:** normalização deve reproduzir o contrato publicado sem alterar a senha.
 
+### Registro de T08
+
+- `registerSchema` valida nome, e-mail e senha em objeto estrito, normaliza nome/e-mail e preserva a senha.
+- `src/features/auth/schemas/register.spec.ts` cobre normalização, limites 2/100 e 8/128, entradas inválidas, propriedades desconhecidas e mensagens associadas aos campos.
+- Verificação: `npm test -- --run src/features/auth/schemas/register.spec.ts` (8 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check src/features/auth/schemas/register.ts src/features/auth/schemas/register.spec.ts` e `git diff --check` — todos passaram.
+
 ## Tarefa T09 — Implementar o gateway de cadastro e seus erros contratados
 
 Adicionar `POST /auth/register` ao gateway de autenticação, validar a resposta segura `{ id, name, email }` e mapear validação, origem rejeitada, e-mail duplicado, rate limit e falha não confiável. A resposta nunca pode aceitar senha, hash, cookie ou token como dado da aplicação.
@@ -33,6 +39,13 @@ Adicionar `POST /auth/register` ao gateway de autenticação, validar a resposta
 - **Testes e verificações:** provar `201`, `400`, `403`, `409`, `429`, `Retry-After`, erro por campo, `correlationId`, rede e resposta com campos sensíveis ou schema inválido.
 - **Critérios de conclusão:** sucesso só existe após validar os três campos seguros; e-mail duplicado e origem rejeitada têm resultado específico; mutação não recebe retry automático nem cabeçalho CSRF.
 - **Riscos ou premissas:** mensagens brutas da API não são apresentadas; apenas códigos conhecidos orientam feedback específico.
+
+### Registro de T09
+
+- O gateway chama `POST /auth/register` diretamente com `credentials: include`, sem cabeçalho CSRF, Authorization ou retry automático.
+- `registeredUserSchema` aceita somente `id`, `name` e `email`; respostas com senha, hash, token ou propriedades desconhecidas viram falha de resposta inválida.
+- O mapeamento cobre validação, origem rejeitada, e-mail duplicado, rate limit com `Retry-After`, indisponibilidade e fallback desconhecido, preservando `correlationId` validado.
+- Verificação: `npm test -- --run src/features/auth/schemas/register.spec.ts src/features/auth/schemas/registered-user.spec.ts src/features/auth/api/auth-gateway.spec.ts` (25 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
 
 ## Tarefa T10 — Entregar a tela de cadastro e a transição segura para login
 
@@ -46,6 +59,13 @@ Compor `/register` com formulário acessível baseado nas primitivas compartilha
 - **Critérios de conclusão:** visitante conclui o cadastro e vê a confirmação no login; o histórico não mantém informação pessoal; o cadastro não trata `201` como autenticação e não acessa o catálogo.
 - **Riscos ou premissas:** o sinal transitório pode permanecer na URL apenas até ser consumido; deve usar valor enumerado, não texto livre nem dado do usuário.
 
+### Registro de T10
+
+- `/register` compõe um formulário acessível com campos independentes, validação local, feedback persistente, loading e bloqueio de reenvio.
+- O sucesso limpa o estado efêmero, não cria sessão e navega apenas para `/login?registered=success`; o login exibe a confirmação e canonicaliza a URL para `/login`.
+- `AuthShell` concentra somente a composição visual compartilhada, enquanto cadastro e login mantêm schemas e mensagens de negócio separados.
+- Verificação: `npm test -- --run src/features/auth/components/login-screen.spec.tsx src/features/auth/components/register-screen.spec.tsx` (9 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+
 ## Tarefa T11 — Completar o feedback seguro do login público
 
 Completar a tela de login do tracer bullet para tratar validação, credenciais inválidas, origem rejeitada, rate limit com duração válida, falha de rede e `correlationId`, mantendo o erro importante junto ao formulário e oferecendo nova tentativa somente por ação explícita.
@@ -58,6 +78,13 @@ Completar a tela de login do tracer bullet para tratar validação, credenciais 
 - **Critérios de conclusão:** cada resposta pública contratada gera orientação coerente; excesso de requisições informa espera sem retentar automaticamente; detalhes internos nunca chegam à interface.
 - **Riscos ou premissas:** a duração exibida é apenas a informada de modo confiável pela API e não cria um relógio de sessão.
 
+### Registro de T11
+
+- O login mantém validação de campo, credenciais inválidas, origem rejeitada, rate limit e fallback de rede/status em mensagens seguras e persistentes.
+- `Retry-After` só é exibido quando já foi validado como inteiro confiável pelo cliente HTTP; ausência ou valor inválido usa orientação genérica sem retentativa automática.
+- `correlationId` validado pode ser mostrado como referência de suporte, enquanto mensagens externas e detalhes de falhas permanecem fora da interface.
+- Verificação: `npm test -- --run src/features/auth/components/login-screen.spec.tsx src/features/auth/components/register-screen.spec.tsx src/features/auth/api/auth-gateway.spec.ts` (27 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+
 ## Tarefa T12 — Provar cadastro e login público de ponta a ponta
 
 Adicionar testes integrados que criem uma conta nova, confirmem a chegada ao login sem sessão, autentiquem essa conta e validem e-mail duplicado, credenciais inválidas, validações e rate limit nos níveis apropriados.
@@ -69,6 +96,21 @@ Adicionar testes integrados que criem uma conta nova, confirmem a chegada ao log
 - **Testes e verificações:** executar a suíte da feature e um E2E com dados únicos e isoláveis; repetir os gates `lint`, `typecheck`, testes e build; verificar ausência de segredo em URL, storage, console e mensagens.
 - **Critérios de conclusão:** o cenário reproduz cadastro → login → catálogo; cadastro não autentica; os erros essenciais estão cobertos por teste observável; o review independente consegue reproduzir o fluxo.
 - **Riscos ou premissas:** o mecanismo de dados E2E precisa ser autorizado e não pode depender de usuários de produção.
+
+### Registro de T12
+
+- `e2e/registration-and-login.spec.ts` usa um e-mail único por execução e cobre validação local, cadastro, confirmação no login, duplicidade, credencial inválida e login até o catálogo.
+- E2E integrado controlado: `$env:E2E_API_URL='http://localhost:3001'; $env:E2E_WEB_URL='http://localhost:3000'; npm run test:e2e -- e2e/registration-and-login.spec.ts` — 1 teste passou com API NestJS local, DynamoDB Local e origem `http://localhost:3000` autorizada.
+- Gate padrão: `npm test -- --run` (72 testes), `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`, `npm audit --omit=optional`, `npm run test:e2e` com API local (4 passaram e 2 foram pulados por credenciais opcionais do tracer) e `git diff --check` — todos passaram.
+- O E2E integrado usa o mesmo host `localhost` no front e na API porque o cookie aprovado é `SameSite=Strict`; configurar `localhost` de um lado e `127.0.0.1` do outro não representa uma origem same-site.
+
+## Encerramento da fase
+
+- Critério 1: cadastro normaliza os campos públicos, rejeita limites/entradas desconhecidas antes do transporte e mapeia e-mail duplicado.
+- Critério 2: sucesso navega somente com o sinal enumerado `registered=success`, sem PII, e o login o canonicaliza sem iniciar sessão no cadastro.
+- Critério 3: login trata validação, credenciais, origem, rate limit, falhas não confiáveis e referências de correlação sem mensagens externas.
+- Critério 4: cadastro e login bloqueiam reenvio enquanto a mutação está em andamento e não fazem retry automático.
+- Critério 5: schemas, gateways, componentes e E2E possuem cobertura reproduzível; a fase foi aprovada pelo review independente v5.
 
 ## Orientações de implementação
 
@@ -92,4 +134,12 @@ Executar testes de schema, gateway e componentes, o E2E público contra ambiente
 
 - Cadastro público depende dos limites e códigos vigentes da OpenAPI.
 - Rate limit pode tornar o E2E instável se os dados e a frequência não forem isolados.
-- A conclusão exige `review`; não iniciar a Fase 03 automaticamente.
+- A conclusão foi registrada após o `review` independente v5; não iniciar a Fase 03 automaticamente.
+
+## Correções pós-review independente v4
+
+- **A-01:** o fallback genérico do login preserva e exibe `correlationId` quando a API retorna uma referência junto com código desconhecido ou indisponibilidade; o teste de componente cobre o código `unknown`.
+- **A-02:** o E2E público atualizado foi executado contra API NestJS local, DynamoDB Local e origem `http://localhost:3000` autorizada pela API em `http://localhost:3001`; cadastro sem sessão automática, duplicidade, credencial inválida e login até o catálogo passaram.
+- **A-03:** `e2e/public-auth-zoom.spec.ts` verifica `/register` e `/login` em viewport efetiva de 640 px, equivalente ao reflow de uma tela de 1280 px em zoom de 200%, preservando conteúdo, ações e ausência de overflow horizontal.
+- **Verificação:** suíte de autenticação `npm test -- --run src/features/auth/components/register-screen.spec.tsx src/features/auth/components/login-screen.spec.tsx src/features/auth/api/auth-gateway.spec.ts` (30 testes), suíte completa `npm test -- --run` (72 testes), `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`, `git diff --check` e `npm run test:e2e` integrado (4 passaram e 2 foram pulados por credenciais opcionais) — todos passaram.
+- **Estado:** correções implementadas, verificadas e aprovadas no `review` independente v5. A Fase 03 continua pendente.

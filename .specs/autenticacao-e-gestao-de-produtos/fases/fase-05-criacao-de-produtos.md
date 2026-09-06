@@ -1,6 +1,6 @@
 # Fase 05 — Criação de produtos
 
-| Status       | Pendente   |
+| Status       | Concluída |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
@@ -72,6 +72,14 @@ Adicionar testes integrados para proteção da rota, validação, criação bem-
 
 ## Orientações de implementação
 
+## Estado da execução
+
+- T22 — **Concluída**. O schema compartilhado de entrada e o schema de formulário foram adicionados; a resposta de produto reutiliza os mesmos limites dos campos editáveis. Evidências: `npm test -- --run src/features/products/schemas/product-input-schema.spec.ts` (9 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+- T23 — **Concluída**. `createProduct` valida o payload, chama `POST /products` uma única vez, valida `201` e mapeia os erros contratados sem cabeçalhos proibidos ou retry. Evidências: `npm test -- --run src/features/products/api/products-gateway.spec.ts` (10 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+- T24 — **Concluída**. A rota `/products/new` executa um probe único de `GET /products?limit=1`, trata `401`, erro recuperável, retry manual, aborto e Strict Mode sem duplicação. Evidências: `npm test -- --run src/features/products/components/product-creation-gate.spec.tsx src/features/products/api/products-gateway.spec.ts` (15 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+- T25 — **Concluída**. O formulário reutilizável valida todos os campos antes do transporte, foca o primeiro erro, preserva dados corrigíveis, bloqueia duplo envio e exibe erro de campo, erro geral e referência de suporte. A criação bem-sucedida navega para o detalhe validado com o sinal público enumerado `created=success`; a leitura detalhada mínima foi criada como suporte necessário da confirmação, sem antecipar edição ou exclusão. Evidências: `npm test -- --run src/features/products/api/products-gateway.spec.ts src/features/products/schemas/product-input-schema.spec.ts src/features/products/components/product-creation-screen.spec.tsx src/features/products/components/product-detail-screen.spec.tsx` (28 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+- T26 — **Concluída**. O E2E determinístico cobre probe protegido com `limit=1`, validação sem mutação, criação única com payload exato, leitura posterior do produto, sessão expirada, origem rejeitada, rate limit e resposta inesperada; os mocks aceitam somente requisições `fetch` da API para não interferir na navegação do Next. Evidência: `npm run test:e2e -- e2e/product-create.spec.ts` (6 testes) — todos passaram.
+
 - Reutilizar o conceito de campos de produto na edição futura, sem criar formulário universal orientado por configuração.
 - O probe é uma leitura de autorização, não cache nem carregamento antecipado do catálogo.
 - Não tratar falha de renderização da imagem como falha de criação do domínio.
@@ -91,5 +99,5 @@ Executar unitários do schema/gateway, testes do formulário, E2E de criação, 
 ## Riscos, premissas e dependências externas da fase
 
 - O probe e o E2E dependem de rate limit e origem corretamente configurados.
-- A renderização da imagem depende da allowlist, mas sempre deve existir fallback.
+- A renderização da imagem usa diretamente a URL HTTP(S) validada pela API, mas sempre deve existir fallback.
 - A conclusão exige `review`; não iniciar a Fase 06 automaticamente.

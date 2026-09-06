@@ -1,6 +1,6 @@
 # Fase 06 — Consulta, edição e exclusão
 
-| Status       | Pendente   |
+| Status       | Concluída e aprovada |
 |--------------|------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
@@ -87,6 +87,15 @@ Adicionar cenários E2E que criem um produto isolado, consultem, editem um únic
 - A rota de detalhe serve consulta e edição; não criar telas duplicadas sem necessidade.
 - Reutilizar o schema base, mas manter a regra de patch em função/mapeador próprio e testável.
 - Depois de excluir, reiniciar o catálogo evita inconsistência com cursores e mudanças concorrentes.
+
+## Estado da execução
+
+- T27 — **Concluída**. A leitura `GET /products/:id` valida a resposta antes de renderizar, separa loading, sucesso, não encontrado, não autorizado e erro recuperável, permite retry manual, exibe `correlationId` seguro e oferece retorno ao catálogo. A implementação mínima da rota foi antecipada na T25 para suportar a confirmação da criação. Evidências: `npm test -- --run src/features/products/api/products-gateway.spec.ts src/features/products/components/product-detail-screen.spec.tsx` (19 testes), `npm run typecheck`, `npm run lint` e `npx prettier --check` nos arquivos alterados — todos passaram.
+- T28 — **Concluída**. O `productPatchSchema` e `buildProductPatch` validam valores públicos, comparam a forma normalizada, rejeitam patch vazio, `null` e chaves desconhecidas e retornam somente campos alterados. Evidências: `npm test -- --run src/features/products/product-patch.spec.ts` (9 testes), `npm run typecheck`, `npm run lint` e `npx prettier --check` nos arquivos alterados — todos passaram.
+- T29 — **Concluída**. A edição foi integrada à tela de detalhe com formulário preenchido pela resposta validada, patch mínimo, confirmação persistente, bloqueio de duplo envio, preservação de valores corrigíveis e estados seguros para `400`, `401`, `403`, `404`, `429` e falhas não confiáveis. Evidências: `npm test -- --run` (156 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+- T30 — **Concluída**. A confirmação destrutiva foi criada com `AlertDialog` Base UI/shadcn, incluindo nome do produto, cancelamento por botão/Escape, foco gerenciado pela primitiva e ações desabilitadas durante confirmação. Evidências: `npm test -- --run src/features/products/components/product-delete-dialog.spec.tsx` (3 testes), `npm run typecheck` e `npx prettier --check` — todos passaram.
+- T31 — **Concluída**. A exclusão foi ligada diretamente ao gateway com `DELETE /products/:id`, sem retry automático; o detalhe trata `204`, `401`, `403`, `404`, `429` e falhas seguras, e o catálogo retorna à primeira página sem cursor com confirmação pública. Evidências: `npm test -- --run` (169 testes), `npm run typecheck`, `npm run lint`, `npm run format:check` e `git diff --check` — todos passaram.
+- T32 — **Concluída**. O catálogo oferece navegação acessível do nome do card para o detalhe, e o ciclo E2E cobre criação isolada pelo fluxo de UI, consulta, edição parcial com campos omitidos preservados, cancelamento sem mutação, exclusão confirmada, retorno ao catálogo sem cursor, `404` e `401`. Evidências: `product-card.spec.tsx`, `npm run test:e2e -- e2e/product-detail-mutations.spec.ts` (3 testes), `npm test -- --run` (169 testes), `npm run typecheck`, `npm run lint`, `npm run format:check` e `git diff --check` — todos passaram.
 
 ## Testes e verificações da fase
 

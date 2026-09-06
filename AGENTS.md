@@ -44,3 +44,13 @@ Também ler os requisitos, o contrato e as ADRs relacionados à tarefa. As regra
 5. Aplicar o checklist e relatar evidências, limitações e arquivos alterados.
 
 Não declarar uma funcionalidade implementada com base apenas em documentação. Se ainda não houver `package.json` ou aplicação executável, limitar a validação ao conteúdo documental e registrar essa limitação.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

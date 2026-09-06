@@ -1,7 +1,7 @@
 # Fase 04 — Catálogo e paginação sequencial
 
-| Status       | Pendente   |
-|--------------|------------|
+| Status       | Concluída  |
+| ------------ | ---------- |
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
 
@@ -58,6 +58,21 @@ Criar a apresentação reutilizável dos itens com nome, descrição, preço e i
 - **Critérios de conclusão:** todos os itens permanecem compreensíveis sem imagem; a allowlist é explícita; cartões usam tokens e chave estável; ação essencial não depende de hover.
 - **Riscos ou premissas:** as origens concretas precisam ser fornecidas por ambiente; uma origem nova exige mudança de configuração revisada, não liberação genérica.
 
+## Registro de T19
+
+- `pagination.ts` valida `page` como posição humana positiva e serializa a posição visitada sem inserir cursores na URL.
+- `ProductsScreen` publica `/?page=N` ao avançar ou retornar, restaura apenas posições existentes na pilha em memória e trata reload/deep link impossível ou divergência com canonicalização para `/` e nova leitura sem cursor.
+- O sentinel de canonicalização é limpo quando a posição volta a ser válida, garantindo que uma mesma URL inválida seja canonicalizada novamente após nova entrada.
+- O boundary `Suspense` mantém a leitura de `useSearchParams` compatível com o build do App Router; a pilha continua efêmera e nenhuma posição/cursor é persistida em storage.
+- Verificação: `npm test -- --run 'src/features/products/pagination.spec.ts' 'src/features/products/components/products-screen.spec.tsx'` (18 testes), `npm run typecheck`, `npm run lint` e `git diff --check` — todos passaram.
+
+## Registro de T20
+
+- `ProductCard` separa a apresentação dos itens com nome, descrição e preço; `formatProductPrice` fixa a exibição em moeda brasileira com duas casas decimais.
+- `ProductImage` mantém dimensões e `sizes` coerentes, usa `next/image` somente para origens explicitamente configuradas em `NEXT_PUBLIC_IMAGE_ORIGINS` e apresenta fallback acessível tanto para origem bloqueada quanto para falha de carregamento.
+- `next.config.ts` converte a mesma allowlist em `images.remotePatterns`, sem wildcard; nenhum proxy ou origem genérica foi introduzido. A grade permanece responsiva e baseada nos tokens semânticos existentes.
+- Verificação: testes de política de imagem, formatador, cartão e tela de produtos (18 testes), `npm run typecheck`, `npm run lint`, `npm run build` e `git diff --check` — todos passaram.
+
 ## Tarefa T21 — Provar paginação e estados do catálogo
 
 Consolidar testes de componente e E2E para lista vazia, múltiplas páginas, retorno, fim da sequência, reload, cursor inválido, retry e sessão expirada durante navegação.
@@ -70,11 +85,31 @@ Consolidar testes de componente e E2E para lista vazia, múltiplas páginas, ret
 - **Critérios de conclusão:** cenários provam anterior/próxima sem salto, posição atual, fim, reinício e fallback; cursores não vazam; sessão inválida retorna ao login.
 - **Riscos ou premissas:** o ambiente E2E precisa oferecer dados determinísticos suficientes para mais de uma página.
 
+## Registro de T21
+
+- `e2e/product-pagination.spec.ts` usa respostas controladas no endpoint direto da API para provar duas páginas, envio byte a byte do cursor opaco, fim da sequência, retorno por controle e por histórico do navegador, reload/deep link sem cursor, retry manual, catálogo vazio e `401` durante a navegação.
+- O cenário adicional em viewport de 400px confirma ausência de overflow horizontal e foco visível/operável no controle `Próxima`.
+- Verificação: `npm test -- --run` (18 arquivos, 101 testes), `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`, `npm run test:e2e` (7 passaram, 4 foram pulados por credenciais opcionais do tracer) e `git diff --check` — todos os gates passaram.
+
 ## Orientações de implementação
 
 - Usar união discriminada para o estado da leitura e manter paginação próxima da tela que a consome.
 - Não persistir cursor em query string, storage, cookie ou estado global.
 - Separar `ProductList`, `ProductCard` e estados quando cada responsabilidade existir; evitar wrappers sem semântica.
+
+## Registro de T17
+
+- `ProductsViewState` agora representa explicitamente `loading`, `empty`, `success`, `error` e `unauthorized`; somente o estado correspondente é renderizado por vez.
+- `ProductsEmpty` diferencia catálogo vazio de erro e oferece o link acessível `Criar produto` para a rota planejada.
+- A listagem preserva `items` e `total` recebidos, sem calcular páginas ou inferir ordenação; falha de rede/resposta inválida mantém retry manual e `401` usa a política da Fase 03.
+- Verificação: `npm test -- --run 'src/features/products/components/products-screen.spec.tsx'` (6 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
+
+## Registro de T18
+
+- `src/features/products/pagination.ts` modela a sequência em memória: primeira posição sem cursor, cursores recebidos por índice, avanço somente com `nextCursor`, retorno somente a índice visitado e substituição de ramos futuros obsoletos.
+- `ProductsScreen` envia o cursor opaco byte a byte, desabilita controles enquanto carrega, cancela/ignora respostas obsoletas e trata `400` de cursor inválido ou página posterior vazia reiniciando sem cursor.
+- `pagination.spec.ts` cobre início, avanço, retorno, fim, ramo obsoleto e opacidade; `products-screen.spec.tsx` cobre três páginas, controles, retorno e reinício após `400`.
+- Verificação: `npm test -- --run 'src/features/products/pagination.spec.ts' 'src/features/products/components/products-screen.spec.tsx'` (12 testes), `npm run typecheck`, `npm run lint`, `npx prettier --check` nos arquivos alterados e `git diff --check` — todos passaram.
 
 ## Testes e verificações da fase
 
@@ -93,3 +128,7 @@ Executar unitários de paginação e formatação, componentes da lista, E2E pag
 - Cursores e dataset são controlados pela API e podem mudar entre leituras; a interface não promete snapshot global.
 - Origens de imagem devem ser governadas antes do ambiente publicado.
 - A conclusão exige `review`; não iniciar a Fase 05 automaticamente.
+
+## Resultado do review
+
+O review v7 aprovou a Fase 04 após verificar os requisitos, critérios de aceitação, decisões técnicas, testes e gates de qualidade. O achado informativo A-05 registra que o E2E de paginação usa dataset controlado por interceptação; a validação contra API autorizada e dataset isolável fica encaminhada para a Fase 07. A Fase 05 não deve ser iniciada sem autorização explícita.

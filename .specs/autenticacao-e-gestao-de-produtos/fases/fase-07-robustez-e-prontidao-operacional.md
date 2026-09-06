@@ -1,7 +1,7 @@
 # Fase 07 — Robustez e prontidão operacional
 
-| Status       | Pendente   |
-|--------------|------------|
+| Status       | Em execução |
+|--------------|-------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
 
@@ -22,6 +22,10 @@ Revisar todas as telas e estados implementados com automação e evidência manu
 - **Critérios de conclusão:** nenhuma ação ou informação essencial se perde; violações automatizadas aplicáveis são zero; verificações manuais têm evidência por tela/estado; correções compartilhadas não quebram variantes existentes.
 - **Riscos ou premissas:** automação não substitui verificação manual; qualquer mudança de identidade global identificada deve voltar à ADR-004, não ser aplicada silenciosamente.
 
+**Status desta tarefa:** Concluída nesta execução.
+
+**Evidências:** `e2e/accessibility.spec.ts` cobre as rotas públicas, catálogo, criação e detalhe em viewport estreita, com axe para WCAG 2A/2AA, ausência de overflow horizontal, reflow, foco de teclado no `AlertDialog` e `prefers-reduced-motion`; execução dedicada: 2 testes passaram. As telas também tiveram as composições legadas de espaçamento substituídas por `flex`/`gap`, conforme as regras do repositório.
+
 ## Tarefa T34 — Consolidar a conformidade de integração e segurança
 
 Executar uma suíte transversal que prove a forma das chamadas, a validação de todas as respostas e a ausência das construções proibidas. Cobrir `Retry-After`, `correlationId`, falhas não confiáveis, aborto, concorrência e todos os status previstos por operação sem registrar payloads sensíveis.
@@ -34,6 +38,10 @@ Executar uma suíte transversal que prove a forma das chamadas, a validação de
 - **Critérios de conclusão:** nenhuma ocorrência indevida permanece; cada ocorrência legítima está explicada pelo teste/documentação; cliente chama apenas `NEXT_PUBLIC_API_URL` com credenciais; mensagens e logs não expõem segredo ou detalhe bruto.
 - **Riscos ou premissas:** busca textual produz falsos positivos em testes/documentação; cada ocorrência deve ser lida antes de classificar.
 
+**Status desta tarefa:** Concluída nesta execução.
+
+**Evidências:** `src/lib/security-contract.spec.ts` verifica transversalmente a ausência de Web Storage, `Authorization`/`Bearer`, acesso a cookie, cabeçalho CSRF customizado, `Origin`/`Referer` forjados, silenciadores TypeScript e endpoints intermediários; a suíte dedicada passou. `product-detail-screen.spec.tsx` também cobre que uma resposta atrasada não substitua o detalhe atual. A suíte completa passou com 25 arquivos e 172 testes.
+
 ## Tarefa T35 — Entregar configuração, container e documentação executáveis
 
 Criar `.env.example` sem segredos, Dockerfile independente para desenvolvimento/build e atualizar o `README.md` com pré-requisitos, variáveis, instalação, execução, testes, build, integração com API, imagens e limitações de preview. Usar somente os comandos reais do `package.json`.
@@ -43,8 +51,12 @@ Criar `.env.example` sem segredos, Dockerfile independente para desenvolvimento/
 - **Dependências:** `T34`.
 - **Parte do sistema afetada:** `.env.example`, `Dockerfile`, arquivos de ignore e `README.md`.
 - **Testes e verificações:** construir a imagem a partir de checkout limpo, executar com configuração pública controlada, repetir comandos documentados, validar links relativos e confirmar ausência de segredos/cópia indevida de arquivos.
-- **Critérios de conclusão:** outra pessoa consegue instalar, desenvolver, testar e buildar pelos passos publicados; imagem é reproduzível; configuração explica origem autorizada, same-site, allowlist de imagem e preview sem prometer sessão de produção.
+- **Critérios de conclusão:** outra pessoa consegue instalar, desenvolver, testar e buildar pelos passos publicados; imagem é reproduzível; configuração explica origem autorizada, same-site, carregamento direto de imagens e preview sem prometer sessão de produção.
 - **Riscos ou premissas:** Docker não resolve CORS/cookie; a documentação deve separar execução local, integração autorizada e publicação.
+
+**Status desta tarefa:** Concluída nesta execução.
+
+**Evidências:** `.env.example` documenta somente configuração pública e as restrições de origem; `Dockerfile` usa build standalone, lockfile e usuário não-root; `.dockerignore` restringe o contexto; `README.md` documenta instalação, execução, testes, E2E integrado, build, Docker e a pendência de publicação. `npm audit --omit=optional`, `npm run format:check` e `npm run build` passaram. A imagem foi construída e executada localmente: a rota `/login` respondeu HTTP 200 e o processo rodou como `nextjs`.
 
 ## Tarefa T36 — Configurar CI com gates que bloqueiam promoção
 
@@ -58,6 +70,10 @@ Criar workflow do GitHub Actions com instalação reproduzível, formatação, l
 - **Critérios de conclusão:** instalação usa lockfile; gates não são ignorados; build depende apenas de configuração pública permitida; E2E integrado declara e valida suas dependências externas.
 - **Riscos ou premissas:** credenciais de ambiente não entram em pull requests de terceiros; previews sem domínio compatível não são tratados como validação de sessão de produção.
 
+**Status desta tarefa:** Concluída nesta execução.
+
+**Evidências:** `.github/workflows/quality.yml` instala pelo lockfile e executa format-check, lint, typecheck, testes e build em sequência com falha bloqueante; o E2E integrado está isolado em execução manual e valida `E2E_API_URL` antes de iniciar. Os mesmos gates passaram localmente; a execução remota do GitHub Actions e a configuração de proteção de branch permanecem dependências externas não exercitadas nesta sessão.
+
 ## Tarefa T37 — Publicar, executar smoke tests e provar reversão
 
 Configurar a aplicação na Vercel com `NEXT_PUBLIC_API_URL`, origens de imagem e domínio HTTPS aprovados; coordenar a origem exata no CORS/política da API e a compatibilidade de mesmo site. Depois da promoção, executar smoke de login público, cadastro, catálogo protegido, paginação, CRUD e logout; registrar o deployment anterior e testar o roteiro de rollback.
@@ -69,6 +85,8 @@ Configurar a aplicação na Vercel com `NEXT_PUBLIC_API_URL`, origens de imagem 
 - **Testes e verificações:** executar todos os gates em checkout limpo; inspecionar no navegador a chamada direta à API e os atributos observáveis da sessão; realizar smoke dos fluxos; reverter para deployment conhecido em ambiente seguro e repetir os smokes essenciais.
 - **Critérios de conclusão:** aplicação publicada usa HTTPS e origem autorizada; nenhum endpoint intermediário participa; fluxos essenciais passam; rollback é reproduzível e associado a commit/deployment conhecidos; limitações de preview estão registradas.
 - **Riscos ou premissas:** publicação depende de acesso e configuração externos; se indisponíveis, a tarefa permanece pendente e a entrega não é declarada operacional apenas por build local.
+
+**Status desta tarefa:** Pendente por solicitação do usuário. Configurações de Vercel, DNS, variáveis publicadas, coordenação de CORS, smoke publicado e rollback não foram executados.
 
 ## Orientações de implementação
 
@@ -93,3 +111,7 @@ Executar `npm ci`, `npm run format:check`, `npm run lint`, `npm run typecheck`, 
 - Vercel, GitHub, DNS, API e dados de teste são dependências externas explícitas; indisponibilidade bloqueia apenas as tarefas que realmente dependem delas.
 - Domínio e API precisam pertencer ao mesmo site para a sessão `SameSite=Strict` publicada.
 - A conclusão desta fase também exige `review`; somente depois dele o escopo planejado pode ser declarado entregue.
+
+## Estado desta execução
+
+T33, T34, T35 e T36 foram concluídas e registradas em commits atômicos. T37 permanece pendente para configuração e execução pelo usuário; portanto, a Fase 07 ainda não está concluída nem pronta para o review final.

@@ -25,7 +25,7 @@ As principais limitações existentes são:
 - o cookie de sessão pertence ao host da API e não pode ser lido pelo JavaScript nem pelo servidor do Next.js;
 - não existe endpoint dedicado para consultar a sessão;
 - o cursor de paginação é opaco e só permite navegação sequencial;
-- a API aceita qualquer URL HTTP(S) de imagem, enquanto a renderização otimizada no front-end exige uma allowlist segura de origens;
+- a API aceita qualquer URL HTTP(S) de imagem; o front-end deve carregá-la diretamente no navegador sem impor uma allowlist própria;
 - domínios de preview de terceiros não compartilham a sessão `SameSite=Strict` de produção;
 - não há meta numérica de latência ou disponibilidade definida pelo PRD.
 
@@ -90,7 +90,7 @@ A solução termina na interface web e na integração com a API existente. Ela 
 - **Schemas e mapeadores de feature** — validam formulários e fronteiras externas, normalizam valores permitidos e convertem erros reconhecidos em dados utilizáveis pela UI.
 - **Estado de paginação** — mantém em memória a pilha de cursores de requisição, o índice visitado e a resposta corrente. Nunca interpreta o cursor nem deriva total de páginas.
 - **Primitivas e variantes do design system** — fornecem controles acessíveis, tokens semânticos, feedback, skeletons, estado vazio e confirmação destrutiva. Não conhecem endpoints ou tipos de domínio.
-- **Boundary de imagens de produto** — permite apenas origens explicitamente autorizadas no build do ambiente e apresenta fallback acessível quando a URL não for renderizável com segurança.
+- **Boundary de imagens de produto** — usa `next/image` com `unoptimized` para carregar diretamente a URL HTTP(S) validada pela API e apresenta fallback acessível quando o carregamento falhar.
 - **Suítes de teste e pipeline** — verificam schemas, cliente HTTP, componentes, acessibilidade, fluxos integrados e build reproduzível.
 
 Comunicação entre componentes:
@@ -134,12 +134,12 @@ O fluxo entre navegador e API é síncrono por HTTP. Não há fila, evento assí
 | URL com parâmetros públicos | Preserva posição navegacional compartilhável sem expor cursor opaco | Será introduzido | `AGP-23` a `AGP-25` | URL e memória podem divergir após reload; a solução deve canonicalizar para a primeira página. |
 | Tailwind CSS com tokens semânticos | Implementa identidade visual, responsividade, contraste e estados | Aprovado documentalmente; será introduzido | `EXPECT-02` a `EXPECT-06`; restrição da ADR-004 | Uso de valores locais ou tokens duplicados fragmenta o sistema visual. |
 | shadcn/ui | Fornece primitivas acessíveis incorporadas e customizáveis | Aprovado documentalmente; será introduzido | `AGP-05`, `AGP-19`, `AGP-34`, `AGP-37`, `EXPECT-01` a `EXPECT-06` | A base e a API da versão instalada precisam ser confirmadas antes de compor componentes. |
-| Mecanismos de fontes e imagens do Next.js | Inclui fontes no build e otimiza imagens com política explícita de origens | Será introduzido | `AGP-26`, `AGP-29`, `AGP-30`, `EXPECT-02`, `EXPECT-10` | URLs aceitas pela API podem estar fora da allowlist; devem degradar para fallback seguro. |
+| Mecanismos de fontes e imagens do Next.js | Inclui fontes no build e renderiza imagens remotas diretamente com `next/image`/`unoptimized` | Será introduzido | `AGP-26`, `AGP-29`, `AGP-30`, `EXPECT-02`, `EXPECT-10` | A disponibilidade e o formato final dependem do endereço externo; falhas devem degradar para fallback seguro. |
 | Vitest, React Testing Library e user-event | Testes unitários e de componentes pelo comportamento observável | Aprovado documentalmente; será introduzido | `EXPECT-01` a `EXPECT-09` | Mocks excessivos podem ocultar divergência do contrato real. |
 | Playwright | Valida cadastro, sessão, proteção, paginação, CRUD e logout no navegador | Aprovado documentalmente; será introduzido | `EXPECT-07`, `EXPECT-09`, `EXPECT-10` | Exige ambiente integrado determinístico, origem autorizada e dados isoláveis. |
 | ESLint, Prettier e verificação de tipos | Padronizam qualidade estática e bloqueiam regressões no pipeline | Aprovado documentalmente; serão introduzidos | `EXPECT-08` | Regras incompatíveis ou sobrepostas podem gerar ruído; configuração deve seguir a versão do framework. |
 | Docker | Ambiente de desenvolvimento e build independente do back-end | Aprovado documentalmente; será introduzido | Entregáveis e decisão de tecnologia | Requer configuração de URL da API por ambiente e não resolve compatibilidade de cookie em preview. |
-| Vercel e GitHub Actions | Preview, build, promoção, rollback e gates automatizados | Aprovado documentalmente; serão configurados | `EXPECT-08`, `EXPECT-10` | Previews de terceiros não usam a sessão de produção; variáveis e allowlists precisam ser coordenadas. |
+| Vercel e GitHub Actions | Preview, build, promoção, rollback e gates automatizados | Aprovado documentalmente; serão configurados | `EXPECT-08`, `EXPECT-10` | Previews de terceiros não usam a sessão de produção; a URL pública da API precisa ser coordenada. |
 
 Alternativas relevantes estão registradas nas decisões `DEC-01` a `DEC-12`; versões e comandos permanecem fora deste documento porque pertencem ao plano e à implementação.
 
@@ -236,7 +236,7 @@ Não há contratos de eventos — a solução não publica nem consome mensageri
 - **Segredos:** JWT e cookie nunca entram em código, estado, storage, logs, payloads ou mensagens. Não existe chave JWT ou segredo de autenticação no front-end.
 - **Credenciais de usuário:** senha vive apenas no estado efêmero do formulário pelo tempo necessário à tentativa, não é persistida e deve ser descartada ao concluir ou abandonar o fluxo.
 - **Validação de fronteiras:** schemas validam entradas e respostas. Dados inválidos da API são tratados como falha não confiável, não como objetos válidos da aplicação.
-- **Imagens remotas:** apenas origens explicitamente permitidas no ambiente são carregadas pelo mecanismo de imagem. URLs válidas para a API mas fora da allowlist recebem fallback, sem wildcard amplo ou proxy implícito.
+- **Imagens remotas:** URLs HTTP(S) validadas pela API são carregadas diretamente pelo navegador com `next/image`/`unoptimized`; falhas de carregamento recebem fallback acessível e não há proxy de imagem no front-end.
 - **Privacidade:** nome e e-mail são dados pessoais enviados diretamente à API apenas para cadastro e login. O front-end não cria retenção própria nem telemetria de produto.
 - **Observabilidade:** erros reconhecidos podem exibir o `correlationId` como referência de suporte. A aplicação não registra corpos de autenticação, senhas, cookies, JWTs ou respostas sensíveis. Não há serviço adicional de telemetria nesta versão.
 - **Supply chain:** instalação reproduzível, lockfile, análise estática, testes e build formam o gate antes da publicação.
@@ -267,7 +267,7 @@ Não há contratos de eventos — a solução não publica nem consome mensageri
 | `DEC-08` | Mutações bloqueiam reenvio e nunca têm retry automático; leituras oferecem retry manual. | Retry automático uniforme ou atualização otimista para todas as operações. | Evita duplicidade e respeita rate limit e idempotência real dos endpoints. | Falhas transitórias exigem ação explícita do usuário e podem tornar o fluxo mais lento. |
 | `DEC-09` | Feedback de sucesso entre rotas usa um sinal transitório público, sem dados pessoais ou segredo. | Storage persistente, cookie próprio, estado global ou somente toast antes da navegação. | Permite que a tela de destino confirme a operação sem criar persistência ou infraestrutura. | O sinal pode permanecer no histórico e precisa ser consumido/canonicalizado pela tela de destino. |
 | `DEC-10` | Tailwind CSS implementa tokens semânticos e shadcn/ui fornece primitivas acessíveis customizadas. | CSS local, biblioteca visual fechada, componentes totalmente manuais ou múltiplos frameworks. | Aplica a ADR-004, favorece consistência, reutilização e acessibilidade. | Componentes incorporados exigem revisão e customização; duas fontes aumentam o tamanho do build. |
-| `DEC-11` | Imagens remotas usam allowlist explícita por ambiente e fallback para origens não autorizadas. | Wildcard amplo, elemento de imagem sem política, proxy próprio ou restringir a API nesta entrega. | Mantém segurança do front-end sem mudar o contrato atual da API. | Uma URL aceita pela API pode não renderizar até a origem ser governada no ambiente. |
+| `DEC-11` | Imagens remotas usam `next/image` com `unoptimized` para carregar diretamente qualquer URL HTTP(S) validada pela API e fallback para falhas. | Otimização server-side dependente de allowlist, proxy próprio ou restringir a API nesta entrega. | Mantém o front-end compatível com URLs cadastradas pelo usuário e evita configuração por origem. | O carregamento depende da disponibilidade e do formato servido pelo endereço externo. |
 | `DEC-12` | A qualidade combina testes de schemas/cliente/componentes com E2E integrado e gates de CI antes do deploy. | Somente E2E, somente unitários ou validação manual. | Cobre comportamento local, contrato de fronteira e integração real em níveis proporcionais. | Ambiente E2E autorizado e determinístico aumenta o custo operacional da entrega. |
 
 ## Riscos, dependências e migração
@@ -277,7 +277,7 @@ Não há contratos de eventos — a solução não publica nem consome mensageri
 | CORS, allowlist de origem ou domínio same-site incompatível com o ambiente | Alto | Média | Validar ambiente integrado cedo; testar credenciais, preflight e mutações em origem autorizada; documentar matriz de ambientes. |
 | Divergência entre schemas do front-end e OpenAPI da API | Alto | Média | Validar respostas em runtime, manter testes de contrato e executar E2E contra versão controlada da API. |
 | Ausência de endpoint de sessão gerar leitura extra na criação | Médio | Alta | Limitar o probe a um item, não duplicá-lo em telas que já fazem leitura protegida e monitorar rate limit; substituir se o contrato evoluir. |
-| URL de imagem aceita pela API não pertencer à allowlist do front-end | Médio | Alta | Configurar origens explícitas por ambiente, usar fallback acessível e alinhar governança de URLs antes da produção. |
+| URL externa de imagem estar indisponível ou não servir uma imagem | Médio | Média | Carregar diretamente no navegador, manter fallback acessível e validar o formato HTTP(S) na API. |
 | Cursor expirar ou ficar inválido durante navegação | Médio | Baixa | Tratar `400` como sequência inválida, limpar a pilha e oferecer retorno à primeira página. |
 | Resposta atrasada sobrescrever estado mais recente | Médio | Média | Cancelar leituras ao trocar página ou desmontar a tela e ignorar resultados obsoletos. |
 | Retry ou duplo clique duplicar mutação | Alto | Média | Desabilitar ação durante envio e proibir retry automático de escrita. |
@@ -325,7 +325,7 @@ Migração: não aplicável — não existe aplicação ou estado local anterior
 | `AGP-23` | Índice público e URL; `DEC-06` | A posição não representa total de páginas. |
 | `AGP-24` | Pilha sequencial; `DEC-06` | Não existe cursor para posição não visitada. |
 | `AGP-25` | Recuperação/canonicalização da paginação; `DEC-06` | Perda da pilha retorna à primeira página. |
-| `AGP-26` | Formulário, schema e gateway de produtos; `DEC-03`, `DEC-11` | URL HTTP(S) é validada; renderização obedece allowlist. |
+| `AGP-26` | Formulário, schema e gateway de produtos; `DEC-03`, `DEC-11` | URL HTTP(S) é validada; renderização direta usa fallback em caso de falha. |
 | `AGP-27` | Schema de produto; `DEC-03` | Limites operacionais são espelhados no cliente. |
 | `AGP-28` | Fluxo de criação e feedback; `DEC-09` | Sucesso depende de `201` e resposta validada. |
 | `AGP-29` | Tela de detalhe e `GET /products/:id`; `DEC-03`, `DEC-05` | A leitura também confirma a sessão. |
