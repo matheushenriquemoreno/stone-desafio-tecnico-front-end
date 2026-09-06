@@ -131,6 +131,8 @@ test.describe('catálogo e paginação por cursor', () => {
         hasText: 'Muitas consultas em sequência',
       }),
     ).toBeVisible()
+    await expect(page.getByRole('banner')).not.toBeVisible()
+    await expect(page.getByRole('link', { name: 'Novo produto' })).not.toBeVisible()
     shouldSucceed = true
     await page.getByRole('button', { name: 'Tentar novamente' }).click()
     await expect(page.getByRole('heading', { name: 'Catálogo vazio' })).toBeVisible()
@@ -139,6 +141,42 @@ test.describe('catálogo e paginação por cursor', () => {
       'href',
       '/products/new',
     )
+  })
+
+  test('revela o shell e o catálogo somente após confirmar a sessão', async ({
+    page,
+  }) => {
+    let releaseResponse: (() => void) | undefined
+    let requestStarted: (() => void) | undefined
+    const responseHold = new Promise<void>((resolve) => {
+      releaseResponse = resolve
+    })
+    const requestStartedSignal = new Promise<void>((resolve) => {
+      requestStarted = resolve
+    })
+
+    await page.route(/\/products(?:\?.*)?$/, async (route) => {
+      requestStarted?.()
+      await responseHold
+      await route.fulfill({
+        body: JSON.stringify(pageOne),
+        contentType: 'application/json',
+        status: 200,
+      })
+    })
+
+    await page.goto('/')
+    await requestStartedSignal
+    await expect(page.getByRole('banner')).not.toBeVisible()
+    await expect(
+      page.getByRole('status', { name: 'Carregando catálogo' }),
+    ).not.toBeVisible()
+
+    releaseResponse?.()
+    await expect(page.getByRole('heading', { name: 'Catálogo' })).toBeVisible()
+    await expect(page.getByRole('banner')).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Novo produto' })).toBeVisible()
+    await expect(page.getByText('Produto um')).toBeVisible()
   })
 
   test('redireciona para login sem expor a área protegida quando a API cai', async ({
@@ -155,6 +193,54 @@ test.describe('catálogo e paginação por cursor', () => {
     await expect(
       page.getByText('Não foi possível carregar o catálogo'),
     ).not.toBeVisible()
+  })
+
+  test('mantém a entrada neutra enquanto confirma a sessão', async ({ page }) => {
+    let releaseResponse: (() => void) | undefined
+    let requestStarted: (() => void) | undefined
+    const responseHold = new Promise<void>((resolve) => {
+      releaseResponse = resolve
+    })
+    const requestStartedSignal = new Promise<void>((resolve) => {
+      requestStarted = resolve
+    })
+
+    await page.route(/\/products(?:\?.*)?$/, async (route) => {
+      requestStarted?.()
+      await responseHold
+      await route.fulfill({
+        body: JSON.stringify({
+          code: 'UNAUTHORIZED',
+          correlationId: 'e2e-entry-session',
+          message: 'Sessão ausente.',
+          statusCode: 401,
+        }),
+        contentType: 'application/json',
+        status: 401,
+      })
+    })
+
+    await page.goto('/')
+    await requestStartedSignal
+
+    await expect(page.getByRole('banner')).not.toBeVisible()
+    await expect(page.getByRole('link', { name: 'Catálogo' })).not.toBeVisible()
+    await expect(page.getByRole('link', { name: 'Novo produto' })).not.toBeVisible()
+    await expect(page.getByRole('button', { name: 'Sair' })).not.toBeVisible()
+    await expect(
+      page.getByRole('status', { name: 'Carregando catálogo' }),
+    ).not.toBeVisible()
+    expect(
+      await page
+        .locator(
+          'main a,main button,main input,main select,main textarea,main [tabindex]:not([tabindex="-1"])',
+        )
+        .count(),
+    ).toBe(0)
+
+    releaseResponse?.()
+    await expect(page).toHaveURL(/\/login$/)
+    await expect(page.getByRole('heading', { name: 'Boas-vindas' })).toBeVisible()
   })
 
   test('redireciona para login quando a sessão expira na próxima página', async ({

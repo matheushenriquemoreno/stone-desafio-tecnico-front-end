@@ -1,5 +1,6 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import Link from 'next/link'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { getSearchParam, push, replace } = vi.hoisted(() => ({
@@ -49,7 +50,7 @@ describe('ProductsScreen', () => {
     vi.clearAllMocks()
   })
 
-  it('mostra skeleton durante a leitura e o total após resposta válida', async () => {
+  it('mantém a entrada neutra e revela o catálogo após resposta válida', async () => {
     let resolveRequest:
       | ((value: { kind: 'success'; page: typeof productPage }) => void)
       | undefined
@@ -60,14 +61,29 @@ describe('ProductsScreen', () => {
         }),
     )
 
-    render(<ProductsScreen />)
+    render(
+      <ProductsScreen
+        protectedHeader={
+          <header>
+            <nav aria-label="Navegação protegida">
+              <Link href="/">Catálogo</Link>
+            </nav>
+          </header>
+        }
+      />,
+    )
     expect(
-      screen.getByRole('status', { name: 'Carregando catálogo' }),
+      screen.getByRole('status', { name: 'Confirmando sessão' }),
     ).toBeInTheDocument()
+    expect(screen.queryByRole('banner')).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('status', { name: 'Carregando catálogo' }),
+    ).not.toBeInTheDocument()
 
     resolveRequest?.({ kind: 'success', page: productPage })
 
     expect(await screen.findByRole('heading', { name: 'Catálogo' })).toBeInTheDocument()
+    expect(screen.getByRole('banner')).toBeVisible()
     expect(screen.getByText('12 produtos')).toBeInTheDocument()
     expect(screen.getByText('Produto principal')).toBeInTheDocument()
   })
@@ -78,19 +94,28 @@ describe('ProductsScreen', () => {
       kind: 'error',
     })
 
-    render(<ProductsScreen />)
+    render(
+      <ProductsScreen
+        protectedHeader={<header aria-label="Shell protegido">Protegido</header>}
+      />,
+    )
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'))
     expect(await screen.findByRole('status')).toHaveTextContent(
       'Sua sessão não está mais disponível. Redirecionando para o login…',
     )
     expect(screen.queryByText('mensagem externa')).not.toBeInTheDocument()
+    expect(screen.queryByRole('banner')).not.toBeInTheDocument()
   })
 
   it('redireciona para login quando a API fica indisponível na primeira leitura', async () => {
     listProductsMock.mockResolvedValue({ kind: 'failure', reason: 'network' })
 
-    render(<ProductsScreen />)
+    render(
+      <ProductsScreen
+        protectedHeader={<header aria-label="Shell protegido">Protegido</header>}
+      />,
+    )
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'))
     expect(await screen.findByRole('status')).toHaveTextContent(
@@ -99,6 +124,7 @@ describe('ProductsScreen', () => {
     expect(
       screen.queryByText('Não foi possível carregar o catálogo'),
     ).not.toBeInTheDocument()
+    expect(screen.queryByRole('banner')).not.toBeInTheDocument()
   })
 
   it('remove conteúdo protegido anterior antes de redirecionar após nova leitura 401', async () => {
@@ -129,7 +155,11 @@ describe('ProductsScreen', () => {
       page: { items: [], total: 0 },
     })
 
-    render(<ProductsScreen />)
+    render(
+      <ProductsScreen
+        protectedHeader={<header aria-label="Shell protegido">Protegido</header>}
+      />,
+    )
 
     expect(
       await screen.findByRole('heading', { name: 'Catálogo vazio' }),
@@ -175,6 +205,7 @@ describe('ProductsScreen', () => {
       'Muitas consultas em sequência. Aguarde 17 segundos antes de tentar novamente.',
     )
     expect(alert).toHaveTextContent('Referência: corr-products-limit')
+    expect(screen.queryByRole('banner')).not.toBeInTheDocument()
   })
 
   it('confirma remoção no catálogo e lê somente o sinal público', async () => {
