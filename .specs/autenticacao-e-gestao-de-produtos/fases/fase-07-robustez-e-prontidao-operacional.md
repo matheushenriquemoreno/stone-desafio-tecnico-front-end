@@ -38,7 +38,9 @@ Executar uma suíte transversal que prove a forma das chamadas, a validação de
 - **Critérios de conclusão:** nenhuma ocorrência indevida permanece; cada ocorrência legítima está explicada pelo teste/documentação; cliente chama apenas `NEXT_PUBLIC_API_URL` com credenciais; mensagens e logs não expõem segredo ou detalhe bruto.
 - **Riscos ou premissas:** busca textual produz falsos positivos em testes/documentação; cada ocorrência deve ser lida antes de classificar.
 
-**Status desta tarefa:** Pendente nesta etapa de commits; a implementação já está preparada no worktree e será registrada após T33.
+**Status desta tarefa:** Concluída nesta execução.
+
+**Evidências:** `src/lib/security-contract.spec.ts` verifica transversalmente a ausência de Web Storage, `Authorization`/`Bearer`, acesso a cookie, cabeçalho CSRF customizado, `Origin`/`Referer` forjados, silenciadores TypeScript e endpoints intermediários; a suíte dedicada passou. `product-detail-screen.spec.tsx` também cobre que uma resposta atrasada não substitua o detalhe atual. A suíte completa passou com 25 arquivos e 172 testes.
 
 ## Tarefa T35 — Entregar configuração, container e documentação executáveis
 

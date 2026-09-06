@@ -28,6 +28,7 @@ vi.mock('next/image', () => ({
 }))
 
 import { ProductDetailScreen } from './product-detail-screen'
+import type { ProductDetailResult } from '@/features/products/types'
 
 const product = {
   createdAt: '2026-09-02T12:00:00.000Z',
@@ -292,5 +293,35 @@ describe('ProductDetailScreen', () => {
     expect(
       screen.queryByRole('button', { name: 'Excluir produto' }),
     ).not.toBeInTheDocument()
+  })
+
+  it('ignora resposta atrasada de um produto anterior sem substituir o detalhe atual', async () => {
+    const firstProduct = { ...product, id: 'product-first', name: 'Produto antigo' }
+    const secondProduct = { ...product, id: 'product-second', name: 'Produto atual' }
+    let resolveFirst: (result: ProductDetailResult) => void = () => undefined
+    let resolveSecond: (result: ProductDetailResult) => void = () => undefined
+    const firstRequest = new Promise<ProductDetailResult>((resolve) => {
+      resolveFirst = resolve
+    })
+    const secondRequest = new Promise<ProductDetailResult>((resolve) => {
+      resolveSecond = resolve
+    })
+    getProductMock.mockReturnValueOnce(firstRequest).mockReturnValueOnce(secondRequest)
+
+    const rendered = render(<ProductDetailScreen productId={firstProduct.id} />)
+    rendered.rerender(<ProductDetailScreen productId={secondProduct.id} />)
+
+    await vi.waitFor(() => expect(getProductMock).toHaveBeenCalledTimes(2))
+    resolveSecond({ kind: 'success', product: secondProduct })
+
+    expect(await screen.findByRole('heading', { name: 'Produto atual' })).toBeVisible()
+
+    resolveFirst({ kind: 'success', product: firstProduct })
+
+    await vi.waitFor(() =>
+      expect(
+        screen.queryByRole('heading', { name: 'Produto antigo' }),
+      ).not.toBeInTheDocument(),
+    )
   })
 })
