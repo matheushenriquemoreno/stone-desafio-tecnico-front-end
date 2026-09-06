@@ -6,7 +6,7 @@
 | Last Updated | 2026-09-06 |
 
 **Escopo revisado:** correção do bug `flash-catalogo-antes-confirmacao-sessao`
-**Versão da avaliação:** 1
+**Versão da avaliação:** 2
 
 ## Artefatos analisados
 
@@ -18,7 +18,7 @@
 
 ## Resumo executivo
 
-A implementação elimina o shell e o skeleton da primeira renderização da raiz e mantém somente uma superfície neutra até a primeira leitura protegida responder. O review confirmou os caminhos `200`, `401`, falha de rede e `429`, além da preservação do shell nas rotas de produto. Veredito **Aprovado**; as duas falhas restantes do E2E completo dependem da API local de cadastro/sessão e não envolvem esta correção.
+A implementação elimina o shell e o skeleton da primeira renderização da raiz e mantém somente um loading visual da aplicação, sem conteúdo protegido, até a primeira leitura protegida responder. O review confirmou os caminhos `200`, `401`, falha de rede e `429`, além da preservação do shell nas rotas de produto. Veredito **Aprovado**; as duas falhas restantes do E2E completo dependem da API local de cadastro/sessão e não envolvem esta correção.
 
 ## Resultado das verificações obrigatórias
 
@@ -31,19 +31,19 @@ A implementação elimina o shell e o skeleton da primeira renderização da rai
 | Plano                  | Atendida               | Escopo limitado à entrada `/`; `/products/new` e `/products/:id` mantêm o shell no layout aninhado.                              |
 | Escopo                 | Atendida               | Mudanças restritas à composição da raiz, slot visual, testes e relatórios do bug.                                                |
 | Qualidade              | Atendida               | Typecheck, lint, build, Prettier dos arquivos tocados e `git diff --check` passaram.                                             |
-| Padrões do projeto     | Atendida               | `ProtectedHeader` reutiliza os tokens e componentes existentes; loading visualmente oculto mantém status acessível.              |
+| Padrões do projeto     | Atendida               | `ProtectedHeader` e `Spinner` reutilizam os componentes e tokens existentes; loading visível mantém status acessível.            |
 | Manutenibilidade       | Atendida               | Uma única chamada existente controla a transição; paginações posteriores preservam o shell após acesso confirmado.               |
 | Riscos                 | Atendida com limitação | O E2E completo teve 22 passagens, 2 skips e 2 falhas por API local indisponível nos fluxos de cadastro/sessão.                   |
 
 ## Matriz de rastreabilidade
 
-| Requisito do bug                                    | Código                                                                           | Teste                                                                      | Evidência                                                                             | Status     |
-| --------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ---------- |
-| Nenhum shell ou skeleton durante a primeira leitura | `ProductsScreen`, `SessionDecisionLoading` e composição sem shell no layout raiz | `mantém a entrada neutra enquanto confirma a sessão` + teste de componente | Banner, links, logout, skeleton e foco interno ausentes enquanto a rota fica pendente | Comprovado |
-| Sessão válida revela a página principal             | `hasConfirmedAccess` e `protectedHeader`                                         | `revela o shell e o catálogo somente após confirmar a sessão`              | `200` revela banner, link de novo produto e produto                                   | Comprovado |
-| Sessão inválida/falha protegida não expõe conteúdo  | estados `unauthorized` e `redirectToLogin`                                       | cenários `401`, API cai e testes de componente                             | URL `/login` sem catálogo ou navegação protegida                                      | Comprovado |
-| Rate limit inicial permanece recuperável e seguro   | `getProductsError` sem marcar acesso confirmado                                  | `permite retry manual após rate limit...` + teste de componente            | Erro e retry aparecem sem banner; sucesso posterior revela shell                      | Comprovado |
-| Rotas de produto permanecem protegidas              | `src/app/(protected)/products/layout.tsx`                                        | E2E de criação e detalhe                                                   | Fluxos existentes continuam passando no conjunto controlado                           | Comprovado |
+| Requisito do bug                                    | Código                                                                           | Teste                                                                   | Evidência                                                                                                      | Status     |
+| --------------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ---------- |
+| Nenhum shell ou skeleton durante a primeira leitura | `ProductsScreen`, `SessionDecisionLoading` e composição sem shell no layout raiz | `mostra o loading de sessão sem expor o catálogo` + teste de componente | Loading visual presente; banner, links, logout, skeleton e foco interno ausentes enquanto a rota fica pendente | Comprovado |
+| Sessão válida revela a página principal             | `hasConfirmedAccess` e `protectedHeader`                                         | `revela o shell e o catálogo somente após confirmar a sessão`           | `200` revela banner, link de novo produto e produto                                                            | Comprovado |
+| Sessão inválida/falha protegida não expõe conteúdo  | estados `unauthorized` e `redirectToLogin`                                       | cenários `401`, API cai e testes de componente                          | URL `/login` sem catálogo ou navegação protegida                                                               | Comprovado |
+| Rate limit inicial permanece recuperável e seguro   | `getProductsError` sem marcar acesso confirmado                                  | `permite retry manual após rate limit...` + teste de componente         | Erro e retry aparecem sem banner; sucesso posterior revela shell                                               | Comprovado |
+| Rotas de produto permanecem protegidas              | `src/app/(protected)/products/layout.tsx`                                        | E2E de criação e detalhe                                                | Fluxos existentes continuam passando no conjunto controlado                                                    | Comprovado |
 
 ## Achados
 
@@ -54,7 +54,7 @@ A implementação elimina o shell e o skeleton da primeira renderização da rai
 ## Riscos residuais e ressalvas aceitas
 
 - O escopo não altera a entrada direta de `/products/new` ou `/products/:id`.
-- O status “Confirmando sessão” é visualmente oculto, mas permanece disponível para tecnologia assistiva.
+- O loading “Preparando seu catálogo…” é visual e mantém o status “Confirmando sessão” acessível.
 - Nenhuma configuração externa, publicação ou smoke test de produção foi executado.
 
 ## Veredito
@@ -69,6 +69,7 @@ Bug fechado. Correção, testes e relatório estão prontos para commit atômico
 
 ## Histórico de revisões anteriores
 
-| Versão | Data       | Veredito | Resumo                                     |
-| ------ | ---------- | -------- | ------------------------------------------ |
-| 1      | 2026-09-06 | Aprovado | Primeira revisão independente da correção. |
+| Versão | Data       | Veredito | Resumo                                                 |
+| ------ | ---------- | -------- | ------------------------------------------------------ |
+| 1      | 2026-09-06 | Aprovado | Primeira revisão independente da correção.             |
+| 2      | 2026-09-06 | Aprovado | Loading visual adicionado sem expor o shell protegido. |

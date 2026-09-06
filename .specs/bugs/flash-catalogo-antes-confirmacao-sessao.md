@@ -7,7 +7,7 @@
 
 ## Comportamento esperado e observado
 
-**Esperado:** ao acessar `/`, a aplicação deve manter uma transição neutra até a resposta da primeira leitura protegida. Com sessão válida, o cabeçalho e o catálogo aparecem; sem sessão válida, a pessoa é conduzida ao login sem visualizar a área protegida.
+**Esperado:** ao acessar `/`, a aplicação deve exibir um loading visual da aplicação, sem conteúdo protegido, até a resposta da primeira leitura protegida. Com sessão válida, o cabeçalho e o catálogo aparecem; sem sessão válida, a pessoa é conduzida ao login sem visualizar a área protegida.
 
 **Observado:** o cabeçalho protegido, os links “Catálogo”, “Novo produto”, “Sair” e o skeleton do catálogo aparecem imediatamente. Aproximadamente um segundo depois, a navegação muda para `/login`.
 
@@ -41,7 +41,7 @@ O layout do grupo protegido envolve `/` com `ProtectedShell` no primeiro render,
 
 ## Proposta de correção
 
-Isolar `/` do layout que monta o shell antecipadamente, extrair o cabeçalho reutilizável e entregá-lo à `ProductsScreen` como slot. A tela deve renderizar somente um fundo neutro durante a primeira leitura e revelar o slot após sucesso; em `401` ou falha protegida, deve removê-lo antes do redirecionamento.
+Isolar `/` do layout que monta o shell antecipadamente, extrair o cabeçalho reutilizável e entregá-lo à `ProductsScreen` como slot. A tela deve renderizar apenas um loading visual da aplicação, sem dados, navegação ou ações protegidas, durante a primeira leitura e revelar o slot após sucesso; em `401` ou falha protegida, deve removê-lo antes do redirecionamento.
 
 ## Teste de regressão
 
@@ -51,12 +51,12 @@ O E2E deve manter `GET /products` pendente e comprovar ausência do banner, link
 
 - Teste de regressão antes da correção: falhou pelo motivo certo; `getByRole('banner')` permaneceu visível enquanto `GET /products` estava pendente.
 - Correção aplicada: o layout do grupo protegido deixou de envolver `/`; o shell foi preservado em `src/app/(protected)/products/layout.tsx`; `ProtectedHeader` e o slot `protectedHeader` controlam a revelação após a confirmação.
-- Teste de regressão depois: passou — os cenários E2E de entrada neutra com `401` e de revelação com `200` passaram; o estado pendente não contém banner, links, logout, skeleton ou foco interno.
-- Reprodução original: não reproduz mais — a entrada permanece neutra até a resposta e chega ao login sem exibir a área protegida.
+- Teste de regressão depois: passou — os cenários E2E de loading de entrada com `401` e de revelação com `200` passaram; o estado pendente exibe somente o loading visual e não contém banner, links, logout, skeleton ou foco interno.
+- Reprodução original: não reproduz mais — a entrada mostra o loading enquanto aguarda a resposta e chega ao login sem exibir a área protegida.
 - Testes relevantes do projeto: `npm test -- --run` passou com 25 arquivos e 178 testes; `npm run typecheck`, `npm run lint`, `npm run build`, Prettier dos arquivos tocados e `git diff --check` passaram; E2E completo passou em 22 de 26 cenários, com 2 pulados e 2 falhas de cadastro/sessão por API local indisponível.
 
 ## Riscos e prevenções futuras
 
 - O escopo fica restrito à raiz; as rotas `/products/new` e `/products/:id` preservam o layout atual.
-- O fallback neutro mantém somente um status visualmente oculto para acessibilidade e não cria estado de sessão paralelo.
+- O fallback de loading usa somente os componentes visuais existentes, mantém o status acessível e não cria estado de sessão paralelo.
 - O E2E integrado de cadastro e sessão continua dependente da API NestJS autorizada em `localhost:3001`; essa limitação não afeta a reprodução interceptada desta correção.

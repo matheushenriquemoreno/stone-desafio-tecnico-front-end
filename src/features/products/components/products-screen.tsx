@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Spinner } from '@/components/ui/spinner'
 import {
   canGoNext,
   canGoPrevious,
@@ -78,8 +79,22 @@ function getFailureError(): ProductsViewState {
 
 function SessionDecisionLoading() {
   return (
-    <div aria-label="Confirmando sessão" className="sr-only" role="status">
-      Confirmando sessão…
+    <div
+      aria-label="Confirmando sessão"
+      className="flex min-h-svh flex-col items-center justify-center gap-5 text-center"
+      role="status"
+    >
+      <div
+        aria-hidden="true"
+        className="flex size-14 items-center justify-center rounded-2xl bg-primary font-display text-3xl font-semibold text-primary-foreground shadow-sm"
+      >
+        S
+      </div>
+      <div className="flex flex-col gap-1">
+        <p className="font-display text-2xl font-semibold tracking-tight">Stone</p>
+        <p className="text-sm text-muted-foreground">Preparando seu catálogo…</p>
+      </div>
+      <Spinner aria-hidden="true" className="size-5 text-primary" />
     </div>
   )
 }

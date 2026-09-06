@@ -168,6 +168,7 @@ test.describe('catálogo e paginação por cursor', () => {
     await page.goto('/')
     await requestStartedSignal
     await expect(page.getByRole('banner')).not.toBeVisible()
+    await expect(page.getByText('Preparando seu catálogo…')).toBeVisible()
     await expect(
       page.getByRole('status', { name: 'Carregando catálogo' }),
     ).not.toBeVisible()
@@ -195,7 +196,7 @@ test.describe('catálogo e paginação por cursor', () => {
     ).not.toBeVisible()
   })
 
-  test('mantém a entrada neutra enquanto confirma a sessão', async ({ page }) => {
+  test('mostra o loading de sessão sem expor o catálogo', async ({ page }) => {
     let releaseResponse: (() => void) | undefined
     let requestStarted: (() => void) | undefined
     const responseHold = new Promise<void>((resolve) => {
@@ -224,6 +225,7 @@ test.describe('catálogo e paginação por cursor', () => {
     await requestStartedSignal
 
     await expect(page.getByRole('banner')).not.toBeVisible()
+    await expect(page.getByText('Preparando seu catálogo…')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Catálogo' })).not.toBeVisible()
     await expect(page.getByRole('link', { name: 'Novo produto' })).not.toBeVisible()
     await expect(page.getByRole('button', { name: 'Sair' })).not.toBeVisible()

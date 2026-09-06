@@ -75,6 +75,7 @@ describe('ProductsScreen', () => {
     expect(
       screen.getByRole('status', { name: 'Confirmando sessão' }),
     ).toBeInTheDocument()
+    expect(screen.getByText('Preparando seu catálogo…')).toBeVisible()
     expect(screen.queryByRole('banner')).not.toBeInTheDocument()
     expect(
       screen.queryByRole('status', { name: 'Carregando catálogo' }),
