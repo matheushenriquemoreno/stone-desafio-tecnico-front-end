@@ -58,6 +58,17 @@ describe('ProductCreationScreen', () => {
     expect(createProductMock).not.toHaveBeenCalled()
   })
 
+  it('formata o preço em Real e não mantém letras no campo', async () => {
+    const user = userEvent.setup()
+
+    render(<ProductCreationScreen />)
+    const priceInput = screen.getByLabelText('Preço')
+
+    await user.type(priceInput, 'abc9990xyz')
+
+    expect(priceInput).toHaveValue('R$ 99,90')
+  })
+
   it('bloqueia duplo envio e navega somente após criação validada', async () => {
     let resolveCreate:
       | ((value: { kind: 'success'; product: typeof product }) => void)
@@ -80,6 +91,12 @@ describe('ProductCreationScreen', () => {
     await user.dblClick(submitButton)
 
     expect(createProductMock).toHaveBeenCalledOnce()
+    expect(createProductMock).toHaveBeenCalledWith({
+      description: 'Descrição do produto',
+      imageUrl: product.imageUrl,
+      name: 'Produto principal',
+      price: 99.9,
+    })
     expect(submitButton).toBeDisabled()
     expect(push).not.toHaveBeenCalled()
 

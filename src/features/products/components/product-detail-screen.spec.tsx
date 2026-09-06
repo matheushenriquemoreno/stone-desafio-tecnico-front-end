@@ -156,6 +156,21 @@ describe('ProductDetailScreen', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Produto atualizado')
   })
 
+  it('abre a edição com preço em Real e a mesma composição da criação', async () => {
+    getProductMock.mockResolvedValue({ kind: 'success', product })
+    const user = userEvent.setup()
+
+    render(<ProductDetailScreen productId={product.id} />)
+    await user.click(await screen.findByRole('button', { name: 'Editar produto' }))
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Editar produto' }),
+    ).toBeVisible()
+    expect(screen.getByText('Catálogo compartilhado')).toBeVisible()
+    expect(screen.getByText('Dados do produto')).toBeVisible()
+    expect(screen.getByLabelText('Preço')).toHaveValue('R$ 99,90')
+  })
+
   it('impede salvar sem alteração e preserva os dados editáveis', async () => {
     getProductMock.mockResolvedValue({ kind: 'success', product })
     const user = userEvent.setup()

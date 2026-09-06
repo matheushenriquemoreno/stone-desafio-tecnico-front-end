@@ -3,15 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { createProduct } from '@/features/products/api/products-gateway'
 import { ProductForm } from '@/features/products/components/product-form'
+import { ProductFormLayout } from '@/features/products/components/product-form-layout'
 import { getProductMutationFeedback } from '@/features/products/product-mutation-feedback'
 import type {
   ProductFieldError,
@@ -87,43 +81,22 @@ export function ProductCreationScreen() {
   }
 
   return (
-    <section
-      aria-labelledby="new-product-title"
-      className="mx-auto flex max-w-2xl flex-col gap-6"
+    <ProductFormLayout
+      cardDescription="Todos os campos são obrigatórios."
+      description="Informe os dados públicos do produto para adicioná-lo ao catálogo."
+      title="Novo produto"
+      titleId="new-product-title"
     >
-      <header className="flex flex-col gap-2">
-        <p className="text-sm font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-          Catálogo compartilhado
-        </p>
-        <h1
-          id="new-product-title"
-          className="font-display text-5xl leading-none font-semibold"
-        >
-          Novo produto
-        </h1>
-        <p className="text-muted-foreground">
-          Informe os dados públicos do produto para adicioná-lo ao catálogo.
-        </p>
-      </header>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Dados do produto</CardTitle>
-          <CardDescription>Todos os campos são obrigatórios.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ProductForm
-            correlationId={correlationId}
-            fieldErrors={fieldErrors}
-            generalError={generalError}
-            initialValues={emptyProductValues}
-            isSubmitting={isSubmitting}
-            onFieldChange={clearErrors}
-            onSubmit={handleSubmit}
-            submitLabel="Criar produto"
-          />
-        </CardContent>
-      </Card>
-    </section>
+      <ProductForm
+        correlationId={correlationId}
+        fieldErrors={fieldErrors}
+        generalError={generalError}
+        initialValues={emptyProductValues}
+        isSubmitting={isSubmitting}
+        onFieldChange={clearErrors}
+        onSubmit={handleSubmit}
+        submitLabel="Criar produto"
+      />
+    </ProductFormLayout>
   )
 }

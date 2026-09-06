@@ -15,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
+import { formatProductPriceInput } from '@/features/products/format-product-price'
 import {
   productFormSchema,
   type ProductFormValues,
@@ -230,10 +231,14 @@ export function ProductForm({
             <Input
               aria-describedby={priceError ? 'product-price-error' : undefined}
               aria-invalid={priceError !== undefined}
+              autoComplete="off"
               disabled={isSubmitting}
               id="product-price"
-              inputMode="decimal"
-              onChange={(event) => updateField('price', event.target.value)}
+              inputMode="numeric"
+              onChange={(event) =>
+                updateField('price', formatProductPriceInput(event.target.value))
+              }
+              placeholder="R$ 0,00"
               ref={(element) => {
                 inputRefs.current.price = element
               }}

@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { parseProductPriceInput } from '@/features/products/format-product-price'
+
 const productNameSchema = z
   .string({ error: 'Informe o nome do produto.' })
   .trim()
@@ -47,10 +49,10 @@ const productFormPriceSchema = z
   .trim()
   .min(1, 'Informe o preço.')
   .refine(
-    (value) => productPriceSchema.safeParse(Number(value)).success,
+    (value) => productPriceSchema.safeParse(parseProductPriceInput(value)).success,
     'Informe um preço válido ou use até duas casas decimais.',
   )
-  .transform(Number)
+  .transform(parseProductPriceInput)
 
 export const productInputSchema = z.strictObject({
   description: productDescriptionSchema,

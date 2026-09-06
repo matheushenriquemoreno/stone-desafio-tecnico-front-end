@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { patchProduct } from '@/features/products/api/products-gateway'
 import { ProductForm } from '@/features/products/components/product-form'
+import { ProductFormLayout } from '@/features/products/components/product-form-layout'
+import { formatProductPrice } from '@/features/products/format-product-price'
 import { buildProductPatch } from '@/features/products/product-patch'
 import { getProductMutationFeedback } from '@/features/products/product-mutation-feedback'
 import type {
@@ -34,7 +36,7 @@ function productToFormValues(product: Product): ProductFormValues {
     description: product.description,
     imageUrl: product.imageUrl,
     name: product.name,
-    price: String(product.price),
+    price: formatProductPrice(product.price),
   }
 }
 
@@ -119,16 +121,12 @@ export function ProductEditForm({
   }
 
   return (
-    <section aria-labelledby="edit-product-title" className="flex flex-col gap-5">
-      <header className="flex flex-col gap-2">
-        <h2 id="edit-product-title" className="font-display text-3xl font-semibold">
-          Editar produto
-        </h2>
-        <p className="text-muted-foreground">
-          Altere apenas os campos necessários. Os demais permanecem inalterados.
-        </p>
-      </header>
-
+    <ProductFormLayout
+      cardDescription="Os campos não alterados serão preservados."
+      description="Altere apenas os campos necessários. Os demais permanecem inalterados."
+      title="Editar produto"
+      titleId="edit-product-title"
+    >
       <ProductForm
         correlationId={correlationId}
         fieldErrors={fieldErrors}
@@ -140,9 +138,15 @@ export function ProductEditForm({
         submitLabel="Salvar alterações"
       />
 
-      <Button disabled={isSubmitting} onClick={onCancel} type="button" variant="ghost">
+      <Button
+        className="w-full sm:w-fit"
+        disabled={isSubmitting}
+        onClick={onCancel}
+        type="button"
+        variant="ghost"
+      >
         Cancelar
       </Button>
-    </section>
+    </ProductFormLayout>
   )
 }

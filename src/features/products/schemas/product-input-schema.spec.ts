@@ -6,7 +6,7 @@ const validFormValues = {
   description: 'Descrição do produto',
   imageUrl: ' https://images.example.com/product.png ',
   name: ' Produto principal ',
-  price: '99.90',
+  price: 'R$ 99,90',
 }
 
 describe('product input schemas', () => {

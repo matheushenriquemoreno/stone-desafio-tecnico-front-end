@@ -36,6 +36,19 @@ async function fillValidProduct(page: Page) {
   await page.getByLabel('URL da imagem').fill(initialProduct.imageUrl)
 }
 
+async function getProductFormCardWidth(page: Page): Promise<number> {
+  const card = page
+    .getByText('Dados do produto', { exact: true })
+    .locator('xpath=ancestor::*[@data-slot="card"][1]')
+  const bounds = await card.boundingBox()
+
+  if (!bounds) {
+    throw new Error('O card do formulário de produto não está visível.')
+  }
+
+  return bounds.width
+}
+
 test.describe('consulta, edição e exclusão de produtos', () => {
   test('cria, consulta, edita parcialmente e exclui somente após confirmação', async ({
     page,
@@ -43,6 +56,7 @@ test.describe('consulta, edição e exclusão de produtos', () => {
     let currentProduct = initialProduct
     let probeRequests = 0
     let createRequests = 0
+    let createBody: unknown
     let detailRequests = 0
     let listRequests = 0
     const listRequestCursors: (string | null)[] = []
@@ -75,6 +89,7 @@ test.describe('consulta, edição e exclusão de produtos', () => {
 
       if (request.method() === 'POST' && isCollectionRequest(route)) {
         createRequests += 1
+        createBody = request.postDataJSON()
         await fulfill(route, currentProduct, 201)
         return
       }
@@ -118,6 +133,8 @@ test.describe('consulta, edição e exclusão de produtos', () => {
     await page.goto('/products/new')
     await expect(page.getByRole('heading', { name: 'Novo produto' })).toBeVisible()
     await fillValidProduct(page)
+    await expect(page.getByLabel('Preço')).toHaveValue('R$ 99,90')
+    const creationCardWidth = await getProductFormCardWidth(page)
     await page.getByRole('button', { name: 'Criar produto' }).click()
 
     await expect(page.getByRole('heading', { name: initialProduct.name })).toBeVisible()
@@ -126,7 +143,14 @@ test.describe('consulta, edição e exclusão de produtos', () => {
     ).toBeVisible()
 
     await page.getByRole('button', { name: 'Editar produto' }).click()
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Editar produto' }),
+    ).toBeVisible()
+    await expect(page.getByText('Catálogo compartilhado')).toBeVisible()
+    await expect(page.getByText('Dados do produto')).toBeVisible()
     await expect(page.getByLabel('Nome')).toHaveValue(initialProduct.name)
+    await expect(page.getByLabel('Preço')).toHaveValue('R$ 99,90')
+    expect(await getProductFormCardWidth(page)).toBe(creationCardWidth)
     await page.getByRole('button', { name: 'Cancelar' }).click()
     expect(patchRequests).toBe(0)
 
@@ -159,6 +183,12 @@ test.describe('consulta, edição e exclusão de produtos', () => {
 
     expect(probeRequests).toBe(1)
     expect(createRequests).toBe(1)
+    expect(createBody).toEqual({
+      description: initialProduct.description,
+      imageUrl: initialProduct.imageUrl,
+      name: initialProduct.name,
+      price: initialProduct.price,
+    })
     expect(detailRequests).toBeGreaterThanOrEqual(1)
     expect(listRequests).toBeGreaterThanOrEqual(1)
     expect(listRequestCursors.every((cursor) => cursor === null)).toBe(true)

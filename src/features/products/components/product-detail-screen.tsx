@@ -254,8 +254,8 @@ export function ProductDetailScreen({
 
         {state.kind === 'success' && (
           <section
-            aria-labelledby="product-detail-title"
-            className="mx-auto flex max-w-2xl flex-col gap-6"
+            aria-labelledby={isEditing ? 'edit-product-title' : 'product-detail-title'}
+            className="mx-auto flex w-full max-w-2xl flex-col gap-6"
           >
             {createdConfirmation && (
               <Alert>
