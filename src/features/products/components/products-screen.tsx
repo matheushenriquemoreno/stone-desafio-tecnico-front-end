@@ -77,8 +77,8 @@ function getFailureError(): ProductsViewState {
 
 function ProductsLoading() {
   return (
-    <div aria-label="Carregando catálogo" className="space-y-6" role="status">
-      <div className="space-y-3">
+    <div aria-label="Carregando catálogo" className="flex flex-col gap-6" role="status">
+      <div className="flex flex-col gap-3">
         <Skeleton className="h-4 w-28" />
         <Skeleton className="h-12 w-64" />
         <Skeleton className="h-5 w-80 max-w-full" />
@@ -106,7 +106,7 @@ function ProductsEmpty() {
         <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
           <Package2 aria-hidden="true" className="size-5" />
         </div>
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1">
           <h2 className="font-display text-2xl font-semibold">Catálogo vazio</h2>
           <p className="text-muted-foreground">Ainda não há produtos para exibir.</p>
         </div>
@@ -386,7 +386,7 @@ function ProductsScreenContent() {
         )}
 
         {(viewState.kind === 'empty' || viewState.kind === 'success') && (
-          <div className="space-y-8">
+          <div className="flex flex-col gap-8">
             {deletedConfirmation && (
               <Alert>
                 <AlertTitle>Produto removido</AlertTitle>
@@ -396,7 +396,7 @@ function ProductsScreenContent() {
               </Alert>
             )}
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <p className="text-sm font-semibold tracking-[0.18em] text-muted-foreground uppercase">
                   Visão geral
                 </p>

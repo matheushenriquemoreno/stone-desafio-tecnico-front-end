@@ -43,7 +43,7 @@ const genericDeleteError =
 
 function DetailLoading() {
   return (
-    <div aria-label="Carregando produto" className="space-y-5" role="status">
+    <div aria-label="Carregando produto" className="flex flex-col gap-5" role="status">
       <Skeleton className="h-4 w-36" />
       <Skeleton className="h-12 w-80 max-w-full" />
       <Skeleton className="h-72 rounded-xl" />
@@ -61,7 +61,7 @@ function DetailUnauthorized() {
 
 function DetailNotFound({ correlationId }: { correlationId?: string }) {
   return (
-    <div className="mx-auto max-w-2xl space-y-5">
+    <div className="mx-auto flex max-w-2xl flex-col gap-5">
       <Alert>
         <AlertTitle>Produto não encontrado</AlertTitle>
         <AlertDescription>
@@ -238,7 +238,7 @@ export function ProductDetailScreen({
         )}
 
         {state.kind === 'error' && (
-          <div className="mx-auto max-w-2xl space-y-5">
+          <div className="mx-auto flex max-w-2xl flex-col gap-5">
             <Alert variant="destructive">
               <AlertTitle>Não foi possível carregar</AlertTitle>
               <AlertDescription>
@@ -255,7 +255,7 @@ export function ProductDetailScreen({
         {state.kind === 'success' && (
           <section
             aria-labelledby="product-detail-title"
-            className="mx-auto max-w-2xl space-y-6"
+            className="mx-auto flex max-w-2xl flex-col gap-6"
           >
             {createdConfirmation && (
               <Alert>
@@ -302,7 +302,7 @@ export function ProductDetailScreen({
                   </CardTitle>
                   <CardDescription>{state.product.description}</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-5">
+                <CardContent className="flex flex-col gap-5">
                   <p className="font-display text-3xl font-semibold tracking-tight">
                     {formatProductPrice(state.product.price)}
                   </p>

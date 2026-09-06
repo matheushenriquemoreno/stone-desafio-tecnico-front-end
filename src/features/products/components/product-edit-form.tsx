@@ -119,8 +119,8 @@ export function ProductEditForm({
   }
 
   return (
-    <section aria-labelledby="edit-product-title" className="space-y-5">
-      <header className="space-y-2">
+    <section aria-labelledby="edit-product-title" className="flex flex-col gap-5">
+      <header className="flex flex-col gap-2">
         <h2 id="edit-product-title" className="font-display text-3xl font-semibold">
           Editar produto
         </h2>

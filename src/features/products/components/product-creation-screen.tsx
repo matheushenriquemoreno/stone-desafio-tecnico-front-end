@@ -89,9 +89,9 @@ export function ProductCreationScreen() {
   return (
     <section
       aria-labelledby="new-product-title"
-      className="mx-auto max-w-2xl space-y-6"
+      className="mx-auto flex max-w-2xl flex-col gap-6"
     >
-      <header className="space-y-2">
+      <header className="flex flex-col gap-2">
         <p className="text-sm font-semibold tracking-[0.18em] text-muted-foreground uppercase">
           Catálogo compartilhado
         </p>

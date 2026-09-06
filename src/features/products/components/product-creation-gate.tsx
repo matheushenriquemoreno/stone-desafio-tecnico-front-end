@@ -53,7 +53,7 @@ function getProbeError(
 
 function CreationGateLoading() {
   return (
-    <div aria-label="Confirmando sessão" className="space-y-5" role="status">
+    <div aria-label="Confirmando sessão" className="flex flex-col gap-5" role="status">
       <Skeleton className="h-4 w-36" />
       <Skeleton className="h-12 w-72 max-w-full" />
       <Skeleton className="h-72 rounded-xl" />

@@ -1,7 +1,7 @@
 # Estado da Implementação — Interface web de autenticação e gestão de produtos
 
-| Status       | Concluído |
-| ------------ | ---------- |
+| Status       | Em execução |
+| ------------ | ----------- |
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
 
@@ -10,6 +10,8 @@
 Fase 06 — Consulta, edição e exclusão — concluída e aprovada no review independente v9. A Fase 05 foi aprovada no review v8; a execução das Fases 05 e 06 foi autorizada nesta sessão.
 
 Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase deve passar por `review` independente antes que a próxima seja marcada como ativa.
+
+A Fase 07 está em execução. T33 foi concluída; T34, T35 e T36 estão implementadas no worktree e serão registradas uma por vez. T37 permanece pendente por solicitação do usuário, pois depende de publicação e configurações externas.
 
 ## Fases
 
@@ -21,7 +23,7 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | 04  | Catálogo e paginação sequencial          | fases/fase-04-catalogo-e-paginacao.md             | Concluída | 2026-09-05   |
 | 05  | Criação de produtos                      | fases/fase-05-criacao-de-produtos.md              | Concluída | 2026-09-05 |
 | 06  | Consulta, edição e exclusão              | fases/fase-06-consulta-edicao-e-exclusao.md       | Concluída | 2026-09-05   |
-| 07  | Robustez e prontidão operacional         | fases/fase-07-robustez-e-prontidao-operacional.md | Pendente  | —            |
+| 07  | Robustez e prontidão operacional         | fases/fase-07-robustez-e-prontidao-operacional.md | Em execução | —          |
 
 ## Tarefas
 
@@ -59,7 +61,7 @@ Uma fase é executada por vez. Ao concluir suas tarefas e evidências, a fase de
 | T30 | 06   | Concluída | `AlertDialog` Base UI/shadcn com confirmação nomeada, cancelamento por botão/Escape, foco inicial/devolvido e bloqueio durante confirmação; `npm test -- --run src/features/products/components/product-delete-dialog.spec.tsx` (3 testes), `npm run typecheck` e `npx prettier --check` — todos passaram. |
 | T31 | 06   | Concluída | `deleteProduct` chama `DELETE /products/:id` sem retry; detalhe exige confirmação, trata `204`, `401`, `403`, `404`, `429` e falhas seguras; catálogo retorna sem cursor e consome confirmação pública; `npm test -- --run` (169 testes), `npm run typecheck`, `npm run lint`, `npm run format:check` e `git diff --check` — todos passaram. |
 | T32 | 06   | Concluída | `ProductCard` liga o nome do produto à rota protegida de detalhe; `e2e/product-detail-mutations.spec.ts` cobre criação isolada pelo fluxo de UI, consulta, patch parcial, cancelamento, exclusão confirmada, retorno sem cursor, `404` e `401`; `product-card.spec.tsx`, `npm run test:e2e -- e2e/product-detail-mutations.spec.ts` (3 testes), `npm test -- --run` (169 testes), typecheck, lint, format-check e diff-check — todos passaram. |
-| T33 | 07   | Pendente  | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| T33 | 07   | Concluída | `e2e/accessibility.spec.ts` com axe WCAG 2A/2AA, rotas públicas/protegidas, viewport 400x900, ausência de overflow, reflow, teclado/foco do diálogo e `prefers-reduced-motion`; execução dedicada: 2 testes passaram. Composições legadas de `space-y-*` foram alinhadas às regras de `flex`/`gap`. |
 | T34 | 07   | Pendente  | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | T35 | 07   | Pendente  | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | T36 | 07   | Pendente  | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |

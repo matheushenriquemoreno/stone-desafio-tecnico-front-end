@@ -1,7 +1,7 @@
 # Fase 07 — Robustez e prontidão operacional
 
-| Status       | Pendente   |
-|--------------|------------|
+| Status       | Em execução |
+|--------------|-------------|
 | Created      | 2026-09-05 |
 | Last Updated | 2026-09-05 |
 
@@ -22,6 +22,10 @@ Revisar todas as telas e estados implementados com automação e evidência manu
 - **Critérios de conclusão:** nenhuma ação ou informação essencial se perde; violações automatizadas aplicáveis são zero; verificações manuais têm evidência por tela/estado; correções compartilhadas não quebram variantes existentes.
 - **Riscos ou premissas:** automação não substitui verificação manual; qualquer mudança de identidade global identificada deve voltar à ADR-004, não ser aplicada silenciosamente.
 
+**Status desta tarefa:** Concluída nesta execução.
+
+**Evidências:** `e2e/accessibility.spec.ts` cobre as rotas públicas, catálogo, criação e detalhe em viewport estreita, com axe para WCAG 2A/2AA, ausência de overflow horizontal, reflow, foco de teclado no `AlertDialog` e `prefers-reduced-motion`; execução dedicada: 2 testes passaram. As telas também tiveram as composições legadas de espaçamento substituídas por `flex`/`gap`, conforme as regras do repositório.
+
 ## Tarefa T34 — Consolidar a conformidade de integração e segurança
 
 Executar uma suíte transversal que prove a forma das chamadas, a validação de todas as respostas e a ausência das construções proibidas. Cobrir `Retry-After`, `correlationId`, falhas não confiáveis, aborto, concorrência e todos os status previstos por operação sem registrar payloads sensíveis.
@@ -33,6 +37,8 @@ Executar uma suíte transversal que prove a forma das chamadas, a validação de
 - **Testes e verificações:** buscar `localStorage`, `sessionStorage`, `Authorization`, `Bearer`, cookie/JWT, `/api`, `route.ts`, `use server`, Middleware, Proxy, cabeçalho CSRF, `Origin`/`Referer` definidos, wildcards de imagem e silenciadores TypeScript; executar testes contratuais correspondentes.
 - **Critérios de conclusão:** nenhuma ocorrência indevida permanece; cada ocorrência legítima está explicada pelo teste/documentação; cliente chama apenas `NEXT_PUBLIC_API_URL` com credenciais; mensagens e logs não expõem segredo ou detalhe bruto.
 - **Riscos ou premissas:** busca textual produz falsos positivos em testes/documentação; cada ocorrência deve ser lida antes de classificar.
+
+**Status desta tarefa:** Pendente nesta etapa de commits; a implementação já está preparada no worktree e será registrada após T33.
 
 ## Tarefa T35 — Entregar configuração, container e documentação executáveis
 
@@ -46,6 +52,8 @@ Criar `.env.example` sem segredos, Dockerfile independente para desenvolvimento/
 - **Critérios de conclusão:** outra pessoa consegue instalar, desenvolver, testar e buildar pelos passos publicados; imagem é reproduzível; configuração explica origem autorizada, same-site, allowlist de imagem e preview sem prometer sessão de produção.
 - **Riscos ou premissas:** Docker não resolve CORS/cookie; a documentação deve separar execução local, integração autorizada e publicação.
 
+**Status desta tarefa:** Pendente nesta etapa de commits; a implementação será registrada após T34.
+
 ## Tarefa T36 — Configurar CI com gates que bloqueiam promoção
 
 Criar workflow do GitHub Actions com instalação reproduzível, formatação, lint, tipos, testes unitários/componentes e build. Executar E2E somente em job/ambiente que possua API controlada, origem autorizada e dados isoláveis, sem ocultar quando essa dependência não estiver disponível.
@@ -58,6 +66,8 @@ Criar workflow do GitHub Actions com instalação reproduzível, formatação, l
 - **Critérios de conclusão:** instalação usa lockfile; gates não são ignorados; build depende apenas de configuração pública permitida; E2E integrado declara e valida suas dependências externas.
 - **Riscos ou premissas:** credenciais de ambiente não entram em pull requests de terceiros; previews sem domínio compatível não são tratados como validação de sessão de produção.
 
+**Status desta tarefa:** Pendente nesta etapa de commits; a implementação será registrada após T35.
+
 ## Tarefa T37 — Publicar, executar smoke tests e provar reversão
 
 Configurar a aplicação na Vercel com `NEXT_PUBLIC_API_URL`, origens de imagem e domínio HTTPS aprovados; coordenar a origem exata no CORS/política da API e a compatibilidade de mesmo site. Depois da promoção, executar smoke de login público, cadastro, catálogo protegido, paginação, CRUD e logout; registrar o deployment anterior e testar o roteiro de rollback.
@@ -69,6 +79,8 @@ Configurar a aplicação na Vercel com `NEXT_PUBLIC_API_URL`, origens de imagem 
 - **Testes e verificações:** executar todos os gates em checkout limpo; inspecionar no navegador a chamada direta à API e os atributos observáveis da sessão; realizar smoke dos fluxos; reverter para deployment conhecido em ambiente seguro e repetir os smokes essenciais.
 - **Critérios de conclusão:** aplicação publicada usa HTTPS e origem autorizada; nenhum endpoint intermediário participa; fluxos essenciais passam; rollback é reproduzível e associado a commit/deployment conhecidos; limitações de preview estão registradas.
 - **Riscos ou premissas:** publicação depende de acesso e configuração externos; se indisponíveis, a tarefa permanece pendente e a entrega não é declarada operacional apenas por build local.
+
+**Status desta tarefa:** Pendente por solicitação do usuário. Configurações de Vercel, DNS, variáveis publicadas, coordenação de CORS, smoke publicado e rollback não foram executados.
 
 ## Orientações de implementação
 
@@ -93,3 +105,7 @@ Executar `npm ci`, `npm run format:check`, `npm run lint`, `npm run typecheck`, 
 - Vercel, GitHub, DNS, API e dados de teste são dependências externas explícitas; indisponibilidade bloqueia apenas as tarefas que realmente dependem delas.
 - Domínio e API precisam pertencer ao mesmo site para a sessão `SameSite=Strict` publicada.
 - A conclusão desta fase também exige `review`; somente depois dele o escopo planejado pode ser declarado entregue.
+
+## Estado desta execução
+
+T33 foi concluída e registrada. T34, T35 e T36 serão registradas em commits atômicos subsequentes. T37 permanece pendente para configuração e execução pelo usuário; portanto, a Fase 07 ainda não está concluída nem pronta para o review final.
