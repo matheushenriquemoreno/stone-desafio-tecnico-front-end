@@ -14,6 +14,31 @@ Este repositório contém somente o front-end:
 
 A API NestJS e a persistência no DynamoDB pertencem ao repositório de back-end. A aplicação não possui BFF, Route Handlers, Server Actions, Middleware ou endpoints intermediários. A URL consumida pelo navegador vem de `NEXT_PUBLIC_API_URL`.
 
+## Documentação
+
+- [Requisitos do front-end](./docs/Requisitos.md)
+- [Contrato de integração com a API](./docs/Contrato-de-integracao.md)
+- [Decisões de tecnologia](./docs/Decisao-tecnologias.md)
+- [Decisão de deploy](./docs/Decisao-deploy.md)
+- [Architecture Decision Records](./docs/adr/README.md)
+
+
+## Entrega do desafio
+
+O objetivo do desafio era entragar somente a api, porém com o front-end opcional, eu quiz fazer a entrega de ambos para poder ficar mais facil a utilização da api, e demostrar uma entrega mais confiavel. Além dos desafios que o front-end nos proporcina no dia a dia de desenvolvedor.
+
+Segue os links dos projetos hospedados.
+
+[Front-end](https://products.devmoreno.com.br) em products.devmoreno.com.br
+ 
+[Documentação do back-end](https://apiproducts.devmoreno.com.br/reference) em apiproducts.devmoreno.com.br
+
+## Processo de deploy
+
+O deloy do front-end foi realizado utilizando a infraestrutura da propria versel, com configuração do github actions somente para rodar os testes de qualidade.
+Para gerenciamento do dns foi escolhido a cloudflare visando ter toda a segurança que eles fornecem.
+
+
 ## Pré-requisitos
 
 - Node.js `>=24.0.0 <25`;
@@ -84,21 +109,3 @@ docker run --rm -p 3000:3000 stone-front
 ```
 
 O container expõe a interface em `http://localhost:3000`. Docker não configura CORS, cookie ou DNS da API.
-
-## CI
-
-`.github/workflows/quality.yml` executa `npm ci`, formatação, lint, typecheck, testes e build em pushes e pull requests. O job E2E integrado só é executado manualmente quando uma API controlada e uma origem autorizada forem fornecidas; a ausência dessas dependências falha o preflight desse job quando ele é solicitado.
-
-Configure esse workflow como verificação obrigatória na proteção da branch principal para bloquear a promoção de alterações com gates vermelhos.
-
-## Publicação — pendente de configuração
-
-A publicação na Vercel, o domínio/DNS, as variáveis de ambiente publicadas, a allowlist CORS/origem da API e o smoke test de produção permanecem pendentes para configuração manual. Também permanece pendente a prova de rollback para um deployment conhecido. Essas atividades correspondem à T37 da Fase 07 e não são realizadas por este checkout.
-
-## Documentação
-
-- [Requisitos do front-end](./docs/Requisitos.md)
-- [Contrato de integração com a API](./docs/Contrato-de-integracao.md)
-- [Decisões de tecnologia](./docs/Decisao-tecnologias.md)
-- [Decisão de deploy](./docs/Decisao-deploy.md)
-- [Architecture Decision Records](./docs/adr/README.md)
