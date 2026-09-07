@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Package2 } from 'lucide-react'
@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Spinner } from '@/components/ui/spinner'
 import {
   canGoNext,
   canGoPrevious,
@@ -74,6 +75,28 @@ function getFailureError(): ProductsViewState {
     kind: 'error',
     message: genericProductsError,
   }
+}
+
+function SessionDecisionLoading() {
+  return (
+    <div
+      aria-label="Confirmando sessão"
+      className="flex min-h-svh flex-col items-center justify-center gap-5 text-center"
+      role="status"
+    >
+      <div
+        aria-hidden="true"
+        className="flex size-14 items-center justify-center rounded-2xl bg-primary font-display text-3xl font-semibold text-primary-foreground shadow-sm"
+      >
+        S
+      </div>
+      <div className="flex flex-col gap-1">
+        <p className="font-display text-2xl font-semibold tracking-tight">Stone</p>
+        <p className="text-sm text-muted-foreground">Preparando seu catálogo…</p>
+      </div>
+      <Spinner aria-hidden="true" className="size-5 text-primary" />
+    </div>
+  )
 }
 
 function ProductsLoading() {
@@ -152,10 +175,15 @@ function ProductsContent({ page }: { page: ProductPage }) {
   )
 }
 
-function ProductsScreenContent() {
+function ProductsScreenContent({
+  protectedHeader,
+}: Readonly<{
+  protectedHeader?: ReactNode
+}>) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [attempt, setAttempt] = useState(0)
+  const [hasConfirmedAccess, setHasConfirmedAccess] = useState(false)
   const [pagination, setPagination] = useState<PaginationState>(createPaginationState)
   const [viewState, setViewState] = useState<ProductsViewState>({ kind: 'loading' })
   const requestVersion = useRef(0)
@@ -292,6 +320,7 @@ function ProductsScreenContent() {
             ? setCurrentPage(current, result.page)
             : current,
         )
+        setHasConfirmedAccess(true)
         setViewState({
           kind: result.page.items.length === 0 ? 'empty' : 'success',
           page: result.page,
@@ -315,12 +344,14 @@ function ProductsScreenContent() {
       }
 
       if (shouldRedirectToLoginForProtectedRead(result)) {
+        setHasConfirmedAccess(false)
         setViewState({ kind: 'unauthorized' })
         redirectToLogin(router)
         return
       }
 
       if (result.kind === 'error' && result.error.code === 'unauthorized') {
+        setHasConfirmedAccess(false)
         setViewState({ kind: 'unauthorized' })
         redirectToLogin(router)
         return
@@ -386,116 +417,121 @@ function ProductsScreenContent() {
   const hasNextPage = isLoaded && canGoNext(pagination)
 
   return (
-    <main
-      className="min-h-svh bg-background px-4 py-6 sm:px-6 lg:px-8"
-      aria-label="Catálogo protegido"
-    >
-      <div className="mx-auto max-w-6xl">
-        {viewState.kind === 'loading' && <ProductsLoading />}
+    <div className="min-h-svh bg-background">
+      {hasConfirmedAccess && protectedHeader}
+      <main
+        className="min-h-svh bg-background px-4 py-6 sm:px-6 lg:px-8"
+        aria-label={hasConfirmedAccess ? 'Catálogo protegido' : 'Carregando aplicação'}
+      >
+        <div className="mx-auto max-w-6xl">
+          {viewState.kind === 'loading' &&
+            (hasConfirmedAccess ? <ProductsLoading /> : <SessionDecisionLoading />)}
 
-        {viewState.kind === 'unauthorized' && <ProductsUnauthorized />}
+          {viewState.kind === 'unauthorized' && <ProductsUnauthorized />}
 
-        {viewState.kind === 'error' && (
-          <div className="mx-auto max-w-2xl">
-            <Alert variant="destructive">
-              <AlertTitle>Não foi possível carregar</AlertTitle>
-              <AlertDescription>
-                <p>{viewState.message}</p>
-                {viewState.correlationId && (
-                  <p className="mt-2 text-xs">Referência: {viewState.correlationId}</p>
-                )}
-              </AlertDescription>
-            </Alert>
-            <Button className="mt-5" onClick={retry}>
-              Tentar novamente
-            </Button>
-          </div>
-        )}
-
-        {(viewState.kind === 'empty' || viewState.kind === 'success') && (
-          <div className="flex flex-col gap-8">
-            {deletedConfirmation && (
-              <Alert>
-                <AlertTitle>Produto removido</AlertTitle>
+          {viewState.kind === 'error' && (
+            <div className="mx-auto max-w-2xl">
+              <Alert variant="destructive">
+                <AlertTitle>Não foi possível carregar</AlertTitle>
                 <AlertDescription>
-                  O produto foi removido e o catálogo foi atualizado.
+                  <p>{viewState.message}</p>
+                  {viewState.correlationId && (
+                    <p className="mt-2 text-xs">
+                      Referência: {viewState.correlationId}
+                    </p>
+                  )}
                 </AlertDescription>
               </Alert>
-            )}
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-              <div className="flex flex-col gap-2">
-                <p className="text-sm font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                  Visão geral
-                </p>
-                <h1
-                  id="catalog-title"
-                  className="font-display text-5xl leading-none font-semibold tracking-tight"
+              <Button className="mt-5" onClick={retry}>
+                Tentar novamente
+              </Button>
+            </div>
+          )}
+
+          {(viewState.kind === 'empty' || viewState.kind === 'success') && (
+            <div className="flex flex-col gap-8">
+              {deletedConfirmation && (
+                <Alert>
+                  <AlertTitle>Produto removido</AlertTitle>
+                  <AlertDescription>
+                    O produto foi removido e o catálogo foi atualizado.
+                  </AlertDescription>
+                </Alert>
+              )}
+              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                    Visão geral
+                  </p>
+                  <h1
+                    id="catalog-title"
+                    className="font-display text-5xl leading-none font-semibold tracking-tight"
+                  >
+                    Catálogo
+                  </h1>
+                  <p className="text-muted-foreground">
+                    Produtos disponíveis para consulta.
+                  </p>
+                </div>
+                <p
+                  aria-live="polite"
+                  className="text-sm font-medium text-muted-foreground"
                 >
-                  Catálogo
-                </h1>
-                <p className="text-muted-foreground">
-                  Produtos disponíveis para consulta.
+                  {getProductCountLabel(viewState.page.total)}
                 </p>
               </div>
-              <p
-                aria-live="polite"
-                className="text-sm font-medium text-muted-foreground"
+
+              {viewState.kind === 'empty' ? (
+                <ProductsEmpty />
+              ) : (
+                <ProductsContent page={viewState.page} />
+              )}
+
+              <nav
+                aria-label="Paginação do catálogo"
+                className="flex flex-wrap items-center justify-between gap-3"
               >
-                {getProductCountLabel(viewState.page.total)}
-              </p>
+                <Button
+                  disabled={!hasPreviousPage}
+                  onClick={goPrevious}
+                  variant="outline"
+                >
+                  Anterior
+                </Button>
+                <p
+                  aria-live="polite"
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  Página {currentPageIndex + 1}
+                </p>
+                <Button disabled={!hasNextPage} onClick={goNext}>
+                  Próxima
+                </Button>
+              </nav>
             </div>
-
-            {viewState.kind === 'empty' ? (
-              <ProductsEmpty />
-            ) : (
-              <ProductsContent page={viewState.page} />
-            )}
-
-            <nav
-              aria-label="Paginação do catálogo"
-              className="flex flex-wrap items-center justify-between gap-3"
-            >
-              <Button
-                disabled={!hasPreviousPage}
-                onClick={goPrevious}
-                variant="outline"
-              >
-                Anterior
-              </Button>
-              <p
-                aria-live="polite"
-                className="text-sm font-medium text-muted-foreground"
-              >
-                Página {currentPageIndex + 1}
-              </p>
-              <Button disabled={!hasNextPage} onClick={goNext}>
-                Próxima
-              </Button>
-            </nav>
-          </div>
-        )}
-      </div>
-    </main>
+          )}
+        </div>
+      </main>
+    </div>
   )
 }
 
 function ProductsScreenFallback() {
   return (
-    <main
-      className="min-h-svh bg-background px-4 py-6 sm:px-6 lg:px-8"
-      aria-label="Catálogo protegido"
-    >
-      <div className="mx-auto max-w-6xl">
-        <ProductsLoading />
-      </div>
+    <main className="min-h-svh bg-background" aria-label="Carregando aplicação">
+      <SessionDecisionLoading />
     </main>
   )
 }
 
-export function ProductsScreen() {
+export function ProductsScreen({
+  protectedHeader,
+}: Readonly<{
+  protectedHeader?: ReactNode
+}>) {
   return (
     <Suspense fallback={<ProductsScreenFallback />}>
-      <ProductsScreenContent />
+      <ProductsScreenContent protectedHeader={protectedHeader} />
     </Suspense>
   )
 }
